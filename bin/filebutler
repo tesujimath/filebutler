@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+import string
+import sys
+
+import filebutler.GnuFindOut
+
+def nothing():
+    filelist = []
+    totalSize = 0
+    count = 0
+
+    with open(sys.argv[1]) as f:
+        for line in f:
+            fields = string.split(line)
+            size = int(fields[6].strip())
+            name = fields[10]
+            filelist.append({'size': size, 'name': name})
+            totalSize += size
+            count += 1
+        print "%d files, total size %d" % (count, totalSize)
+
+        mysize = 0
+        for f in filelist:
+            mysize += f['size']
+        print "mytotal %d" % mysize
+
+def main():
+    print "main"
+    g = filebutler.GnuFindOut("/home/guestsi/junk/some-scratch-files",
+                              lambda p: os.path.join("/home/guestsi", p))
+    for f in g.all():
+        print f
+
+if __name__ == '__main__':
+    main()
