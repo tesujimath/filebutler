@@ -4,6 +4,7 @@ import string
 import sys
 
 import filebutler.GnuFindOut
+import filebutler.Localtime
 
 def nothing():
     filelist = []
@@ -29,8 +30,25 @@ def main():
     print "main"
     g = filebutler.GnuFindOut("/home/guestsi/junk/some-scratch-files",
                               lambda p: os.path.join("/home/guestsi", p))
+    print("all files")
     for f in g.all():
         print f
+
+    f1 = filebutler.Filter(owner="laugrauda")
+    print("owner files")
+    for spec in g.filter(f1):
+        print spec
+
+    f2 = filebutler.Filter(owner="laugrauda", sizeGeq=197)
+    print("large owner files")
+    for spec in g.filter(f2):
+        print spec
+
+    localtime = filebutler.Localtime()
+    f3 = filebutler.Filter(mtimeBefore=localtime.t(2015, 1, 1))
+    print("mtime files")
+    for spec in g.filter(f3):
+        print spec
 
 if __name__ == '__main__':
     main()

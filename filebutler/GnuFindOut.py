@@ -13,7 +13,6 @@ class GnuFindOut(object):
     class _dateParser(object):
         """Converts find format dates into time since epoch."""
         def __init__(self):
-            self._epoch = datetime.datetime.utcfromtimestamp(0)
             self._localtime = filebutler.Localtime()
             self._monthNumbers = {}  # indexed by month_abbr, of 1 to 12
             for i in range(12):
@@ -37,12 +36,11 @@ class GnuFindOut(object):
                     #print "last year"
                     year = self._today.year - 1
             #print "year", year
-            dt = self._localtime.datetime(year, month, int(fields[8]))
-            return (dt - self._epoch).total_seconds()
+            return self._localtime.t(year, month, int(fields[8]))
 
     def all(self):
-        with open(self._filelist) as f:
-            for line in f:
+        with open(self._filelist) as filelist:
+            for line in filelist:
                 fields = line.split(None, 10)
                 yield filebutler.Filespec(path=fields[10],
                                           user=fields[4],
@@ -50,3 +48,16 @@ class GnuFindOut(object):
                                           size=int(fields[6]),
                                           mtime=self._dateParser.t(fields),
                                           perms=fields[2])
+
+    def filter(self, filt):
+        with open(self._filelist) as filelist:
+            for line in filelist:
+                fields = line.split(None, 10)
+                filespec = filebutler.Filespec(path=fields[10],
+                                               user=fields[4],
+                                               group=fields[5],
+                                               size=int(fields[6]),
+                                               mtime=self._dateParser.t(fields),
+                                               perms=fields[2])
+                if filt.selects(filespec):
+                    yield filespec
