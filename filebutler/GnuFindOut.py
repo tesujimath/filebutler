@@ -44,7 +44,7 @@ class GnuFindOut(object):
         with open(self._filelist) as f:
             for line in f:
                 fields = line.split(None, 10)
-                filespec = filebutler.Filespec(path=fields[10],
+                filespec = filebutler.Filespec(path=self._fullpathfn(fields[10]),
                                                user=fields[4],
                                                group=fields[5],
                                                size=int(fields[6]),

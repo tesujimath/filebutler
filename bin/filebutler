@@ -6,30 +6,15 @@ import sys
 
 from filebutler import *
 
-def nothing():
-    filelist = []
-    totalSize = 0
-    count = 0
-
-    with open(sys.argv[1]) as f:
-        for line in f:
-            fields = string.split(line)
-            size = int(fields[6].strip())
-            name = fields[10]
-            filelist.append({'size': size, 'name': name})
-            totalSize += size
-            count += 1
-        print("%d files, total size %d" % (count, totalSize))
-
-        mysize = 0
-        for f in filelist:
-            mysize += f['size']
-        print("mytotal %d" % mysize)
+def datasetSplitter(tier):
+    def tierSplitter(path):
+        dataset, relpath = os.path.split(path)
+        return os.path.join("/dataset", dataset, tier, relpath)
+    return tierSplitter
 
 def main():
     print("main")
-    g = GnuFindOut("/home/guestsi/junk/some-scratch-files",
-                   lambda p: os.path.join("/home/guestsi", p))
+    g = GnuFindOut("/home/guestsi/junk/some-scratch-files", datasetSplitter("scratch"))
     print("all files")
     for f in g.select():
         print(f)
