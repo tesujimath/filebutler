@@ -50,7 +50,7 @@ def main():
     for spec in g.select(f3):
         print(spec)
 
-    stack = CollationStack([WeeklyFilelist, SimpleFilelist])
+    stack = CollationStack([WeeklyFilelist, UserFilelist, SimpleFilelist])
     filelist = stack.filelist("/home/guestsi/junk/some-scratch-files.collate")
     for filespec in g.select():
         filelist.add(filespec)
