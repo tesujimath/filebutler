@@ -3,6 +3,7 @@ import pytz
 import tzlocal
 
 class Localtime(object):
+
     def __init__(self):
         self._epoch = datetime.datetime.utcfromtimestamp(0)
         self._localtimezone = pytz.timezone(str(tzlocal.get_localzone()))

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
+import os.path
 import string
 import sys
 
-import filebutler.GnuFindOut
-import filebutler.Localtime
+from filebutler import *
 
 def nothing():
     filelist = []
@@ -19,36 +19,42 @@ def nothing():
             filelist.append({'size': size, 'name': name})
             totalSize += size
             count += 1
-        print "%d files, total size %d" % (count, totalSize)
+        print("%d files, total size %d" % (count, totalSize))
 
         mysize = 0
         for f in filelist:
             mysize += f['size']
-        print "mytotal %d" % mysize
+        print("mytotal %d" % mysize)
 
 def main():
-    print "main"
-    g = filebutler.GnuFindOut("/home/guestsi/junk/some-scratch-files",
-                              lambda p: os.path.join("/home/guestsi", p))
+    print("main")
+    g = GnuFindOut("/home/guestsi/junk/some-scratch-files",
+                   lambda p: os.path.join("/home/guestsi", p))
     print("all files")
-    for f in g.all():
-        print f
+    for f in g.select():
+        print(f)
 
-    f1 = filebutler.Filter(owner="laugrauda")
+    f1 = Filter(owner="laugrauda")
     print("owner files")
-    for spec in g.filter(f1):
-        print spec
+    for spec in g.select(f1):
+        print(spec)
 
-    f2 = filebutler.Filter(owner="laugrauda", sizeGeq=197)
+    f2 = Filter(owner="laugrauda", sizeGeq=197)
     print("large owner files")
-    for spec in g.filter(f2):
-        print spec
+    for spec in g.select(f2):
+        print(spec)
 
-    localtime = filebutler.Localtime()
-    f3 = filebutler.Filter(mtimeBefore=localtime.t(2015, 1, 1))
+    localtime = Localtime()
+    f3 = Filter(mtimeBefore=localtime.t(2015, 1, 1))
     print("mtime files")
-    for spec in g.filter(f3):
-        print spec
+    for spec in g.select(f3):
+        print(spec)
+
+    stack = CollationStack([WeeklyFilelist, SimpleFilelist])
+    filelist = stack.filelist("/home/guestsi/junk/some-scratch-files.collate")
+    for filespec in g.select():
+        filelist.add(filespec)
+    filelist.save()
 
 if __name__ == '__main__':
     main()
