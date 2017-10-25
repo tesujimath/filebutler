@@ -2,10 +2,10 @@ import calendar
 import datetime
 import re
 
-import filebutler.Filespec
-import filebutler.Localtime
+from Filespec import Filespec
+from Localtime import Localtime
 
-class GnuFindOut(object):
+class GnuFindOutFileset(object):
 
     @classmethod
     def parse(cls, toks):
@@ -26,7 +26,7 @@ class GnuFindOut(object):
     class _dateParser(object):
         """Converts find format dates into time since epoch."""
         def __init__(self):
-            self._localtime = filebutler.Localtime()
+            self._localtime = Localtime()
             self._monthNumbers = {}  # indexed by month_abbr, of 1 to 12
             for i in range(12):
                 #print calendar.month_abbr[i + 1], i + 1
@@ -57,12 +57,12 @@ class GnuFindOut(object):
         with open(self._filelist) as f:
             for line in f:
                 fields = line.split(None, 10)
-                filespec = filebutler.Filespec(path=re.sub(self._match, self._replace, fields[10]),
-                                               user=fields[4],
-                                               group=fields[5],
-                                               size=int(fields[6]),
-                                               mtime=self._dateParser.t(fields),
-                                               perms=fields[2])
+                filespec = Filespec(path=re.sub(self._match, self._replace, fields[10]),
+                                    user=fields[4],
+                                    group=fields[5],
+                                    size=int(fields[6]),
+                                    mtime=self._dateParser.t(fields),
+                                    perms=fields[2])
                 if filter == None or filter.selects(filespec):
                     print(filespec)
                     yield filespec

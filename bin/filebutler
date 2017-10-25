@@ -4,42 +4,7 @@ import os.path
 import string
 import sys
 
-from filebutler import *
-
-def datasetSplitter(tier):
-    def tierSplitter(path):
-        dataset, relpath = os.path.split(path)
-        return os.path.join("/dataset", dataset, tier, relpath)
-    return tierSplitter
-
-def test():
-    print("main")
-    g = GnuFindOut("/home/guestsi/junk/some-scratch-files", datasetSplitter("scratch"))
-    print("all files")
-    for f in g.select():
-        print(f)
-
-    f1 = Filter(owner="laugrauda")
-    print("owner files")
-    for spec in g.select(f1):
-        print(spec)
-
-    f2 = Filter(owner="laugrauda", sizeGeq=197)
-    print("large owner files")
-    for spec in g.select(f2):
-        print(spec)
-
-    localtime = Localtime()
-    f3 = Filter(mtimeBefore=localtime.t(2015, 1, 1))
-    print("mtime files")
-    for spec in g.select(f3):
-        print(spec)
-
-    stack = CollationStack([WeeklyFilelist, UserFilelist, SimpleFilelist])
-    filelist = stack.filelist("/home/guestsi/junk/some-scratch-files.collate")
-    for filespec in g.select():
-        filelist.add(filespec)
-    filelist.save()
+from filebutler.CLI import CLI
 
 def main():
     cli = CLI()

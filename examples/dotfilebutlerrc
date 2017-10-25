@@ -1,1 +1,2 @@
+set cachedir /home/guestsi/junk/filebutler.cache
 fileset some-scratch find.gnu.out /home/guestsi/junk/some-scratch-files ^([^/]*) /dataset/\\1/scratch
