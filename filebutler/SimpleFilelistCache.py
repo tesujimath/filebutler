@@ -1,8 +1,8 @@
 import os.path
 
-class SimpleFilelist(object):
+class SimpleFilelistCache(object):
 
-    def __init__(self, path, stack):
+    def __init__(self, path):
         self._path = path
         self._filespecs = None
 

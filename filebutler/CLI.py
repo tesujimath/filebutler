@@ -1,7 +1,9 @@
 import os.path
 import readline
 import shlex
+import sys
 
+from Cache import Cache
 from CLIError import CLIError
 from GnuFindOutFileset import GnuFindOutFileset
 
@@ -10,6 +12,19 @@ class CLI:
     def __init__(self):
         self._attrs = {}
         self._filesets = {}
+        self._caches = {}
+
+    def _cached(self, name, filelist):
+        if not self._attrs.has_key('cachedir'):
+            raise CLIError("missing attr cachedir")
+        cache = Cache(filelist, os.path.join(self._attrs['cachedir'], name))
+        self._caches[name] = cache
+        return cache.filelist()
+
+    def _updateCache(self):
+        for name in self._caches.keys():
+            print("updating cache %s" % name)
+            self._caches[name].update()
 
     def _process(self, line):
         tok = shlex.split(line, comments=True)
@@ -31,6 +46,11 @@ class CLI:
                     raise CLIError("usage: %s" % cmd)
                 for name in sorted(self._filesets.keys()):
                     print(name)
+            elif cmd == "ls-caches":
+                if len(tok) != 1:
+                    raise CLIError("usage: %s" % cmd)
+                for name in sorted(self._caches.keys()):
+                    print(name)
             elif cmd == "fileset":
                 if len(tok) < 3:
                     raise CLIError("usage: %s <name> <spec>" % cmd)
@@ -40,14 +60,23 @@ class CLI:
                     fileset = GnuFindOutFileset.parse(tok[3:])
                     for filespec in fileset.select():
                         print("%s" % filespec)
-                    self._filesets[name] = fileset
-                elif type == "filter":
-                    fileset = FilterFileset.parse(tok[3:])
-                    for filespec in fileset.select():
-                        print("%s" % filespec)
-                    self._filesets[name] = fileset
-                else:
-                    raise CLIError("unknown fileset type %s for %s" % (type, name))
+                    self._filesets[name] = self._cached(name, fileset)
+                # elif type == "filter":
+                #     if len(tok) < 4:
+                #         raise CLIError("filter requires fileset, criteria")
+                #     filterName = tok[2]
+                #     filesetName = tok[3]
+                #     if not self._filesets.has_key(filesetName):
+                #         raise CLIError("no such fileset %s" % filesetName)
+                #     fileset = self._filesets[filesetName]
+                #     filter = FilterFileset.parse(fileset, tok[4:])
+                #     self._filesets[name] = filter
+            elif cmd == "update-caches":
+                if len(tok) != 1:
+                    raise CLIError("usage: %s" % cmd)
+                self._updateCache()
+            else:
+                raise CLIError("unknown command %s" % cmd)
 
     def _handleProcess(self, line):
         try:

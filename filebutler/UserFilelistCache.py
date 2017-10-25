@@ -1,10 +1,10 @@
 import os.path
 
-class UserFilelist(object):
+class UserFilelistCache(object):
 
-    def __init__(self, path, stack):
+    def __init__(self, path, next):
         self._path = path
-        self._stack = stack
+        self._next = next
         self._users = {}        # of filelist, indexed by integer user
 
         # load stubs for all users found
@@ -22,7 +22,7 @@ class UserFilelist(object):
         else:
             filelist = None
         if filelist is None:
-            filelist = self._stack.filelist(self._subpath(u))
+            filelist = self._next(self._subpath(u))
             self._users[u] = filelist
         return filelist
 
@@ -36,7 +36,7 @@ class UserFilelist(object):
 
     def save(self):
         if not os.path.exists(self._path):
-            os.mkdir(self._path)
+            os.makedirs(self._path)
         for filelist in self._users.values():
             filelist.save()
 

@@ -1,7 +1,7 @@
 import datetime
 import os.path
 
-class WeeklyFilelist(object):
+class WeeklyFilelistCache(object):
 
     @classmethod
     def week(cls, t):
@@ -10,9 +10,9 @@ class WeeklyFilelist(object):
         isoyear,isoweek,isoweekday = dt.isocalendar()
         return isoyear * 100 + isoweek
 
-    def __init__(self, path, stack):
+    def __init__(self, path, next):
         self._path = path
-        self._stack = stack
+        self._next = next
         self._weeks = {}        # of filelist, indexed by integer week
 
         # load stubs for all weeks found
@@ -31,7 +31,7 @@ class WeeklyFilelist(object):
         else:
             filelist = None
         if filelist is None:
-            filelist = self._stack.filelist(self._subpath(w))
+            filelist = self._next(self._subpath(w))
             self._weeks[w] = filelist
         return filelist
 
@@ -45,7 +45,7 @@ class WeeklyFilelist(object):
 
     def save(self):
         if not os.path.exists(self._path):
-            os.mkdir(self._path)
+            os.makedirs(self._path)
         for filelist in self._weeks.values():
             filelist.save()
 
