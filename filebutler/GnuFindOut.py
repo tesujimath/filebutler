@@ -1,13 +1,26 @@
 import calendar
 import datetime
+import re
 
 import filebutler.Filespec
 import filebutler.Localtime
 
 class GnuFindOut(object):
-    def __init__(self, filelist, fullpathfn):
+
+    @classmethod
+    def parse(cls, toks):
+        if len(toks) != 3:
+            raise CLIError("find.gnu.out requires path, match-re, replace-str")
+        path = toks[0]
+        match = toks[1]
+        replace = toks[2]
+        return cls(path, match, replace)
+
+    def __init__(self, filelist, match, replace):
+        print("GnuFindOut %s %s %s" % (filelist, match, replace))
         self._filelist = filelist
-        self._fullpathfn = fullpathfn
+        self._match = match
+        self._replace = replace
         self._dateParser = self.__class__._dateParser()
 
     class _dateParser(object):
@@ -44,11 +57,12 @@ class GnuFindOut(object):
         with open(self._filelist) as f:
             for line in f:
                 fields = line.split(None, 10)
-                filespec = filebutler.Filespec(path=self._fullpathfn(fields[10]),
+                filespec = filebutler.Filespec(path=re.sub(self._match, self._replace, fields[10]),
                                                user=fields[4],
                                                group=fields[5],
                                                size=int(fields[6]),
                                                mtime=self._dateParser.t(fields),
                                                perms=fields[2])
                 if filter == None or filter.selects(filespec):
+                    print(filespec)
                     yield filespec

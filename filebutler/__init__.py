@@ -6,3 +6,5 @@ from Localtime import Localtime
 from SimpleFilelist import SimpleFilelist
 from UserFilelist import UserFilelist
 from WeeklyFilelist import WeeklyFilelist
+from CLI import CLI
+from CLIError import CLIError
