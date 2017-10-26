@@ -16,9 +16,9 @@ class GnuFindOutFileset(object):
         replace = toks[2]
         return cls(path, match, replace)
 
-    def __init__(self, fileset, match, replace):
-        print("GnuFindOut %s %s %s" % (fileset, match, replace))
-        self._fileset = fileset
+    def __init__(self, path, match, replace):
+        #print("GnuFindOutFileset init %s %s %s" % (path, match, replace))
+        self._path = path
         self._match = match
         self._replace = replace
         self._dateParser = self.__class__._dateParser()
@@ -52,7 +52,8 @@ class GnuFindOutFileset(object):
             return self._localtime.t(year, month, int(fields[8]))
 
     def select(self, filter=None):
-        with open(self._fileset) as f:
+        #print("GnuFindOutFileset %s select %s" % (self._path, filter))
+        with open(self._path) as f:
             for line in f:
                 fields = line.rstrip().split(None, 10)
                 filespec = Filespec(path=re.sub(self._match, self._replace, fields[10]),
@@ -62,5 +63,5 @@ class GnuFindOutFileset(object):
                                     mtime=self._dateParser.t(fields),
                                     perms=fields[2])
                 if filter == None or filter.selects(filespec):
-                    print("GnuFindOutFileset read from file %s" % filespec)
+                    #print("GnuFindOutFileset read from file %s" % filespec)
                     yield filespec

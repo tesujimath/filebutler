@@ -53,7 +53,7 @@ class FilterFileset(object):
             i += 1
 
         filter = Filter(owner=owner, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore)
-        print("parsed filter %s" % filter)
+        #print("parsed filter %s" % filter)
         return cls(fileset, filter)
 
     def __init__(self, fileset, filter):

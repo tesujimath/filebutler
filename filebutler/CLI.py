@@ -59,8 +59,6 @@ class CLI:
                 type = tok[2]
                 if type == "find.gnu.out":
                     fileset = GnuFindOutFileset.parse(tok[3:])
-                    for filespec in fileset.select():
-                        print("%s" % filespec)
                     self._filesets[name] = self._cached(name, fileset)
                 elif type == "filter":
                     if len(tok) < 4:
