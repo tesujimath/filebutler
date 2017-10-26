@@ -1,4 +1,5 @@
 import functools
+import os.path
 
 from SimpleFilelistCache import SimpleFilelistCache
 from UserFilelistCache import UserFilelistCache
@@ -24,7 +25,8 @@ class Cache(object):
 
     def update(self):
         cache = self.filelist()
-        cache.purge()
+        if os.path.exists(self._path):
+            cache.purge()
         for filespec in self._filelist.select():
             cache.add(filespec)
         cache.save()
