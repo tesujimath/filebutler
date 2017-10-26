@@ -1,5 +1,8 @@
 import datetime
 import os.path
+import re
+import shutil
+import sys
 
 class WeeklyFilelistCache(object):
 
@@ -54,3 +57,13 @@ class WeeklyFilelistCache(object):
         filelist = self._filelist(w)
         filelist.add(filespec)
 
+    def purge(self):
+        """Delete all cache files from disk."""
+        # For safety in case of misconfiguration, we only delete directories in the format YYYYWW
+        YYYYWW = re.compile(r"""^\d\d\d\d\d\d$""")
+        for x in os.listdir(self._path):
+            px = os.path.join(self._path, x)
+            if YYYYWW.match(x):
+                shutil.rmtree(px)
+            else:
+                sys.stderr.write("WARNING: cache purge ignoring %s\n" % px)
