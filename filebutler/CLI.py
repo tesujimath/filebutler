@@ -15,7 +15,8 @@ from UnionFileset import UnionFileset
 
 class CLI:
 
-    def __init__(self):
+    def __init__(self, args):
+        self._args = args
         self._attrs = {}
         self._filesets = {}
         self._caches = {}
@@ -131,8 +132,7 @@ class CLI:
         except CLIError as e:
             sys.stderr.write("ERROR %s\n" % e.msg)
 
-    def interact(self):
-        # startup files
+    def startup(self):
         for rc in ["/etc/filebutlerrc",
                    os.path.expanduser("~/.filebutlerrc"),
                    os.path.expanduser("~/projects/filebutler/examples/dotfilebutlerrc")]:
@@ -143,6 +143,7 @@ class CLI:
             except IOError:
                 pass
 
+    def interact(self):
         done = False
         while not done:
             try:

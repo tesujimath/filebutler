@@ -7,7 +7,8 @@ import sys
 from filebutler.CLI import CLI
 
 def main():
-    cli = CLI()
+    cli = CLI(sys.argv)
+    cli.startup()
     cli.interact()
 
 if __name__ == '__main__':
