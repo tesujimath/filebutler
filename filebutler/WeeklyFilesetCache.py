@@ -4,7 +4,7 @@ import re
 import shutil
 import sys
 
-class WeeklyFilelistCache(object):
+class WeeklyFilesetCache(object):
 
     @classmethod
     def week(cls, t):
@@ -16,7 +16,7 @@ class WeeklyFilelistCache(object):
     def __init__(self, path, next):
         self._path = path
         self._next = next
-        self._weeks = {}        # of filelist, indexed by integer week
+        self._weeks = {}        # of fileset, indexed by integer week
 
         # load stubs for all weeks found
         if os.path.exists(self._path):
@@ -27,35 +27,35 @@ class WeeklyFilelistCache(object):
     def _subpath(self, w):
         return os.path.join(self._path, str(w))
 
-    def _filelist(self, w):
-        """On demand creation of child filelists."""
+    def _fileset(self, w):
+        """On demand creation of child filesets."""
         if self._weeks.has_key(w):
-            filelist = self._weeks[w]
+            fileset = self._weeks[w]
         else:
-            filelist = None
-        if filelist is None:
-            filelist = self._next(self._subpath(w))
-            self._weeks[w] = filelist
-        return filelist
+            fileset = None
+        if fileset is None:
+            fileset = self._next(self._subpath(w))
+            self._weeks[w] = fileset
+        return fileset
 
     def select(self, filter=None):
         weeks = sorted(self._weeks.keys())
         for w in weeks:
             if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
                 # no yield from in python 2, so:
-                for filespec in self._filelist(w).select(filter):
+                for filespec in self._fileset(w).select(filter):
                     yield filespec
 
     def save(self):
         if not os.path.exists(self._path):
             os.makedirs(self._path)
-        for filelist in self._weeks.values():
-            filelist.save()
+        for fileset in self._weeks.values():
+            fileset.save()
 
     def add(self, filespec):
         w = self.__class__.week(filespec.mtime)
-        filelist = self._filelist(w)
-        filelist.add(filespec)
+        fileset = self._fileset(w)
+        fileset.add(filespec)
 
     def purge(self):
         """Delete all cache files from disk."""

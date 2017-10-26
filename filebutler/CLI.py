@@ -15,12 +15,12 @@ class CLI:
         self._filesets = {}
         self._caches = {}
 
-    def _cached(self, name, filelist):
+    def _cached(self, name, fileset):
         if not self._attrs.has_key('cachedir'):
             raise CLIError("missing attr cachedir")
-        cache = Cache(filelist, os.path.join(self._attrs['cachedir'], name))
+        cache = Cache(fileset, os.path.join(self._attrs['cachedir'], name))
         self._caches[name] = cache
-        return cache.filelist()
+        return cache.fileset()
 
     def _updateCache(self):
         for name in self._caches.keys():

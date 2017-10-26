@@ -6,7 +6,7 @@ from Filter import Filter
 class FilterFileset(object):
 
     @classmethod
-    def parse(cls, filelist, toks):
+    def parse(cls, fileset, toks):
         owner = None
         sizeGeq = None
         mtimeBefore = None
@@ -54,13 +54,13 @@ class FilterFileset(object):
 
         filter = Filter(owner=owner, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore)
         print("parsed filter %s" % filter)
-        return cls(filelist, filter)
+        return cls(fileset, filter)
 
-    def __init__(self, filelist, filter):
-        self._filelist = filelist
+    def __init__(self, fileset, filter):
+        self._fileset = fileset
         self._filter = filter
 
     def select(self, filter=None):
         f1 = self._filter.intersect(filter)
-        for filespec in self._filelist.select(f1):
+        for filespec in self._fileset.select(f1):
             yield filespec
