@@ -29,7 +29,7 @@ class CLI:
 
     def _updateCache(self):
         for name in self._caches.keys():
-            print("updating cache %s" % name)
+            #print("updating cache %s" % name)
             self._caches[name].update()
 
     def _expandVars(self, toks):
@@ -117,7 +117,7 @@ class CLI:
                     raise CLIError("no such fileset %s" % name)
                 fileset = self._filesets[name]
                 for filespec in fileset.select():
-                    print("%s" % filespec)
+                    print(filespec)
             elif cmd == "update-caches":
                 if len(toks) != 1:
                     raise CLIError("usage: %s" % cmd)

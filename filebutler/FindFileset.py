@@ -24,7 +24,7 @@ class FindFileset(object):
         return cls(path, match, replace)
 
     def __init__(self, path, match, replace):
-        print("FindFileset init '%s' '%s' '%s'" % (path, match, replace))
+        #print("FindFileset init '%s' '%s' '%s'" % (path, match, replace))
         self._path = path
         self._match = match
         self._replace = replace
@@ -55,10 +55,10 @@ class FindFileset(object):
                         perms=filemode(s.st_mode))
 
     def select(self, filter=None):
-        print("FindFileset %s select %s" % (self._path, filter))
+        #print("FindFileset %s select %s" % (self._path, filter))
         for root,dirs,files in os.walk(self._path):
             for x in dirs + files:
                 filespec = self._filespec(os.path.join(root, x))
                 if filter == None or filter.selects(filespec):
-                    print("FindFileset scan found %s" % filespec)
+                    #print("FindFileset scan found %s" % filespec)
                     yield filespec

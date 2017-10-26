@@ -51,7 +51,7 @@ class Filter(object):
         return self.__class__(owner, sizeGeq, mtimeBefore)
 
     def selects(self, filespec):
-        if '+' in self.owner:
+        if self.owner is not None and '+' in self.owner:
             return False
         if self.owner is not None and filespec.user != self.owner:
             return False
