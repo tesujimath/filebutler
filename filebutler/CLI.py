@@ -6,6 +6,7 @@ import sys
 from Cache import Cache
 from CLIError import CLIError
 from GnuFindOutFileset import GnuFindOutFileset
+from FilterFileset import FilterFileset
 
 class CLI:
 
@@ -61,16 +62,25 @@ class CLI:
                     for filespec in fileset.select():
                         print("%s" % filespec)
                     self._filesets[name] = self._cached(name, fileset)
-                # elif type == "filter":
-                #     if len(tok) < 4:
-                #         raise CLIError("filter requires fileset, criteria")
-                #     filterName = tok[2]
-                #     filesetName = tok[3]
-                #     if not self._filesets.has_key(filesetName):
-                #         raise CLIError("no such fileset %s" % filesetName)
-                #     fileset = self._filesets[filesetName]
-                #     filter = FilterFileset.parse(fileset, tok[4:])
-                #     self._filesets[name] = filter
+                elif type == "filter":
+                    if len(tok) < 4:
+                        raise CLIError("filter requires fileset, criteria")
+                    filterName = tok[2]
+                    filesetName = tok[3]
+                    if not self._filesets.has_key(filesetName):
+                        raise CLIError("no such fileset %s" % filesetName)
+                    fileset = self._filesets[filesetName]
+                    filter = FilterFileset.parse(fileset, tok[4:])
+                    self._filesets[name] = filter
+            elif cmd == "print":
+                if len(tok) != 2:
+                    raise CLIError("usage: %s <fileset>" % cmd)
+                name = tok[1]
+                if not self._filesets.has_key(name):
+                    raise CLIError("no such fileset %s" % name)
+                fileset = self._filesets[name]
+                for filespec in fileset.select():
+                    print("%s" % filespec)
             elif cmd == "update-caches":
                 if len(tok) != 1:
                     raise CLIError("usage: %s" % cmd)

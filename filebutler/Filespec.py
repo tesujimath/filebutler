@@ -1,6 +1,8 @@
 import calendar
 import time
 
+from util import fbTimeFmt, time2str
+
 # FileSpec fields:
 # path - string, relative to some (externally defined) rootdir
 # user - string
@@ -10,19 +12,19 @@ import time
 # perms - string, in ls -l format
 class Filespec(object):
 
-    _fileTimeFmt = "%Y%m%d-%H%M%S"
-    _strTimeFmt = "%Y%m%d-%H%M%S"
-
     @classmethod
     def fromFile(cls, f):
         for line in f:
-            fields = line.split(5)
-            yield Filespec(fields[5],
-                           fields[0],
-                           fields[1],
-                           int(fields[2]),
-                           calendar.timegm(time.strptime(fields[3], cls._fileTimeFmt)),
-                           fields[4])
+            fields = line.rstrip().split(None, 5)
+            if len(fields) != 6:
+                print("bad filespec: %s" % line.rstrip())
+            else:
+                yield Filespec(fields[5],
+                               fields[0],
+                               fields[1],
+                               int(fields[2]),
+                               calendar.timegm(time.strptime(fields[3], fbTimeFmt)),
+                               fields[4])
 
     def __init__(self, path, user, group, size, mtime, perms):
         self.path = path
@@ -37,7 +39,7 @@ class Filespec(object):
             self.user,
             self.group,
             self.size,
-            time.strftime(self.__class__._strTimeFmt, time.localtime(self.mtime)),
+            time2str(self.mtime),
             self.perms,
             self.path)
 
@@ -46,6 +48,6 @@ class Filespec(object):
             self.user,
             self.group,
             self.size,
-            time.strftime(self.__class__._fileTimeFmt, time.gmtime(self.mtime)),
+            time2str(self.mtime),
             self.perms,
             self.path))

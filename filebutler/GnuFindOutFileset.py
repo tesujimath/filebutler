@@ -51,12 +51,10 @@ class GnuFindOutFileset(object):
             #print "year", year
             return self._localtime.t(year, month, int(fields[8]))
 
-    # the public interface, which makes the a Filelist
-
     def select(self, filter=None):
         with open(self._filelist) as f:
             for line in f:
-                fields = line.split(None, 10)
+                fields = line.rstrip().split(None, 10)
                 filespec = Filespec(path=re.sub(self._match, self._replace, fields[10]),
                                     user=fields[4],
                                     group=fields[5],

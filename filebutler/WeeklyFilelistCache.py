@@ -35,10 +35,10 @@ class WeeklyFilelistCache(object):
             self._weeks[w] = filelist
         return filelist
 
-    def select(self, filter):
+    def select(self, filter=None):
         weeks = sorted(self._weeks.keys())
         for w in weeks:
-            if filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
+            if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
                 # no yield from in python 2, so:
                 for filespec in self._filelist(w).select(filter):
                     yield filespec

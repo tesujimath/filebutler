@@ -26,10 +26,10 @@ class UserFilelistCache(object):
             self._users[u] = filelist
         return filelist
 
-    def select(self, filter):
+    def select(self, filter=None):
         users = sorted(self._users.keys())
         for u in users:
-            if filter.owner is None or u == filter.owner:
+            if filter is None or filter.owner is None or u == filter.owner:
                 # no yield from in python 2, so:
                 for filespec in self._filelist(u).select(filter):
                     yield filespec

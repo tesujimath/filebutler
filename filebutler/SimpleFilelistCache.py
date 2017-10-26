@@ -1,12 +1,14 @@
 import os.path
 
+from Filespec import Filespec
+
 class SimpleFilelistCache(object):
 
     def __init__(self, path):
         self._path = path
         self._filespecs = None
 
-    def select(self, filter):
+    def select(self, filter=None):
         if self._filespecs is None:
             self._filespecs = []
             with open(self._path, 'r') as f:
@@ -15,7 +17,7 @@ class SimpleFilelistCache(object):
                     yield filespec
         else:
             for filespec in self._filespecs:
-                if filter.selects(filespec):
+                if filter is None or filter.selects(filespec):
                     yield filespec
 
     def save(self):
