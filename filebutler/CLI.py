@@ -6,10 +6,11 @@ import shlex
 import string
 import sys
 
-from Cache import Cache
 from CLIError import CLIError
-from GnuFindOutFileset import GnuFindOutFileset
+from Cache import Cache
 from FilterFileset import FilterFileset
+from FindFileset import FindFileset
+from GnuFindOutFileset import GnuFindOutFileset
 from UnionFileset import UnionFileset
 
 class CLI:
@@ -84,6 +85,9 @@ class CLI:
                 if type == "find.gnu.out":
                     fileset = GnuFindOutFileset.parse(toks[3:])
                     self._filesets[name] = self._cached(name, fileset)
+                elif type == "find":
+                    fileset = FindFileset.parse(toks[3:])
+                    self._filesets[name] = self._cached(name, fileset)
                 elif type == "filter":
                     if len(toks) < 4:
                         raise CLIError("filter requires fileset, criteria")
@@ -103,6 +107,8 @@ class CLI:
                         filesets.append(self._filesets[filesetName])
                     union = UnionFileset(filesets)
                     self._filesets[name] = union
+                else:
+                    raise CLIError("unknown fileset type %s" % type)
             elif cmd == "print":
                 if len(toks) != 2:
                     raise CLIError("usage: %s <fileset>" % cmd)
