@@ -1,6 +1,9 @@
+import os
 import os.path
+import re
 import readline
 import shlex
+import string
 import sys
 
 from Cache import Cache
@@ -28,71 +31,89 @@ class CLI:
             print("updating cache %s" % name)
             self._caches[name].update()
 
+    def _expandVars(self, toks):
+        """Expand environment variables in tokens."""
+        for i in range(len(toks)):
+            m = True
+            while m:
+                m = re.search(r"""\$([a-zA-Z]\w*)""", toks[i])
+                if m:
+                    name = m.group(1)
+                    if os.environ.has_key(name):
+                        val = os.environ[name]
+                    else:
+                        val = ""
+                    toks[i] = string.replace(toks[i], "$%s" % name, val)
+                    #print("matched env var %s, val='%s', token now '%s'" % (name, val, toks[i]))
+
     def _process(self, line):
-        tok = shlex.split(line, comments=True)
-        if len(tok) >= 1:
-            cmd = tok[0]
-            if cmd == "set":
-                if len(tok) != 3:
+        toks = shlex.split(line, comments=True)
+        self._expandVars(toks)
+        if len(toks) >= 1:
+            cmd = toks[0]
+            if cmd == "echo":
+                print(' '.join(toks[1:]))
+            elif cmd == "set":
+                if len(toks) != 3:
                     raise CLIError("usage: %s <attr> <value>" % cmd)
-                name = tok[1]
-                value = tok[2]
+                name = toks[1]
+                value = toks[2]
                 self._attrs[name] = value
             elif cmd == "ls-attrs":
-                if len(tok) != 1:
+                if len(toks) != 1:
                     raise CLIError("usage: %s" % cmd)
                 for name in sorted(self._attrs.keys()):
                     print("%s=%s" % (name, self._attrs[name]))
             elif cmd == "ls-filesets":
-                if len(tok) != 1:
+                if len(toks) != 1:
                     raise CLIError("usage: %s" % cmd)
                 for name in sorted(self._filesets.keys()):
                     print(name)
             elif cmd == "ls-caches":
-                if len(tok) != 1:
+                if len(toks) != 1:
                     raise CLIError("usage: %s" % cmd)
                 for name in sorted(self._caches.keys()):
                     print(name)
             elif cmd == "fileset":
-                if len(tok) < 3:
+                if len(toks) < 3:
                     raise CLIError("usage: %s <name> <spec>" % cmd)
-                name = tok[1]
-                type = tok[2]
+                name = toks[1]
+                type = toks[2]
                 if self._filesets.has_key(name):
                     raise CLIError("duplicate fileset %s" % name)
                 if type == "find.gnu.out":
-                    fileset = GnuFindOutFileset.parse(tok[3:])
+                    fileset = GnuFindOutFileset.parse(toks[3:])
                     self._filesets[name] = self._cached(name, fileset)
                 elif type == "filter":
-                    if len(tok) < 4:
+                    if len(toks) < 4:
                         raise CLIError("filter requires fileset, criteria")
-                    filesetName = tok[3]
+                    filesetName = toks[3]
                     if not self._filesets.has_key(filesetName):
                         raise CLIError("no such fileset %s" % filesetName)
                     fileset = self._filesets[filesetName]
-                    filter = FilterFileset.parse(fileset, tok[4:])
+                    filter = FilterFileset.parse(fileset, toks[4:])
                     self._filesets[name] = filter
                 elif type == "union":
-                    if len(tok) < 4:
+                    if len(toks) < 4:
                         raise CLIError("union requires at least two filesets")
                     filesets = []
-                    for filesetName in tok[3:]:
+                    for filesetName in toks[3:]:
                         if not self._filesets.has_key(filesetName):
                             raise CLIError("no such fileset %s" % filesetName)
                         filesets.append(self._filesets[filesetName])
                     union = UnionFileset(filesets)
                     self._filesets[name] = union
             elif cmd == "print":
-                if len(tok) != 2:
+                if len(toks) != 2:
                     raise CLIError("usage: %s <fileset>" % cmd)
-                name = tok[1]
+                name = toks[1]
                 if not self._filesets.has_key(name):
                     raise CLIError("no such fileset %s" % name)
                 fileset = self._filesets[name]
                 for filespec in fileset.select():
                     print("%s" % filespec)
             elif cmd == "update-caches":
-                if len(tok) != 1:
+                if len(toks) != 1:
                     raise CLIError("usage: %s" % cmd)
                 self._updateCache()
             else:
