@@ -7,6 +7,7 @@ from Cache import Cache
 from CLIError import CLIError
 from GnuFindOutFileset import GnuFindOutFileset
 from FilterFileset import FilterFileset
+from UnionFileset import UnionFileset
 
 class CLI:
 
@@ -57,19 +58,30 @@ class CLI:
                     raise CLIError("usage: %s <name> <spec>" % cmd)
                 name = tok[1]
                 type = tok[2]
+                if self._filesets.has_key(name):
+                    raise CLIError("duplicate fileset %s" % name)
                 if type == "find.gnu.out":
                     fileset = GnuFindOutFileset.parse(tok[3:])
                     self._filesets[name] = self._cached(name, fileset)
                 elif type == "filter":
                     if len(tok) < 4:
                         raise CLIError("filter requires fileset, criteria")
-                    filterName = tok[2]
                     filesetName = tok[3]
                     if not self._filesets.has_key(filesetName):
                         raise CLIError("no such fileset %s" % filesetName)
                     fileset = self._filesets[filesetName]
                     filter = FilterFileset.parse(fileset, tok[4:])
                     self._filesets[name] = filter
+                elif type == "union":
+                    if len(tok) < 4:
+                        raise CLIError("union requires at least two filesets")
+                    filesets = []
+                    for filesetName in tok[3:]:
+                        if not self._filesets.has_key(filesetName):
+                            raise CLIError("no such fileset %s" % filesetName)
+                        filesets.append(self._filesets[filesetName])
+                    union = UnionFileset(filesets)
+                    self._filesets[name] = union
             elif cmd == "print":
                 if len(tok) != 2:
                     raise CLIError("usage: %s <fileset>" % cmd)

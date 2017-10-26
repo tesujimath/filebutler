@@ -63,5 +63,5 @@ class GnuFindOutFileset(object):
                                     mtime=self._dateParser.t(fields),
                                     perms=fields[2])
                 if filter == None or filter.selects(filespec):
-                    #print("GnuFindOutFileset read from file %s" % filespec)
+                    print("GnuFindOutFileset read from file %s" % filespec)
                     yield filespec

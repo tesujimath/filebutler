@@ -14,12 +14,12 @@ class SimpleFilesetCache(object):
             with open(self._path, 'r') as f:
                 for filespec in Filespec.fromFile(f):
                     self._filespecs.append(filespec)
-                    #print("SimpleFilesetCache read from file %s" % filespec)
+                    print("SimpleFilesetCache read from file %s" % filespec)
                     yield filespec
         else:
             for filespec in self._filespecs:
                 if filter is None or filter.selects(filespec):
-                    #print("SimpleFilesetCache read from memory %s" % filespec)
+                    print("SimpleFilesetCache read from memory %s" % filespec)
                     yield filespec
 
     def save(self):

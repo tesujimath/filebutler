@@ -1,3 +1,6 @@
 set cachedir /home/guestsi/junk/filebutler.cache
 fileset some-scratch find.gnu.out /home/guestsi/junk/some-scratch-files ^([^/]*) /dataset/\\1/scratch
+fileset some-home find.gnu.out /home/guestsi/junk/some-home-files ^ /home/guestsi/
+fileset all-files union some-scratch some-home
 fileset laugrauda filter some-scratch -user laugrauda
+fileset guestsi filter all-files -user guestsi
