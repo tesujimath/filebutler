@@ -39,7 +39,8 @@ class FilesetInfo(object):
 
     def users(self):
         lines = [str(self)]
-        for username in sorted(self._users.keys()):
-            user = self._users[username]
-            lines.append("%s %s over %d files" % (username, size2str(user.totalSize), user.nFiles))
+        for user in sorted(self._users.items(), key=lambda u: u[1].totalSize, reverse=True):
+            name = user[0]
+            info = user[1]
+            lines.append("%s %s over %d files" % (name, size2str(info.totalSize), info.nFiles))
         return '\n'.join(lines)
