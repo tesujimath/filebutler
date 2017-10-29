@@ -35,18 +35,15 @@ class Cache(Fileset):
         self._path = path
         self._caches = [WeeklyFilesetCache, UserFilesetCache]
 
-    def _filesetHelper(self, path, level):
+    def _cache(self, path, level):
         if level < len(self._caches):
-            return self._caches[level](path, functools.partial(self._filesetHelper, level = level + 1))
+            return self._caches[level](path, functools.partial(self._cache, level = level + 1))
         else:
             return SimpleFilesetCache(path)
 
-    def fileset(self):
-        return self._filesetHelper(self._path, 0)
-
     def select(self, filter=None):
         verbose_stderr("fileset %s reading from cache at %s\n" % (self._name, self._path))
-        for filespec in self._fileset.select(filter):
+        for filespec in self._cache(self._path, 0).select(filter):
             yield filespec
 
     def update(self):
