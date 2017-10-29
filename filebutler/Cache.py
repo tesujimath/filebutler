@@ -18,15 +18,19 @@
 import functools
 import os.path
 
+from Fileset import Fileset
 from SimpleFilesetCache import SimpleFilesetCache
 from UserFilesetCache import UserFilesetCache
 from WeeklyFilesetCache import WeeklyFilesetCache
+from util import verbose_stderr
 
 # Stack up the caches we support, so that each cache can instantiate
 # its next one, via its next parameter.
-class Cache(object):
+class Cache(Fileset):
 
-    def __init__(self, fileset, path):
+    def __init__(self, name, fileset, path):
+        Fileset.__init__(self)
+        self._name = name
         self._fileset = fileset
         self._path = path
         self._caches = [WeeklyFilesetCache, UserFilesetCache]
@@ -39,6 +43,11 @@ class Cache(object):
 
     def fileset(self):
         return self._filesetHelper(self._path, 0)
+
+    def select(self, filter=None):
+        verbose_stderr("fileset %s reading from cache at %s\n" % (self._name, self._path))
+        for filespec in self._fileset.select(filter):
+            yield filespec
 
     def update(self):
         cache = self.fileset()

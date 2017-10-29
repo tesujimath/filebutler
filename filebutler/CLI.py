@@ -21,7 +21,7 @@ import re
 import readline
 import shlex
 import string
-import sys
+import time
 
 from CLIError import CLIError
 from Cache import Cache
@@ -29,6 +29,7 @@ from FilterFileset import FilterFileset
 from FindFileset import FindFileset
 from GnuFindOutFileset import GnuFindOutFileset
 from UnionFileset import UnionFileset
+from util import stderr
 
 class CLI:
 
@@ -37,13 +38,14 @@ class CLI:
         self._attrs = {}
         self._filesets = {}
         self._caches = {}
+        self._now = time.time() # for consistency between all filters
 
     def _cached(self, name, fileset):
         if not self._attrs.has_key('cachedir'):
             raise CLIError("missing attr cachedir")
-        cache = Cache(fileset, os.path.join(self._attrs['cachedir'], name))
+        cache = Cache(name, fileset, os.path.join(self._attrs['cachedir'], name))
         self._caches[name] = cache
-        return cache.fileset()
+        return cache
 
     def _updateCache(self):
         for name in self._caches.keys():
@@ -64,6 +66,11 @@ class CLI:
                         val = ""
                     toks[i] = string.replace(toks[i], "$%s" % name, val)
                     #print("matched env var %s, val='%s', token now '%s'" % (name, val, toks[i]))
+
+    def _fileset(self, name):
+        if not self._filesets.has_key(name):
+            raise CLIError("no such fileset %s" % name)
+        return self._filesets[name]
 
     def _process(self, line):
         toks = shlex.split(line, comments=True)
@@ -101,40 +108,39 @@ class CLI:
                 if self._filesets.has_key(name):
                     raise CLIError("duplicate fileset %s" % name)
                 if type == "find.gnu.out":
-                    fileset = GnuFindOutFileset.parse(toks[3:])
+                    fileset = GnuFindOutFileset.parse(toks[1], toks[3:])
                     self._filesets[name] = self._cached(name, fileset)
                 elif type == "find":
-                    fileset = FindFileset.parse(toks[3:])
+                    fileset = FindFileset.parse(toks[1], toks[3:])
                     self._filesets[name] = self._cached(name, fileset)
                 elif type == "filter":
                     if len(toks) < 4:
                         raise CLIError("filter requires fileset, criteria")
                     filesetName = toks[3]
-                    if not self._filesets.has_key(filesetName):
-                        raise CLIError("no such fileset %s" % filesetName)
-                    fileset = self._filesets[filesetName]
-                    filter = FilterFileset.parse(fileset, toks[4:])
+                    filter = FilterFileset.parse(self._fileset(filesetName), self._now, toks[4:])
                     self._filesets[name] = filter
                 elif type == "union":
                     if len(toks) < 4:
                         raise CLIError("union requires at least two filesets")
                     filesets = []
                     for filesetName in toks[3:]:
-                        if not self._filesets.has_key(filesetName):
-                            raise CLIError("no such fileset %s" % filesetName)
-                        filesets.append(self._filesets[filesetName])
+                        filesets.append(self._fileset(filesetName))
                     union = UnionFileset(filesets)
                     self._filesets[name] = union
                 else:
                     raise CLIError("unknown fileset type %s" % type)
+            elif cmd == "info":
+                if len(toks) < 2 or len(toks) > 3 or len(toks) == 3 and toks[1] != '--users':
+                    raise CLIError("usage: %s [--users] <fileset>" % cmd)
+                if len(toks) == 2:
+                    print(self._fileset(toks[1]).info())
+                else:
+                    print(self._fileset(toks[2]).info().users())
             elif cmd == "print":
                 if len(toks) != 2:
                     raise CLIError("usage: %s <fileset>" % cmd)
                 name = toks[1]
-                if not self._filesets.has_key(name):
-                    raise CLIError("no such fileset %s" % name)
-                fileset = self._filesets[name]
-                for filespec in fileset.select():
+                for filespec in self._fileset(name).select():
                     print(filespec)
             elif cmd == "update-caches":
                 if len(toks) != 1:
@@ -147,7 +153,7 @@ class CLI:
         try:
             self._process(line)
         except CLIError as e:
-            sys.stderr.write("ERROR %s\n" % e.msg)
+            stderr("ERROR %s\n" % e.msg)
 
     def startup(self):
         for rc in ["/etc/filebutlerrc",

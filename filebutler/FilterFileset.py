@@ -15,15 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
-
+from Fileset import Fileset
 from Filespec import Filespec
 from Filter import Filter
 
-class FilterFileset(object):
+class FilterFileset(Fileset):
 
     @classmethod
-    def parse(cls, fileset, toks):
+    def parse(cls, fileset, now, toks):
         owner = None
         sizeGeq = None
         mtimeBefore = None
@@ -44,7 +43,7 @@ class FilterFileset(object):
                 if len(size) < 2 or size[-1] != 'G':
                     raise CLIError("-size only supports +nG format")
                 try:
-                    n = int(size[:-1]) * 1073741824 # from manpage for find
+                    n = int(size[:-1]) * Giga
                 except ValueError:
                     raise CLIError("-size only supports +nG format")
                 if sizeGeq is not None:
@@ -63,7 +62,7 @@ class FilterFileset(object):
                     raise CLIError("-mtime only supports +n format")
                 if mtimeBefore is not None:
                     raise CLIError("duplicate -mtime")
-                mtimeBefore = time.time() - n * 60 * 60 * 24
+                mtimeBefore = now - n * 60 * 60 * 24
                 i += 1
             else:
                 raise CLIError("unknown filter parameter %s" % tok)

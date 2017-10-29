@@ -19,22 +19,26 @@ import calendar
 import datetime
 import re
 
+from Fileset import Fileset
 from Filespec import Filespec
 from Localtime import Localtime
+from util import verbose_stderr
 
-class GnuFindOutFileset(object):
+class GnuFindOutFileset(Fileset):
 
     @classmethod
-    def parse(cls, toks):
+    def parse(cls, name, toks):
         if len(toks) != 3:
             raise CLIError("find.gnu.out requires path, match-re, replace-str")
         path = toks[0]
         match = toks[1]
         replace = toks[2]
-        return cls(path, match, replace)
+        return cls(name, path, match, replace)
 
-    def __init__(self, path, match, replace):
+    def __init__(self, name, path, match, replace):
         #print("GnuFindOutFileset init %s %s %s" % (path, match, replace))
+        Fileset.__init__(self)
+        self._name = name
         self._path = path
         self._match = match
         self._replace = replace
@@ -69,7 +73,7 @@ class GnuFindOutFileset(object):
             return self._localtime.t(year, month, int(fields[8]))
 
     def select(self, filter=None):
-        #print("GnuFindOutFileset %s select %s" % (self._path, filter))
+        verbose_stderr("fileset %s reading from filelist %s\n" % (self._name, self._path))
         with open(self._path) as f:
             for line in f:
                 fields = line.rstrip().split(None, 10)

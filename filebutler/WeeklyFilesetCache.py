@@ -19,7 +19,8 @@ import datetime
 import os.path
 import re
 import shutil
-import sys
+
+from util import verbose_stderr
 
 class WeeklyFilesetCache(object):
 
@@ -83,4 +84,4 @@ class WeeklyFilesetCache(object):
             if YYYYWW.match(x):
                 shutil.rmtree(px)
             else:
-                sys.stderr.write("WARNING: cache purge ignoring %s\n" % px)
+                verbose_stderr("WARNING: cache purge ignoring %s\n" % px)

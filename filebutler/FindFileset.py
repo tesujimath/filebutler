@@ -21,13 +21,14 @@ import pwd
 import re
 import stat
 
+from Fileset import Fileset
 from Filespec import Filespec
-from util import filemode
+from util import filemode, verbose_stderr
 
-class FindFileset(object):
+class FindFileset(Fileset):
 
     @classmethod
-    def parse(cls, toks):
+    def parse(cls, name, toks):
         if len(toks) == 1:
             path = toks[0]
             match = '/'
@@ -38,10 +39,12 @@ class FindFileset(object):
             replace = toks[2]
         else:
             raise CLIError("find requires path, and either both of match-re, replace-str or neither")
-        return cls(path, match, replace)
+        return cls(name, path, match, replace)
 
-    def __init__(self, path, match, replace):
+    def __init__(self, name, path, match, replace):
         #print("FindFileset init '%s' '%s' '%s'" % (path, match, replace))
+        Fileset.__init__(self)
+        self._name = name
         self._path = path
         self._match = match
         self._replace = replace
@@ -72,7 +75,7 @@ class FindFileset(object):
                         perms=filemode(s.st_mode))
 
     def select(self, filter=None):
-        #print("FindFileset %s select %s" % (self._path, filter))
+        verbose_stderr("fileset %s scanning files under %s\n" % (self._name, self._path))
         for root,dirs,files in os.walk(self._path):
             for x in dirs + files:
                 filespec = self._filespec(os.path.join(root, x))

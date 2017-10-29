@@ -17,6 +17,14 @@
 
 import time
 from stat import *
+import sys
+
+verbose = True
+def stderr(msg):
+    sys.stderr.write(msg)
+def verbose_stderr(msg):
+    if verbose:
+        stderr(msg)
 
 fbTimeFmt = "%Y%m%d-%H%M%S"
 
@@ -62,3 +70,20 @@ def filemode(mode):
         else:
             perm.append("-")
     return "".join(perm)
+
+Kilo = 1024
+Mega = 1024 ** 2
+Giga = 1024 ** 3
+Tera = 1024 ** 4
+
+def size2str(n):
+    if n < Kilo:
+        return "%d bytes" % n
+    elif n < Mega:
+        return "%dk" % (n / Kilo)
+    elif n < Giga:
+        return "%dM" % (n / Mega)
+    elif n < Tera:
+        return "%dG" % (n / Giga)
+    else:
+        return "%.1fT" % (n * 1.0 / Tera)
