@@ -17,11 +17,13 @@
 
 import calendar
 import datetime
+import os
 import re
 
 from Fileset import Fileset
 from Filespec import Filespec
 from Localtime import Localtime
+from PercentageProgress import PercentageProgress
 from util import verbose_stderr
 
 class GnuFindOutFileset(Fileset):
@@ -74,8 +76,12 @@ class GnuFindOutFileset(Fileset):
 
     def select(self, filter=None):
         verbose_stderr("fileset %s reading from filelist %s\n" % (self._name, self._path))
+        filesize = os.stat(self._path).st_size
+        progress = PercentageProgress("reading %s" % self._path)
+        n = 0
         with open(self._path) as f:
             for line in f:
+                progress.report(f.tell() * 1.0 / filesize)
                 fields = line.rstrip().split(None, 10)
                 filespec = Filespec(path=re.sub(self._match, self._replace, fields[10]),
                                     user=fields[4],
@@ -86,3 +92,4 @@ class GnuFindOutFileset(Fileset):
                 if filter == None or filter.selects(filespec):
                     #print("GnuFindOutFileset read from file %s" % filespec)
                     yield filespec
+        progress.complete()
