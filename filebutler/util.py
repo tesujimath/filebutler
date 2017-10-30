@@ -21,19 +21,27 @@ import time
 from stat import *
 import sys
 
-global_diagnostics = True
-global_progress = True
-global_verbose = True
+diagnostics = True
+progress = True
+verbose = True
+def initialize(args):
+    if args.batch:
+        diagnostic_stderr("batch mode\n")
+        global progress
+        global verbose
+        progress = False
+        verbose = False
+
 def stderr(msg):
     sys.stderr.write(msg)
 def diagnostic_stderr(msg):
-    if global_diagnostics:
+    if diagnostics:
         stderr(msg)
 def progress_stderr(msg):
-    if global_progress:
+    if progress:
         stderr(msg)
 def verbose_stderr(msg):
-    if global_verbose:
+    if verbose:
         stderr(msg)
 
 fbTimeFmt = "%Y%m%d-%H%M%S"

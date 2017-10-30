@@ -26,10 +26,11 @@ from filebutler.CLI import CLI
 
 def main():
     parser = argparse.ArgumentParser(description='View and prune old files.')
+    parser.add_argument('--batch', action='store_true', dest='batch', help='batch mode')
     parser.add_argument('-c', dest='command', help='command to invoke')
     args = parser.parse_args()
 
-    cli = CLI(sys.argv)
+    cli = CLI(args)
     cli.startup()
 
     if args.command is not None:

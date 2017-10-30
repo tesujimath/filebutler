@@ -29,16 +29,16 @@ from FilterFileset import FilterFileset
 from FindFileset import FindFileset
 from GnuFindOutFileset import GnuFindOutFileset
 from UnionFileset import UnionFileset
-from util import stderr, diagnostic_stderr
+from util import stderr, diagnostic_stderr, initialize
 
 class CLI:
 
     def __init__(self, args):
-        self._args = args
         self._attrs = {}
         self._filesets = {}
         self._caches = {}
         self._now = time.time() # for consistency between all filters
+        initialize(args)
 
     def _cached(self, name, fileset):
         if not self._attrs.has_key('cachedir'):
