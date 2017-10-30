@@ -42,5 +42,7 @@ class FilesetInfo(object):
         for user in sorted(self._users.items(), key=lambda u: u[1].totalSize, reverse=True):
             name = user[0]
             info = user[1]
-            lines.append("%s %s over %d files" % (name, size2str(info.totalSize), info.nFiles))
+            # exclude trivial small stuff
+            if info.totalSize > 1024:
+                lines.append("%s %s over %d files" % (name, size2str(info.totalSize), info.nFiles))
         return '\n'.join(lines)

@@ -145,8 +145,8 @@ class CLI:
                 else:
                     raise CLIError("unknown fileset type %s" % type)
             elif cmd == "info":
-                if len(toks) < 2 or len(toks) > 3 or len(toks) == 3 and toks[1] != '--users':
-                    raise CLIError("usage: %s [--users] <fileset>" % cmd)
+                if len(toks) < 2 or len(toks) > 3 or len(toks) == 3 and toks[1] != '-u':
+                    raise CLIError("usage: %s [-u] <fileset>" % cmd)
                 if len(toks) == 2:
                     print(self._fileset(toks[1]).info())
                 else:
