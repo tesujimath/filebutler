@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+import errno
 import functools
 import os.path
 
@@ -49,8 +50,17 @@ class Cache(Fileset):
 
     def update(self):
         cache = self._cache(self._path, 0)
-        if os.path.exists(self._path):
-            cache.purge()
+        cache.create()
         for filespec in self._fileset.select():
-            cache.add(filespec)
-        cache.save()
+            try:
+                cache.add(filespec)
+            except IOError as e:
+                if e.errno == errno.EMFILE:
+                    print("open failed, flush all caches and redo" % path)
+                    # It would be better to implement an LRU cache, but that
+                    # hardly seems worth it.  So simply close them all.
+                    cache.flush()
+                    cache.add(filespec)
+                else:
+                    raise
+        cache.flush()

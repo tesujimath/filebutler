@@ -51,13 +51,15 @@ class UserFilesetCache(object):
                 for filespec in self._fileset(u).select(filter):
                     yield filespec
 
-    def save(self):
+    def create(self):
         if not os.path.exists(self._path):
             os.makedirs(self._path)
-        for fileset in self._users.values():
-            fileset.save()
 
     def add(self, filespec):
         fileset = self._fileset(filespec.user)
         fileset.add(filespec)
+
+    def flush(self):
+        for fileset in self._users.values():
+            fileset.flush()
 

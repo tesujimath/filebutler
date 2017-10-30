@@ -19,11 +19,19 @@ import time
 from stat import *
 import sys
 
-verbose = True
+global_diagnostics = True
+global_progress = True
+global_verbose = True
 def stderr(msg):
     sys.stderr.write(msg)
+def diagnostic_stderr(msg):
+    if global_diagnostics:
+        stderr(msg)
+def progress_stderr(msg):
+    if global_progress:
+        stderr(msg)
 def verbose_stderr(msg):
-    if verbose:
+    if global_verbose:
         stderr(msg)
 
 fbTimeFmt = "%Y%m%d-%H%M%S"

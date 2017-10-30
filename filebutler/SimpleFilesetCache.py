@@ -18,34 +18,41 @@
 import os.path
 
 from Filespec import Filespec
+from util import verbose_stderr, diagnostic_stderr
 
 class SimpleFilesetCache(object):
 
     def __init__(self, path):
         self._path = path
-        self._filespecs = None
+        self._filespecs = None  # in-memory read cache
+        self._file = None
 
     def select(self, filter=None):
         if self._filespecs is None:
+            #diagnostic_stderr("SimpleFilesetCache select %s from file cache %s\n" % (str(filter), self._path))
             self._filespecs = []
             with open(self._path, 'r') as f:
+                #diagnostic_stderr("SimpleFilesetCache select %s opened file cache\n" % str(filter))
                 for filespec in Filespec.fromFile(f):
                     self._filespecs.append(filespec)
-                    #print("SimpleFilesetCache read from file %s" % filespec)
+                    #diagnostic_stderr("SimpleFilesetCache read from file %s\n" % filespec)
                     yield filespec
         else:
+            #diagnostic_stderr("SimpleFilesetCache select %s from memory cache\n" % str(filter))
             for filespec in self._filespecs:
                 if filter is None or filter.selects(filespec):
-                    #print("SimpleFilesetCache read from memory %s" % filespec)
+                    #diagnostic_stderr("SimpleFilesetCache read from memory %s\n" % filespec)
                     yield filespec
 
-    def save(self):
-        with open(self._path, 'w') as f:
-            if self._filespecs is not None:
-                for filespec in self._filespecs:
-                    filespec.write(f)
-
     def add(self, filespec):
-        if self._filespecs is None:
-            self._filespecs = []
-        self._filespecs.append(filespec)
+        # don't cache writes, as this would mean caching the whole of the filelist
+        if self._file is None:
+            #diagnostic_stderr("SimpleFilesetCache writing file cache at %s\n" % self._path)
+            self._file = open(self._path, 'w')
+        filespec.write(self._file)
+
+    def flush(self):
+        if self._file is not None:
+            #diagnostic_stderr("flushing %s\n" % self._path)
+            self._file.close()
+            self._file = None

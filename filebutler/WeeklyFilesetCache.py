@@ -20,7 +20,7 @@ import os.path
 import re
 import shutil
 
-from util import verbose_stderr
+from util import verbose_stderr, diagnostic_stderr
 
 class WeeklyFilesetCache(object):
 
@@ -45,7 +45,7 @@ class WeeklyFilesetCache(object):
     def _subpath(self, w):
         return os.path.join(self._path, str(w))
 
-    def _fileset(self, w):
+    def _fileset(self, w, create=False):
         """On demand creation of child filesets."""
         if self._weeks.has_key(w):
             fileset = self._weeks[w]
@@ -54,6 +54,8 @@ class WeeklyFilesetCache(object):
         if fileset is None:
             fileset = self._next(self._subpath(w))
             self._weeks[w] = fileset
+        if create:
+            fileset.create()
         return fileset
 
     def select(self, filter=None):
@@ -64,24 +66,27 @@ class WeeklyFilesetCache(object):
                 for filespec in self._fileset(w).select(filter):
                     yield filespec
 
-    def save(self):
-        if not os.path.exists(self._path):
+    def create(self):
+        """Create empty cache on disk, purging any previous."""
+        #diagnostic_stderr("WeeklyFilesetCache creating at %s\n" % self._path)
+        if os.path.exists(self._path):
+            # Purge existing cache.
+            # For safety in case of misconfiguration, we only delete directories in the format YYYYWW
+            YYYYWW = re.compile(r"""^\d\d\d\d\d\d$""")
+            for x in os.listdir(self._path):
+                px = os.path.join(self._path, x)
+                if YYYYWW.match(x):
+                    shutil.rmtree(px)
+                else:
+                    verbose_stderr("WARNING: cache purge ignoring %s\n" % px)
+        else:
             os.makedirs(self._path)
-        for fileset in self._weeks.values():
-            fileset.save()
 
     def add(self, filespec):
         w = self.__class__.week(filespec.mtime)
-        fileset = self._fileset(w)
+        fileset = self._fileset(w, create=True)
         fileset.add(filespec)
 
-    def purge(self):
-        """Delete all cache files from disk."""
-        # For safety in case of misconfiguration, we only delete directories in the format YYYYWW
-        YYYYWW = re.compile(r"""^\d\d\d\d\d\d$""")
-        for x in os.listdir(self._path):
-            px = os.path.join(self._path, x)
-            if YYYYWW.match(x):
-                shutil.rmtree(px)
-            else:
-                verbose_stderr("WARNING: cache purge ignoring %s\n" % px)
+    def flush(self):
+        for w in self._weeks.itervalues():
+            w.flush()

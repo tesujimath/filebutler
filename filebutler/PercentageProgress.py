@@ -16,8 +16,9 @@
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
 import math
-import sys
 import time
+
+from util import progress_stderr
 
 class PercentageProgress(object):
 
@@ -41,9 +42,9 @@ class PercentageProgress(object):
             else:
                 remaining = ""
             message = self._fmt % (p * 100, remaining)
-            sys.stderr.write(message)
+            progress_stderr(message)
             if len(message) > self._maxlen:
                 self._maxlen = len(message)
 
     def complete(self):
-        sys.stderr.write("\r%s\r" % (' ' * self._maxlen))
+        progress_stderr("\r%s\r" % (' ' * self._maxlen))
