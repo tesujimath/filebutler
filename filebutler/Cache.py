@@ -23,7 +23,7 @@ from Fileset import Fileset
 from SimpleFilesetCache import SimpleFilesetCache
 from UserFilesetCache import UserFilesetCache
 from WeeklyFilesetCache import WeeklyFilesetCache
-from util import filetimestr, verbose_stderr
+from util import filetimestr, verbose_stderr, diagnostic_stderr
 
 # Stack up the caches we support, so that each cache can instantiate
 # its next one, via its next parameter.
@@ -56,7 +56,7 @@ class Cache(Fileset):
                 cache.add(filespec)
             except IOError as e:
                 if e.errno == errno.EMFILE:
-                    print("open failed, flush all caches and redo" % path)
+                    diagnostic_stderr("open failed, flush all caches and redo on %s\n" % self._path)
                     # It would be better to implement an LRU cache, but that
                     # hardly seems worth it.  So simply close them all.
                     cache.flush()
