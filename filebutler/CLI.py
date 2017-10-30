@@ -166,6 +166,10 @@ class CLI:
             except IOError:
                 pass
 
+    def commands(self, cmds):
+        for cmd in cmds:
+            self._handleProcess(cmd)
+
     def interact(self):
         done = False
         while not done:

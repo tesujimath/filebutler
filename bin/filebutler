@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
 import os.path
 import string
 import sys
@@ -24,9 +25,17 @@ import sys
 from filebutler.CLI import CLI
 
 def main():
+    parser = argparse.ArgumentParser(description='View and prune old files.')
+    parser.add_argument('-c', dest='command', help='command to invoke')
+    args = parser.parse_args()
+
     cli = CLI(sys.argv)
     cli.startup()
-    cli.interact()
+
+    if args.command is not None:
+        cli.commands(args.command.split(';'))
+    else:
+        cli.interact()
 
 if __name__ == '__main__':
     main()
