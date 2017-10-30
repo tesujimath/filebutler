@@ -25,10 +25,11 @@ import time
 
 from CLIError import CLIError
 from Cache import Cache
-from IdMapper import IdMapper
 from FilterFileset import FilterFileset
 from FindFileset import FindFileset
 from GnuFindOutFileset import GnuFindOutFileset
+from IdMapper import IdMapper
+from Pager import Pager
 from UnionFileset import UnionFileset
 from util import stderr, diagnostic_stderr, initialize
 
@@ -142,8 +143,12 @@ class CLI:
                 if len(toks) != 2:
                     raise CLIError("usage: %s <fileset>" % cmd)
                 name = toks[1]
+                pager = Pager()
+                width = 0
                 for filespec in self._fileset(name).select():
-                    print(filespec)
+                    s, width = filespec.format(width)
+                    pager.file.write("%s\n" % s)
+                pager.close()
             elif cmd == "update-cache":
                 if len(toks) == 1:
                     for name in self._caches.keys():

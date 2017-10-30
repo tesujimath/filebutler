@@ -11,6 +11,10 @@ fileset integrity-active find.gnu.out /mirror/integrity/z102/active/all-active-f
 fileset integrity-archive find.gnu.out /mirror/integrity/z102/archive/all-archive-files ^([^/]*) /dataset/\\1/archive
 fileset integrity-scratch find.gnu.out /mirror/integrity/z102/scratch/all-scratch-files ^([^/]*) /dataset/\\1/scratch
 fileset irawharau-01-ztmp find /bifo/ztmp ^([^/]*) /dataset/\\1/ztmp
+fileset scratch union gypsy-scratch ignition-scratch integrity-scratch
+fileset ztmp union irawharau-01-ztmp
+fileset old-scratch filter scratch -mtime +730
+fileset old-ztmp filter ztmp -mtime +30
 set cachedir $HOME/.filebutler.cache
 fileset some-scratch find.gnu.out /home/guestsi/junk/some-scratch-files ^([^/]*) /dataset/\\1/scratch
 fileset some-gypsy find.gnu.out /home/guestsi/junk/some-gypsy-files ^([^/]*) /dataset/\\1/active

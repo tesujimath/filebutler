@@ -18,7 +18,7 @@
 import calendar
 import time
 
-from util import fbTimeFmt, time2str
+from util import fbTimeFmt, time2str, size2str
 
 # FileSpec fields:
 # path - string, relative to some (externally defined) rootdir
@@ -51,14 +51,19 @@ class Filespec(object):
         self.mtime = mtime
         self.perms = perms
 
-    def __str__(self):
-        return "%s:%s %d %s %s %s" % (
-            self.user,
-            self.group,
-            self.size,
-            time2str(self.mtime),
+    def format(self, width=50):
+        if width < 50:
+            width = 50
+        if len(self.path) > width:
+            width = (len(self.path) / 10 + 1) * 10
+        s = ("%s %s %4s %-" + str(width) + "s %s:%s") % (
             self.perms,
-            self.path)
+            time2str(self.mtime),
+            size2str(self.size),
+            self.path,
+            self.user,
+            self.group)
+        return s, width
 
     def write(self, f):
         f.write("%s %s %d %s %s %s\n" % (

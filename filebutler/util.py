@@ -96,7 +96,7 @@ Tera = 1024 ** 4
 
 def size2str(n):
     if n < Kilo:
-        return "%d bytes" % n
+        return "%d" % n
     elif n < Mega:
         return "%dk" % (n / Kilo)
     elif n < Giga:
