@@ -25,6 +25,7 @@ import time
 
 from CLIError import CLIError
 from Cache import Cache
+from IdMapper import IdMapper
 from FilterFileset import FilterFileset
 from FindFileset import FindFileset
 from GnuFindOutFileset import GnuFindOutFileset
@@ -38,6 +39,7 @@ class CLI:
         self._filesets = {}
         self._caches = {}
         self._now = time.time() # for consistency between all filters
+        self._idMapper = IdMapper()
         initialize(args)
 
     def _cached(self, name, fileset):
@@ -108,10 +110,10 @@ class CLI:
                 if self._filesets.has_key(name):
                     raise CLIError("duplicate fileset %s" % name)
                 if type == "find.gnu.out":
-                    fileset = GnuFindOutFileset.parse(toks[1], toks[3:])
+                    fileset = GnuFindOutFileset.parse(self._idMapper, toks[1], toks[3:])
                     self._filesets[name] = self._cached(name, fileset)
                 elif type == "find":
-                    fileset = FindFileset.parse(toks[1], toks[3:])
+                    fileset = FindFileset.parse(self._idMapper, toks[1], toks[3:])
                     self._filesets[name] = self._cached(name, fileset)
                 elif type == "filter":
                     if len(toks) < 4:

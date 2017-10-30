@@ -28,7 +28,7 @@ from util import filemode, verbose_stderr
 class FindFileset(Fileset):
 
     @classmethod
-    def parse(cls, name, toks):
+    def parse(cls, idMapper, name, toks):
         if len(toks) == 1:
             path = toks[0]
             match = '/'
@@ -39,37 +39,23 @@ class FindFileset(Fileset):
             replace = toks[2]
         else:
             raise CLIError("find requires path, and either both of match-re, replace-str or neither")
-        return cls(name, path, match, replace)
+        return cls(idMapper, name, path, match, replace)
 
-    def __init__(self, name, path, match, replace):
+    def __init__(self, idMapper, name, path, match, replace):
         #print("FindFileset init '%s' '%s' '%s'" % (path, match, replace))
         Fileset.__init__(self)
+        self._idMapper = idMapper
         self._name = name
         self._path = path
         self._match = match
         self._replace = replace
-        self._users = {}
-        self._groups = {}
 
     def _filespec(self, path):
         s = os.lstat(path)
-        # cache the results of looking up user and group names
-        if not self._users.has_key(s.st_uid):
-            pw = pwd.getpwuid(s.st_uid)
-            user = pw[0]
-            self._users[s.st_uid] = user
-        else:
-            user = self._users[s.st_uid]
-        if not self._groups.has_key(s.st_gid):
-            gr = grp.getgrgid(s.st_gid)
-            group = gr[0]
-            self._groups[s.st_gid] = group
-        else:
-            group = self._groups[s.st_gid]
 
         return Filespec(path=path,
-                        user=user,
-                        group=group,
+                        user=self._idMapper.usernameFromId(s.st_uid),
+                        group=self._idMapper.groupnameFromId(s.st_gid),
                         size=s.st_size,
                         mtime=s.st_mtime,
                         perms=filemode(s.st_mode))
