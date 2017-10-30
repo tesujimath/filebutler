@@ -27,6 +27,7 @@ class FilterFileset(Fileset):
         owner = None
         sizeGeq = None
         mtimeBefore = None
+        notPaths = []
         i = 0
         while i < len(toks):
             tok = toks[i]
@@ -65,11 +66,17 @@ class FilterFileset(Fileset):
                     raise CLIError("duplicate -mtime")
                 mtimeBefore = now - n * 60 * 60 * 24
                 i += 1
+            elif tok == '!':
+                # only for -path
+                if i + 2 >= len(toks) or toks[i + 1] != '-path':
+                    raise CLIError("! requires -path <glob>")
+                notPaths.append(toks[i + 2])
+                i += 2
             else:
                 raise CLIError("unknown filter parameter %s" % tok)
             i += 1
 
-        filter = Filter(owner=owner, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore)
+        filter = Filter(owner=owner, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore, notPaths=notPaths)
         #print("parsed filter %s" % filter)
         return cls(name, fileset, filter)
 
@@ -81,6 +88,6 @@ class FilterFileset(Fileset):
 
     def select(self, filter=None):
         f1 = self._filter.intersect(filter)
-        debug_stderr("FilterFileset(%s)::select filter=%s\n" % (self._name, f1))
+        #debug_stderr("FilterFileset(%s)::select filter=%s\n" % (self._name, f1))
         for filespec in self._fileset.select(f1):
             yield filespec

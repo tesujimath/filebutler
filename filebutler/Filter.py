@@ -16,6 +16,7 @@
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
+import fnmatch
 
 from util import time2str, debug_stderr
 
@@ -28,25 +29,27 @@ def liberal(fn, a, b):
         return fn(a, b)
 
 class Filter(object):
-    def __init__(self, owner=None, sizeGeq=None, mtimeBefore=None):
+    def __init__(self, owner=None, sizeGeq=None, mtimeBefore=None, notPaths=[]):
         self.owner = owner
         self.sizeGeq = sizeGeq
         self.mtimeBefore = mtimeBefore
+        self.notPaths = notPaths
 
     def __str__(self):
         if self.owner is not None:
             owner = self.owner
         else:
-            owner = '*'
+            owner = ''
         if self.sizeGeq is not None:
             sizeGeq = "%d" % self.sizeGeq
         else:
-            sizeGeq = '*'
+            sizeGeq = ''
         if self.mtimeBefore is not None:
             mtimeBefore = time2str(self.mtimeBefore)
         else:
-            mtimeBefore = '*'
-        return "owner:%s,size:%s,mtime:%s" % (owner, sizeGeq, mtimeBefore)
+            mtimeBefore = ''
+        notPaths = str(self.notPaths)
+        return "owner:%s,size:%s,mtime:%s,!path:%s" % (owner, sizeGeq, mtimeBefore, notPaths)
 
     def intersect(self, f1):
         """Return a new filter which is the intersection of self with the parameter f1."""
@@ -65,7 +68,8 @@ class Filter(object):
             owner = self.owner
         sizeGeq = liberal(max, self.sizeGeq, f1.sizeGeq)
         mtimeBefore = liberal(min, self.mtimeBefore, f1.mtimeBefore)
-        f2 = self.__class__(owner, sizeGeq, mtimeBefore)
+        notPaths = self.notPaths + f1.notPaths
+        f2 = self.__class__(owner, sizeGeq, mtimeBefore, notPaths)
         debug_stderr("Filter(%s).intersect(%s)=%s\n" % (self, f1, f2))
         return f2
 
@@ -78,4 +82,9 @@ class Filter(object):
             return False
         if self.mtimeBefore is not None and filespec.mtime >= self.mtimeBefore:
             return False
+        if len(self.notPaths) > 0:
+            for notPath in self.notPaths:
+                if fnmatch.fnmatchcase(filespec.path, notPath):
+                    return False
+        #debug_stderr("%s selects %s\n" % (self, filespec.path))
         return True
