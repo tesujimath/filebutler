@@ -191,7 +191,7 @@ class CLI:
         except CLIError as e:
             stderr("ERROR %s\n" % e.msg)
         except KeyboardInterrupt:
-            stderr("\n^C\n")
+            stderr("\n")
 
     def startup(self):
         for rc in ["/etc/filebutlerrc",
@@ -217,3 +217,5 @@ class CLI:
             except EOFError:
                 print("bye")
                 done = True
+            except KeyboardInterrupt:
+                stderr("^C\n")
