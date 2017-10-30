@@ -17,7 +17,7 @@
 
 import datetime
 
-from util import time2str
+from util import time2str, debug_stderr
 
 def liberal(fn, a, b):
     if a is None:
@@ -48,24 +48,26 @@ class Filter(object):
             mtimeBefore = '*'
         return "owner:%s,size:%s,mtime:%s" % (owner, sizeGeq, mtimeBefore)
 
-    def intersect(self, filter):
-        """Return a new filter which is the intersection of self with the parameter filter."""
-        if filter is None:
+    def intersect(self, f1):
+        """Return a new filter which is the intersection of self with the parameter f1."""
+        if f1 is None:
             return self
 
         if self.owner is None:
-            owner = filter.owner
-        elif filter.owner is not None:
-            if self.owner == filter.owner:
+            owner = f1.owner
+        elif f1.owner is not None:
+            if self.owner == f1.owner:
                 owner = self.owner
             else:
                 # incompatible, so set to something impossible, which we test for in selects()
-                owner = "%s+%s" % (self.owner, filter.owner)
+                owner = "%s+%s" % (self.owner, f1.owner)
         else:
-            owner = None
-        sizeGeq = liberal(max, self.sizeGeq, filter.sizeGeq)
-        mtimeBefore = liberal(min, self.mtimeBefore, filter.mtimeBefore)
-        return self.__class__(owner, sizeGeq, mtimeBefore)
+            owner = self.owner
+        sizeGeq = liberal(max, self.sizeGeq, f1.sizeGeq)
+        mtimeBefore = liberal(min, self.mtimeBefore, f1.mtimeBefore)
+        f2 = self.__class__(owner, sizeGeq, mtimeBefore)
+        debug_stderr("Filter(%s).intersect(%s)=%s\n" % (self, f1, f2))
+        return f2
 
     def selects(self, filespec):
         if self.owner is not None and '+' in self.owner:

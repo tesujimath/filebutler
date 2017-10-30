@@ -17,7 +17,8 @@
 
 class UnionFileset(object):
 
-    def __init__(self, filesets):
+    def __init__(self, name, filesets):
+        self._name = name
         self._filesets = filesets
 
     def select(self, filter=None):

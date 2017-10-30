@@ -132,7 +132,7 @@ class CLI:
                     if len(toks) < 4:
                         raise CLIError("filter requires fileset, criteria")
                     filesetName = toks[3]
-                    filter = FilterFileset.parse(self._fileset(filesetName), self._now, toks[4:])
+                    filter = FilterFileset.parse(name, self._fileset(filesetName), self._now, toks[4:])
                     self._filesets[name] = filter
                 elif type == "union":
                     if len(toks) < 4:
@@ -140,7 +140,7 @@ class CLI:
                     filesets = []
                     for filesetName in toks[3:]:
                         filesets.append(self._fileset(filesetName))
-                    union = UnionFileset(filesets)
+                    union = UnionFileset(name, filesets)
                     self._filesets[name] = union
                 else:
                     raise CLIError("unknown fileset type %s" % type)

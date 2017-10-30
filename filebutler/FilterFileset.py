@@ -18,12 +18,12 @@
 from Fileset import Fileset
 from Filespec import Filespec
 from Filter import Filter
-from util import Giga
+from util import Giga, debug_stderr
 
 class FilterFileset(Fileset):
 
     @classmethod
-    def parse(cls, fileset, now, toks):
+    def parse(cls, name, fileset, now, toks):
         owner = None
         sizeGeq = None
         mtimeBefore = None
@@ -71,13 +71,16 @@ class FilterFileset(Fileset):
 
         filter = Filter(owner=owner, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore)
         #print("parsed filter %s" % filter)
-        return cls(fileset, filter)
+        return cls(name, fileset, filter)
 
-    def __init__(self, fileset, filter):
+    def __init__(self, name, fileset, filter):
+        debug_stderr("FilterFileset(%s), filter=%s\n" % (name, filter))
+        self._name = name
         self._fileset = fileset
         self._filter = filter
 
     def select(self, filter=None):
         f1 = self._filter.intersect(filter)
+        debug_stderr("FilterFileset(%s)::select filter=%s\n" % (self._name, f1))
         for filespec in self._fileset.select(f1):
             yield filespec
