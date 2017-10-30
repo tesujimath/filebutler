@@ -42,12 +42,13 @@ class Cache(Fileset):
             return SimpleFilesetCache(path)
 
     def select(self, filter=None):
+        cache = self._cache(self._path, 0)
         verbose_stderr("fileset %s reading from cache at %s\n" % (self._name, self._path))
-        for filespec in self._cache(self._path, 0).select(filter):
+        for filespec in cache.select(filter):
             yield filespec
 
     def update(self):
-        cache = self.fileset()
+        cache = self._cache(self._path, 0)
         if os.path.exists(self._path):
             cache.purge()
         for filespec in self._fileset.select():
