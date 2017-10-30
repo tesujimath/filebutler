@@ -153,14 +153,18 @@ class CLI:
                 else:
                     print(self._fileset(toks[2]).info().users())
             elif cmd == "print":
-                if len(toks) != 2:
-                    raise CLIError("usage: %s <fileset>" % cmd)
+                if len(toks) < 2:
+                    raise CLIError("usage: %s <fileset> [<filter>]" % cmd)
                 name = toks[1]
                 fileset = self._fileset(name)
+                if len(toks) > 2:
+                    filter = Filter.parse(self._now, toks[2:])
+                else:
+                    filter = None
                 pager = Pager()
                 width = 0
                 try:
-                    for filespec in fileset.select():
+                    for filespec in fileset.select(filter):
                         s, width = filespec.format(width)
                         pager.file.write("%s\n" % s)
                 except IOError as e:
