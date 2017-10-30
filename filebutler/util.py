@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+import errno
+import os
 import time
 from stat import *
 import sys
@@ -95,3 +97,13 @@ def size2str(n):
         return "%dG" % (n / Giga)
     else:
         return "%.1fT" % (n * 1.0 / Tera)
+
+def filetimestr(path):
+    try:
+        return time2str(os.stat(path).st_mtime)
+    except OSError as e:
+        if e.errno == errno.ENOENT:
+            print("stat failed, no such file %s" % path)
+            return "missing"
+        else:
+            raise
