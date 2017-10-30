@@ -76,6 +76,17 @@ class CLI:
             raise CLIError("no such cache %s" % name)
         return self._caches[name]
 
+    def _delete(self, fileset):
+        # delete directories after their contents
+        dirs = []
+        for filespec in fileset.select():
+            if filespec.isdir():
+                dirs.append(filespec)
+            else:
+                filespec.delete()
+        for filespec in sorted(dirs, key=lambda d: d.path, reverse=True):
+            filespec.delete()
+
     def _process(self, line):
         toks = shlex.split(line, comments=True)
         self._expandVars(toks)
@@ -112,10 +123,10 @@ class CLI:
                 if self._filesets.has_key(name):
                     raise CLIError("duplicate fileset %s" % name)
                 if type == "find.gnu.out":
-                    fileset = GnuFindOutFileset.parse(self._idMapper, toks[1], toks[3:])
+                    fileset = GnuFindOutFileset.parse(self._idMapper, name, toks[3:])
                     self._filesets[name] = self._cached(name, fileset)
                 elif type == "find":
-                    fileset = FindFileset.parse(self._idMapper, toks[1], toks[3:])
+                    fileset = FindFileset.parse(self._idMapper, name, toks[3:])
                     self._filesets[name] = self._cached(name, fileset)
                 elif type == "filter":
                     if len(toks) < 4:
@@ -158,6 +169,11 @@ class CLI:
                         raise
                 finally:
                     pager.close()
+            elif cmd == "delete":
+                if len(toks) != 2 :
+                    raise CLIError("usage: %s <fileset>" % cmd)
+                name = toks[1]
+                self._delete(self._fileset(name))
             elif cmd == "update-cache":
                 if len(toks) == 1:
                     for name in self._caches.keys():

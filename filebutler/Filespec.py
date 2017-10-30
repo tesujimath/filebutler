@@ -16,6 +16,8 @@
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
 import calendar
+import errno
+import os
 import time
 
 from util import fbTimeFmt, time2str, size2str
@@ -50,6 +52,25 @@ class Filespec(object):
         self.size = size
         self.mtime = mtime
         self.perms = perms
+
+    def isdir(self):
+        return self.perms[0] == 'd'
+
+    def delete(self):
+        try:
+            if self.isdir():
+                os.rmdir(self.path)
+            else:
+                os.remove(self.path)
+        except OSError as e:
+            if e.errno == errno.ENOENT:
+                # deleted already, don't care
+                pass
+            elif e.errno == errno.EPERM:
+                # silently refuse to delete where we don't have permission
+                pass
+            else:
+                raise
 
     def format(self, width=50):
         if width < 50:
