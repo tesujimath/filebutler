@@ -20,7 +20,7 @@ import errno
 import os
 import time
 
-from util import fbTimeFmt, time2str, size2str
+from util import fbTimeFmt, time2str, date2str, size2str
 
 # FileSpec fields:
 # path - string, relative to some (externally defined) rootdir
@@ -66,8 +66,11 @@ class Filespec(object):
             if e.errno == errno.ENOENT:
                 # deleted already, don't care
                 pass
-            elif e.errno == errno.EPERM:
+            elif e.errno == errno.EACCES:
                 # silently refuse to delete where we don't have permission
+                pass
+            elif e.errno == errno.ENOTEMPTY:
+                # silently refuse to delete non-empty directory
                 pass
             else:
                 raise
@@ -79,7 +82,7 @@ class Filespec(object):
             width = (len(self.path) / 10 + 1) * 10
         s = ("%s %s %4s %-" + str(width) + "s %s:%s") % (
             self.perms,
-            time2str(self.mtime),
+            date2str(self.mtime),
             size2str(self.size),
             self.path,
             self.user,

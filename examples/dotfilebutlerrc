@@ -1,4 +1,4 @@
-set cachedir /home/guestsi/junk/filebutler.cache
+set cachedir /bifo/support/admin/filebutler/cache
 #fileset gypsy-home find.gnu.out /mirror/gypsy/z202/home/all-home-files
 #fileset integrity-home find.gnu.out /mirror/integrity/z102/home/all-home-files
 fileset gypsy-active find.gnu.out /mirror/gypsy/z202/active/all-active-files ^([^/]*) /dataset/\\1/active
@@ -15,5 +15,8 @@ fileset scratch union gypsy-scratch ignition-scratch integrity-scratch
 fileset ztmp union irawharau-01-ztmp
 fileset old-scratch filter scratch -mtime +730
 fileset old-ztmp filter ztmp -mtime +30
+fileset my-old-scratch filter old-scratch -user $USER
+fileset my-big-old-scratch filter my-old-scratch -size +1G
+fileset my-old-ztmp filter old-ztmp -user $USER
 set cachedir $HOME/.filebutler.cache
 fileset guestsi-junk find /home/guestsi/junk2

@@ -89,4 +89,5 @@ class WeeklyFilesetCache(object):
 
     def flush(self):
         for w in self._weeks.itervalues():
-            w.flush()
+            if w is not None:
+                w.flush()

@@ -18,6 +18,7 @@
 from Fileset import Fileset
 from Filespec import Filespec
 from Filter import Filter
+from util import Giga
 
 class FilterFileset(Fileset):
 

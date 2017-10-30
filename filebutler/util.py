@@ -45,9 +45,13 @@ def verbose_stderr(msg):
         stderr(msg)
 
 fbTimeFmt = "%Y%m%d-%H%M%S"
+fbDateFmt = "%Y-%m-%d"
 
 def time2str(t):
     return time.strftime(fbTimeFmt, time.localtime(t))
+
+def date2str(t):
+    return time.strftime(fbDateFmt, time.localtime(t))
 
 # stolen from Python 3:
 _filemode_table = (
@@ -96,7 +100,7 @@ Tera = 1024 ** 4
 
 def size2str(n):
     if n < Kilo:
-        return "%d" % n
+        return "0k"             # so small we don't care
     elif n < Mega:
         return "%dk" % (n / Kilo)
     elif n < Giga:
