@@ -32,7 +32,7 @@ from GnuFindOutFileset import GnuFindOutFileset
 from IdMapper import IdMapper
 from Pager import Pager
 from UnionFileset import UnionFileset
-from util import stderr, diagnostic_stderr, initialize
+from util import stderr, debug_stderr, initialize
 
 class CLI:
 

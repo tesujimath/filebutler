@@ -20,7 +20,7 @@ import os.path
 import re
 import shutil
 
-from util import verbose_stderr, diagnostic_stderr
+from util import verbose_stderr, debug_stderr
 
 class WeeklyFilesetCache(object):
 
@@ -68,7 +68,7 @@ class WeeklyFilesetCache(object):
 
     def create(self):
         """Create empty cache on disk, purging any previous."""
-        #diagnostic_stderr("WeeklyFilesetCache creating at %s\n" % self._path)
+        #debug_stderr("WeeklyFilesetCache creating at %s\n" % self._path)
         if os.path.exists(self._path):
             # Purge existing cache.
             # For safety in case of misconfiguration, we only delete directories in the format YYYYWW

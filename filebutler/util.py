@@ -21,21 +21,27 @@ import time
 from stat import *
 import sys
 
-diagnostics = True
+debug = False
 progress = True
-verbose = True
+verbose = False
 def initialize(args):
+    if args.debug:
+        global debug
+        debug = True
+        debug_stderr("debug mode\n")
     if args.batch:
-        diagnostic_stderr("batch mode\n")
         global progress
-        global verbose
         progress = False
-        verbose = False
+        debug_stderr("batch mode\n")
+    if args.verbose:
+        global verbose
+        verbose = True
+        debug_stderr("verbose mode\n")
 
 def stderr(msg):
     sys.stderr.write(msg)
-def diagnostic_stderr(msg):
-    if diagnostics:
+def debug_stderr(msg):
+    if debug:
         stderr(msg)
 def progress_stderr(msg):
     if progress:
