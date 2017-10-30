@@ -18,7 +18,8 @@
 import datetime
 import fnmatch
 
-from util import time2str, debug_stderr
+from CLIError import CLIError
+from util import Giga, time2str, debug_stderr
 
 def liberal(fn, a, b):
     if a is None:
@@ -29,6 +30,63 @@ def liberal(fn, a, b):
         return fn(a, b)
 
 class Filter(object):
+
+    @classmethod
+    def parse(cls, now, toks):
+        owner = None
+        sizeGeq = None
+        mtimeBefore = None
+        notPaths = []
+        i = 0
+        while i < len(toks):
+            tok = toks[i]
+            if tok == '-user':
+                if i + 1 >= len(toks):
+                    raise CLIError("-user missing parameter")
+                if owner is not None:
+                    raise CLIError("duplicate -user")
+                owner = toks[i + 1]
+                i += 1
+            elif tok == '-size':
+                if i + 1 >= len(toks):
+                    raise CLIError("-size missing parameter")
+                size = toks[i + 1]
+                if len(size) < 2 or size[-1] != 'G':
+                    raise CLIError("-size only supports +nG format")
+                try:
+                    n = int(size[:-1]) * Giga
+                except ValueError:
+                    raise CLIError("-size only supports +nG format")
+                if sizeGeq is not None:
+                    raise CLIError("duplicate -size")
+                sizeGeq = n
+                i += 1
+            elif tok == '-mtime':
+                if i + 1 >= len(toks):
+                    raise CLIError("-mtime missing parameter")
+                mtime = toks[i + 1]
+                if len(mtime) < 2 or mtime[0] != '+':
+                    raise CLIError("-mtime only supports +n format")
+                try:
+                    n = int(mtime[1:])
+                except ValueError:
+                    raise CLIError("-mtime only supports +n format")
+                if mtimeBefore is not None:
+                    raise CLIError("duplicate -mtime")
+                mtimeBefore = now - n * 60 * 60 * 24
+                i += 1
+            elif tok == '!':
+                # only for -path
+                if i + 2 >= len(toks) or toks[i + 1] != '-path':
+                    raise CLIError("! requires -path <glob>")
+                notPaths.append(toks[i + 2])
+                i += 2
+            else:
+                raise CLIError("unknown filter parameter %s" % tok)
+            i += 1
+
+        return cls(owner=owner, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore, notPaths=notPaths)
+
     def __init__(self, owner=None, sizeGeq=None, mtimeBefore=None, notPaths=[]):
         self.owner = owner
         self.sizeGeq = sizeGeq

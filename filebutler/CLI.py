@@ -26,6 +26,7 @@ import time
 
 from CLIError import CLIError
 from Cache import Cache
+from Filter import Filter
 from FilterFileset import FilterFileset
 from FindFileset import FindFileset
 from GnuFindOutFileset import GnuFindOutFileset
@@ -132,7 +133,7 @@ class CLI:
                     if len(toks) < 4:
                         raise CLIError("filter requires fileset, criteria")
                     filesetName = toks[3]
-                    filter = FilterFileset.parse(name, self._fileset(filesetName), self._now, toks[4:])
+                    filter = FilterFileset(name, self._fileset(filesetName), Filter.parse(self._now, toks[4:]))
                     self._filesets[name] = filter
                 elif type == "union":
                     if len(toks) < 4:
