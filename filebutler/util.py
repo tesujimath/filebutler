@@ -25,16 +25,17 @@ debug = False
 progress = True
 verbose = False
 def initialize(args):
+    global debug
+    global verbose
+    global progress
     if args.debug:
-        global debug
         debug = True
+        verbose = True
         debug_stderr("debug mode\n")
     if args.batch:
-        global progress
         progress = False
         debug_stderr("batch mode\n")
     if args.verbose:
-        global verbose
         verbose = True
         debug_stderr("verbose mode\n")
 
