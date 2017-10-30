@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+import errno
 import os
 import os.path
 import re
@@ -143,12 +144,20 @@ class CLI:
                 if len(toks) != 2:
                     raise CLIError("usage: %s <fileset>" % cmd)
                 name = toks[1]
+                fileset = self._fileset(name)
                 pager = Pager()
                 width = 0
-                for filespec in self._fileset(name).select():
-                    s, width = filespec.format(width)
-                    pager.file.write("%s\n" % s)
-                pager.close()
+                try:
+                    for filespec in fileset.select():
+                        s, width = filespec.format(width)
+                        pager.file.write("%s\n" % s)
+                except IOError as e:
+                    if e.errno == errno.EPIPE:
+                        pass
+                    else:
+                        raise
+                finally:
+                    pager.close()
             elif cmd == "update-cache":
                 if len(toks) == 1:
                     for name in self._caches.keys():
@@ -165,6 +174,8 @@ class CLI:
             self._process(line)
         except CLIError as e:
             stderr("ERROR %s\n" % e.msg)
+        except KeyboardInterrupt:
+            stderr("\n^C\n")
 
     def startup(self):
         for rc in ["/etc/filebutlerrc",

@@ -28,6 +28,8 @@ class Pager:
         self._pager = subprocess.Popen(pager, stdin=subprocess.PIPE)
         self.file = self._pager.stdin
 
-    def close(self):
+    def close(self, force=False):
         self.file.close()
+        if force:
+            self._pager.terminate()
         self._pager.wait()

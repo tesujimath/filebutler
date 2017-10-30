@@ -16,11 +16,4 @@ fileset ztmp union irawharau-01-ztmp
 fileset old-scratch filter scratch -mtime +730
 fileset old-ztmp filter ztmp -mtime +30
 set cachedir $HOME/.filebutler.cache
-fileset some-scratch find.gnu.out /home/guestsi/junk/some-scratch-files ^([^/]*) /dataset/\\1/scratch
-fileset some-gypsy find.gnu.out /home/guestsi/junk/some-gypsy-files ^([^/]*) /dataset/\\1/active
-fileset some-home find.gnu.out /home/guestsi/junk/some-home-files ^ /home/guestsi/
-fileset some-junk find /home/guestsi/junk2
-fileset old-junk filter some-junk -mtime +2100
-fileset all-files union some-scratch some-home
-fileset laugrauda filter some-scratch -user laugrauda
-fileset guestsi filter all-files -user guestsi
+fileset home-guestsi find /home/guestsi
