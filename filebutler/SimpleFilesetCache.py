@@ -35,8 +35,9 @@ class SimpleFilesetCache(object):
                 #debug_stderr("SimpleFilesetCache select %s opened file cache\n" % str(filter))
                 for filespec in Filespec.fromFile(f):
                     self._filespecs.append(filespec)
-                    #debug_stderr("SimpleFilesetCache read from file %s\n" % filespec)
-                    yield filespec
+                    if filter is None or filter.selects(filespec):
+                        #debug_stderr("SimpleFilesetCache read from file %s\n" % filespec)
+                        yield filespec
         else:
             #debug_stderr("SimpleFilesetCache select %s from memory cache\n" % str(filter))
             for filespec in self._filespecs:
