@@ -29,7 +29,7 @@ from FilterFileset import FilterFileset
 from FindFileset import FindFileset
 from GnuFindOutFileset import GnuFindOutFileset
 from UnionFileset import UnionFileset
-from util import stderr
+from util import stderr, diagnostic_stderr
 
 class CLI:
 
@@ -46,11 +46,6 @@ class CLI:
         cache = Cache(name, fileset, os.path.join(self._attrs['cachedir'], name))
         self._caches[name] = cache
         return cache
-
-    def _updateCache(self):
-        for name in self._caches.keys():
-            #print("updating cache %s" % name)
-            self._caches[name].update()
 
     def _expandVars(self, toks):
         """Expand environment variables in tokens."""
@@ -71,6 +66,11 @@ class CLI:
         if not self._filesets.has_key(name):
             raise CLIError("no such fileset %s" % name)
         return self._filesets[name]
+
+    def _cache(self, name):
+        if not self._caches.has_key(name):
+            raise CLIError("no such cache %s" % name)
+        return self._caches[name]
 
     def _process(self, line):
         toks = shlex.split(line, comments=True)
@@ -142,10 +142,14 @@ class CLI:
                 name = toks[1]
                 for filespec in self._fileset(name).select():
                     print(filespec)
-            elif cmd == "update-caches":
-                if len(toks) != 1:
-                    raise CLIError("usage: %s" % cmd)
-                self._updateCache()
+            elif cmd == "update-cache":
+                if len(toks) == 1:
+                    for name in self._caches.keys():
+                        #print("updating cache %s" % name)
+                        self._caches[name].update()
+                else:
+                    for name in toks[1:]:
+                        self._cache(name).update()
             else:
                 raise CLIError("unknown command %s" % cmd)
 
