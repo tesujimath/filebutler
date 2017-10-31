@@ -239,8 +239,7 @@ class CLI:
 
     def startup(self):
         for rc in ["/etc/filebutlerrc",
-                   os.path.expanduser("~/.filebutlerrc"),
-                   os.path.expanduser("~/projects/filebutler/examples/dotfilebutlerrc")]:
+                   os.path.expanduser("~/.filebutlerrc")]:
             try:
                 with open(rc) as f:
                     for line in f:
