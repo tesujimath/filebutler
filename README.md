@@ -6,5 +6,4 @@ on directory trees with several million files.  Even using the cache output of f
 can be rather slow for interactive queries.  Filebutler improves on this by
 structuring filelists by age, and by user.
 
-*This is a work-in-progress.  Documentation remains to be fleshed out.*
-
+See the [manpage](doc/filebutler.md) for further details.
