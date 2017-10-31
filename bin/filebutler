@@ -19,6 +19,7 @@
 
 import argparse
 import os.path
+import readline
 import string
 import sys
 
@@ -38,7 +39,11 @@ def main():
     if args.command is not None:
         cli.execute(args.command.split(';'))
     else:
+        historyFile = os.path.expanduser('~/.filebutler.history')
+        if os.path.exists(historyFile):
+            readline.read_history_file(historyFile)
         cli.interact()
+        readline.write_history_file(historyFile)
 
 if __name__ == '__main__':
     main()
