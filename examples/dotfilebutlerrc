@@ -20,3 +20,4 @@ fileset my-big-old-scratch filter my-old-scratch -size +1G
 fileset my-old-ztmp filter old-ztmp -user $USER
 set cachedir $HOME/.filebutler.cache
 fileset guestsi-junk find /home/guestsi/junk2
+fileset old-guestsi-junk filter guestsi-junk -mtime +700

@@ -80,13 +80,28 @@ class CLI:
     def _delete(self, fileset):
         # delete directories after their contents
         dirs = []
+        mtimes = {}
         for filespec in fileset.select():
+            # preserve mtime for parent directory
+            parent = os.path.dirname(filespec.path)
+            if not mtimes.has_key(parent):
+                mtimes[parent] = os.stat(parent).st_mtime
             if filespec.isdir():
                 dirs.append(filespec)
             else:
                 filespec.delete()
         for filespec in sorted(dirs, key=lambda d: d.path, reverse=True):
             filespec.delete()
+        # now reset mtimes of anything that's left
+        for path, mtime in mtimes.iteritems():
+            try:
+                os.utime(path, (mtime, mtime))
+            except OSError as e:
+                if e.errno == errno.EACCES:
+                    # silently do nothing if we don't have permission to fix mtime
+                    pass
+                else:
+                    raise
 
     def _process(self, line):
         toks = shlex.split(line, comments=True)
