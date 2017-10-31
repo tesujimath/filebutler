@@ -1,5 +1,5 @@
 Name:           filebutler
-Version:        0.1.0
+Version:        0.1.1
 Release:        1%{?dist}
 Summary:        Utility for managing old files in large directory structures.
 
