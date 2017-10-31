@@ -23,7 +23,7 @@ from Fileset import Fileset
 from SimpleFilesetCache import SimpleFilesetCache
 from UserFilesetCache import UserFilesetCache
 from WeeklyFilesetCache import WeeklyFilesetCache
-from util import filedatestr, filetimestr, verbose_stderr, debug_stderr
+from util import filedatestr, filetimestr, verbose_stderr, debug_stderr, stderr
 
 # Stack up the caches we support, so that each cache can instantiate
 # its next one, via its next parameter.
@@ -54,7 +54,13 @@ class Cache(Fileset):
 
     def update(self):
         cache = self._cache(self._path, 0)
-        cache.create()
+        try:
+            cache.create()
+        except OSError as e:
+            if e.errno == errno.EACCES:
+                # not ours to update, so silently do nothing
+                stderr("warning: can't update system cache %s\n" % self.name)
+                return
         for filespec in self._fileset.select():
             try:
                 cache.add(filespec)
@@ -68,3 +74,4 @@ class Cache(Fileset):
                 else:
                     raise
         cache.flush()
+        stderr("updated %s\n" % self.name)
