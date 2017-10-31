@@ -36,7 +36,7 @@ def main():
     cli.startup()
 
     if args.command is not None:
-        cli.commands(args.command.split(';'))
+        cli.execute(args.command.split(';'))
     else:
         cli.interact()
 

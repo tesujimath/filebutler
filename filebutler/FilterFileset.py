@@ -24,12 +24,15 @@ class FilterFileset(Fileset):
 
     def __init__(self, name, fileset, filter):
         debug_stderr("FilterFileset(%s), filter=%s\n" % (name, filter))
-        self._name = name
+        self.name = name
         self._fileset = fileset
         self._filter = filter
 
+    def description(self):
+        return "%s filter %s %s" % (self.name, self._fileset.name, self._filter)
+
     def select(self, filter=None):
         f1 = self._filter.intersect(filter)
-        #debug_stderr("FilterFileset(%s)::select filter=%s\n" % (self._name, f1))
+        #debug_stderr("FilterFileset(%s)::select filter=%s\n" % (self.name, f1))
         for filespec in self._fileset.select(f1):
             yield filespec

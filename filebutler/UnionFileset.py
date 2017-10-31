@@ -18,8 +18,11 @@
 class UnionFileset(object):
 
     def __init__(self, name, filesets):
-        self._name = name
+        self.name = name
         self._filesets = filesets
+
+    def description(self):
+        return "%s union %s" % (self.name, ' '.join(sorted([fileset.name for fileset in self._filesets])))
 
     def select(self, filter=None):
         for fileset in self._filesets:

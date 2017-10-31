@@ -41,11 +41,14 @@ class GnuFindOutFileset(Fileset):
         #print("GnuFindOutFileset init %s %s %s" % (path, match, replace))
         Fileset.__init__(self)
         self._idMapper = idMapper
-        self._name = name
+        self.name = name
         self._path = path
         self._match = match
         self._replace = replace
         self._dateParser = self.__class__._dateParser()
+
+    def description(self):
+        return "%s filelist %s" % (self.name, self._path)
 
     class _dateParser(object):
         """Converts find format dates into time since epoch."""
@@ -76,7 +79,7 @@ class GnuFindOutFileset(Fileset):
             return self._localtime.t(year, month, int(fields[8]))
 
     def select(self, filter=None):
-        verbose_stderr("fileset %s reading from filelist %s\n" % (self._name, self._path))
+        verbose_stderr("fileset %s reading from filelist %s\n" % (self.name, self._path))
         filesize = os.stat(self._path).st_size
         progress = PercentageProgress("reading %s" % self._path)
         n = 0

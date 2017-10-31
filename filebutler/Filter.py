@@ -19,7 +19,7 @@ import datetime
 import fnmatch
 
 from CLIError import CLIError
-from util import Giga, time2str, debug_stderr
+from util import Giga, date2str, debug_stderr
 
 def liberal(fn, a, b):
     if a is None:
@@ -94,20 +94,21 @@ class Filter(object):
         self.notPaths = notPaths
 
     def __str__(self):
+        s = ""
+        def append(s0, s1):
+            if len(s0) > 0:
+                return s0 + ',' + s1
+            else:
+                return s1
         if self.owner is not None:
-            owner = self.owner
-        else:
-            owner = ''
+            s = append(s, "owner:%s " % self.owner)
         if self.sizeGeq is not None:
-            sizeGeq = "%d" % self.sizeGeq
-        else:
-            sizeGeq = ''
+            s = append(s, "size:+%dG" % (self.sizeGeq / Giga))
         if self.mtimeBefore is not None:
-            mtimeBefore = time2str(self.mtimeBefore)
-        else:
-            mtimeBefore = ''
-        notPaths = str(self.notPaths)
-        return "owner:%s,size:%s,mtime:%s,!path:%s" % (owner, sizeGeq, mtimeBefore, notPaths)
+            s = append(s, "older:%s" % date2str(self.mtimeBefore))
+        if len(self.notPaths) > 0:
+            s = append(s, "!paths:%s" % str(self.notPaths))
+        return s
 
     def intersect(self, f1):
         """Return a new filter which is the intersection of self with the parameter f1."""

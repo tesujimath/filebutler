@@ -122,7 +122,15 @@ def filetimestr(path):
         return time2str(os.stat(path).st_mtime)
     except OSError as e:
         if e.errno == errno.ENOENT:
-            print("stat failed, no such file %s" % path)
-            return "missing"
+            return "<missing>"
+        else:
+            raise
+
+def filedatestr(path):
+    try:
+        return date2str(os.stat(path).st_mtime)
+    except OSError as e:
+        if e.errno == errno.ENOENT:
+            return "<missing>"
         else:
             raise

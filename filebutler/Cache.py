@@ -23,7 +23,7 @@ from Fileset import Fileset
 from SimpleFilesetCache import SimpleFilesetCache
 from UserFilesetCache import UserFilesetCache
 from WeeklyFilesetCache import WeeklyFilesetCache
-from util import filetimestr, verbose_stderr, debug_stderr
+from util import filedatestr, filetimestr, verbose_stderr, debug_stderr
 
 # Stack up the caches we support, so that each cache can instantiate
 # its next one, via its next parameter.
@@ -31,10 +31,13 @@ class Cache(Fileset):
 
     def __init__(self, name, fileset, path):
         Fileset.__init__(self)
-        self._name = name
+        self.name = name
         self._fileset = fileset
         self._path = path
         self._caches = [WeeklyFilesetCache, UserFilesetCache]
+
+    def description(self):
+        return "%s cached on %s" % (self._fileset.description(), filedatestr(self._path))
 
     def _cache(self, path, level):
         if level < len(self._caches):
@@ -45,7 +48,7 @@ class Cache(Fileset):
     def select(self, filter=None):
         cache = self._cache(self._path, 0)
         filterStr = " " + str(filter) if filter is not None else ""
-        verbose_stderr("fileset %s%s reading from %s cache at %s\n" % (self._name, filterStr, filetimestr(self._path), self._path))
+        verbose_stderr("fileset %s%s reading from %s cache at %s\n" % (self.name, filterStr, filetimestr(self._path), self._path))
         for filespec in cache.select(filter):
             yield filespec
 

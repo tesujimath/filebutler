@@ -45,10 +45,13 @@ class FindFileset(Fileset):
         #print("FindFileset init '%s' '%s' '%s'" % (path, match, replace))
         Fileset.__init__(self)
         self._idMapper = idMapper
-        self._name = name
+        self.name = name
         self._path = path
         self._match = match
         self._replace = replace
+
+    def description(self):
+        return "%s directory %s" % (self.name, self._path)
 
     def _filespec(self, path):
         s = os.lstat(path)
@@ -61,7 +64,7 @@ class FindFileset(Fileset):
                         perms=filemode(s.st_mode))
 
     def select(self, filter=None):
-        verbose_stderr("fileset %s scanning files under %s\n" % (self._name, self._path))
+        verbose_stderr("fileset %s scanning files under %s\n" % (self.name, self._path))
         for root,dirs,files in os.walk(self._path):
             for x in dirs + files:
                 filespec = self._filespec(os.path.join(root, x))

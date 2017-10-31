@@ -37,8 +37,30 @@ from util import stderr, debug_stderr, initialize
 
 class CLI:
 
+    commands = {
+        'help':      { 'desc': 'provide help',
+                       'usage': 'help' },
+        'echo':      { 'desc': 'echo parameters after expansion',
+                       'usage': 'echo <args>'},
+        'set':       { 'desc': 'set attribute, e.g. cachedir',
+                       'usage': 'set <attr> <value>'},
+        'ls-attrs':  { 'desc': 'list attributes',
+                       'usage': 'ls-attrs'},
+        'ls':        { 'desc': 'list filesets',
+                       'usage': 'ls'},
+        'ls-caches': { 'desc': 'list caches',
+                       'usage': 'ls-caches'},
+        'fileset':   { 'desc': 'define a fileset',
+                       'usage': 'fileset find.gnu.out|find|filter|union <name> <spec>'},
+        'info':      { 'desc': 'show summary information for a fileset',
+                       'usage': 'info <fileset>'},
+        'print':     { 'desc': 'print files in a fileset, optionally filtered, via $PAGER',
+                       'usage': 'print <fileset> [<filter-params>]'},
+    }
+
     def __init__(self, args):
         self._attrs = {}
+        self._filesetNames = [] # in order of creation
         self._filesets = {}
         self._caches = {}
         self._now = time.time() # for consistency between all filters
@@ -108,7 +130,11 @@ class CLI:
         self._expandVars(toks)
         if len(toks) >= 1:
             cmd = toks[0]
-            if cmd == "echo":
+            if cmd == "help":
+                for cmdname in sorted(self.__class__.commands.keys()):
+                    cmd = self.__class__.commands[cmdname]
+                    print("%-10s - %s\n             %s\n" % (cmdname, cmd['desc'], cmd['usage']))
+            elif cmd == "echo":
                 print(' '.join(toks[1:]))
             elif cmd == "set":
                 if len(toks) != 3:
@@ -121,16 +147,17 @@ class CLI:
                     raise CLIError("usage: %s" % cmd)
                 for name in sorted(self._attrs.keys()):
                     print("%s=%s" % (name, self._attrs[name]))
-            elif cmd == "ls-filesets":
+            elif cmd == "ls":
                 if len(toks) != 1:
                     raise CLIError("usage: %s" % cmd)
-                for name in sorted(self._filesets.keys()):
-                    print(name)
+                for name in self._filesetNames:
+                    print(self._filesets[name].description())
             elif cmd == "ls-caches":
                 if len(toks) != 1:
                     raise CLIError("usage: %s" % cmd)
-                for name in sorted(self._caches.keys()):
-                    print(name)
+                for name in self._filesetNames:
+                    if self._caches.has_key(name):
+                        print(self._filesets[name].description())
             elif cmd == "fileset":
                 if len(toks) < 3:
                     raise CLIError("usage: %s <name> <spec>" % cmd)
@@ -139,27 +166,24 @@ class CLI:
                 if self._filesets.has_key(name):
                     raise CLIError("duplicate fileset %s" % name)
                 if type == "find.gnu.out":
-                    fileset = GnuFindOutFileset.parse(self._idMapper, name, toks[3:])
-                    self._filesets[name] = self._cached(name, fileset)
+                    fileset = self._cached(name, GnuFindOutFileset.parse(self._idMapper, name, toks[3:]))
                 elif type == "find":
-                    fileset = FindFileset.parse(self._idMapper, name, toks[3:])
-                    self._filesets[name] = self._cached(name, fileset)
+                    fileset = self._cached(name, FindFileset.parse(self._idMapper, name, toks[3:]))
                 elif type == "filter":
                     if len(toks) < 4:
                         raise CLIError("filter requires fileset, criteria")
-                    filesetName = toks[3]
-                    filter = FilterFileset(name, self._fileset(filesetName), Filter.parse(self._now, toks[4:]))
-                    self._filesets[name] = filter
+                    fileset = FilterFileset(name, self._fileset(toks[3]), Filter.parse(self._now, toks[4:]))
                 elif type == "union":
                     if len(toks) < 4:
                         raise CLIError("union requires at least two filesets")
                     filesets = []
                     for filesetName in toks[3:]:
                         filesets.append(self._fileset(filesetName))
-                    union = UnionFileset(name, filesets)
-                    self._filesets[name] = union
+                    fileset = UnionFileset(name, filesets)
                 else:
                     raise CLIError("unknown fileset type %s" % type)
+                self._filesets[name] = fileset
+                self._filesetNames.append(name)
             elif cmd == "info":
                 if len(toks) < 2 or len(toks) > 3 or len(toks) == 3 and toks[1] != '-u':
                     raise CLIError("usage: %s [-u] <fileset>" % cmd)
@@ -203,7 +227,7 @@ class CLI:
                     for name in toks[1:]:
                         self._cache(name).update()
             else:
-                raise CLIError("unknown command %s" % cmd)
+                raise CLIError("unknown command %s, try help" % cmd)
 
     def _handleProcess(self, line):
         try:
@@ -224,7 +248,7 @@ class CLI:
             except IOError:
                 pass
 
-    def commands(self, cmds):
+    def execute(self, cmds):
         for cmd in cmds:
             self._handleProcess(cmd)
 
