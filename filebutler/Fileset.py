@@ -24,7 +24,22 @@ class Fileset:
         pass
 
     def info(self):
-        i = FilesetInfo()
-        for filespec in self.select():
-            i.add(filespec)
-        return i
+        inf = FilesetInfo()
+        self.merge_info(inf)
+        return inf
+
+    def merge_info(self, inf, filter=None):
+        for filespec in self.select(filter):
+            inf.add(filespec)
+
+    def sorted(self, filter=None, sorter=None):
+        if sorter is None:
+            for filespec in self.select(filter):
+                yield filespec
+        else:
+            filespecs = []
+            for filespec in self.select(filter):
+                filespecs.append(filespec)
+            filespecs.sort(key=sorter.key())
+            for filespec in filespecs:
+                yield filespec

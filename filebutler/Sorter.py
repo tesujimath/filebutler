@@ -15,11 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
-class UserInfo(object):
-    def __init__(self, nFiles=0, totalSize=0):
-        self.nFiles = nFiles
-        self.totalSize = totalSize
+class Sorter(object):
 
-    def add(self, n, size):
-        self.nFiles += n
-        self.totalSize += size
+    def __init__(self, bySize=False):
+        self.bySize = bySize
+
+    def key(self):
+        if self.bySize:
+            # negate size, so we sort largest first
+            return lambda fs: -fs.size
+        else:
+            return lambda fs: 0

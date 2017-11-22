@@ -20,6 +20,7 @@ import os.path
 import re
 import shutil
 
+from Filter import Filter
 from util import verbose_stderr, debug_stderr
 
 class WeeklyFilesetCache(object):
@@ -62,9 +63,22 @@ class WeeklyFilesetCache(object):
         weeks = sorted(self._weeks.keys())
         for w in weeks:
             if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
+                if filter is not None and filter.mtimeBefore is not None and w < self.__class__.week(filter.mtimeBefore):
+                    f1 = Filter.clearMtime(filter)
+                else:
+                    f1 = filter
                 # no yield from in python 2, so:
-                for filespec in self._fileset(w).select(filter):
+                for filespec in self._fileset(w).select(f1):
                     yield filespec
+
+    def merge_info(self, inf, filter=None):
+        for w in self._weeks.keys():
+            if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
+                if filter is not None and filter.mtimeBefore is not None and w < self.__class__.week(filter.mtimeBefore):
+                    f1 = Filter.clearMtime(filter)
+                else:
+                    f1 = filter
+                self._fileset(w).merge_info(inf, f1)
 
     def create(self):
         """Create empty cache on disk, purging any previous."""
@@ -91,3 +105,8 @@ class WeeklyFilesetCache(object):
         for w in self._weeks.itervalues():
             if w is not None:
                 w.flush()
+
+    def writeInfo(self):
+        for w in self._weeks.itervalues():
+            if w is not None:
+                w.writeInfo()

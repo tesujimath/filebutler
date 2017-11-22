@@ -17,6 +17,9 @@
 
 import os.path
 
+from Filter import Filter
+from util import debug_stderr
+
 class UserFilesetCache(object):
 
     def __init__(self, path, next):
@@ -48,8 +51,13 @@ class UserFilesetCache(object):
         for u in users:
             if filter is None or filter.owner is None or u == filter.owner:
                 # no yield from in python 2, so:
-                for filespec in self._fileset(u).select(filter):
+                for filespec in self._fileset(u).select(Filter.clearOwner(filter)):
                     yield filespec
+
+    def merge_info(self, inf, filter=None):
+        for u in self._users.keys():
+            if filter is None or filter.owner is None or u == filter.owner:
+                self._fileset(u).merge_info(inf, Filter.clearOwner(filter))
 
     def create(self):
         if not os.path.exists(self._path):
@@ -63,3 +71,7 @@ class UserFilesetCache(object):
         for fileset in self._users.values():
             fileset.flush()
 
+    def writeInfo(self):
+        for u in self._users.itervalues():
+            if u is not None:
+                u.writeInfo()

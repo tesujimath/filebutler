@@ -33,30 +33,10 @@ from GnuFindOutFileset import GnuFindOutFileset
 from IdMapper import IdMapper
 from Pager import Pager
 from UnionFileset import UnionFileset
+from options import parseCommandOptions
 from util import stderr, debug_stderr, initialize
 
 class CLI:
-
-    commands = {
-        'help':      { 'desc': 'provide help',
-                       'usage': 'help' },
-        'echo':      { 'desc': 'echo parameters after expansion',
-                       'usage': 'echo <args>'},
-        'set':       { 'desc': 'set attribute, e.g. cachedir',
-                       'usage': 'set <attr> <value>'},
-        'ls-attrs':  { 'desc': 'list attributes',
-                       'usage': 'ls-attrs'},
-        'ls':        { 'desc': 'list filesets',
-                       'usage': 'ls'},
-        'ls-caches': { 'desc': 'list caches',
-                       'usage': 'ls-caches'},
-        'fileset':   { 'desc': 'define a fileset',
-                       'usage': 'fileset find.gnu.out|find|filter|union <name> <spec>'},
-        'info':      { 'desc': 'show summary information for a fileset',
-                       'usage': 'info <fileset>'},
-        'print':     { 'desc': 'print files in a fileset, optionally filtered, via $PAGER',
-                       'usage': 'print <fileset> [<filter-params>]'},
-    }
 
     def __init__(self, args):
         self._attrs = {}
@@ -65,6 +45,56 @@ class CLI:
         self._caches = {}
         self._now = time.time() # for consistency between all filters
         self._idMapper = IdMapper()
+        self.commands = {
+            'help':          { 'desc': 'provide help',
+                               'usage': 'help',
+                               'method': self._helpCmd,
+            },
+            'quit':          { 'desc': 'finish filebutler session',
+                               'usage': 'quit (or Ctrl-D)',
+                               'method': self._quitCmd,
+            },
+            'echo':          { 'desc': 'echo parameters after expansion',
+                               'usage': 'echo <args>',
+                               'method': self._echoCmd,
+            },
+            'set':           { 'desc': 'set attribute, e.g. cachedir',
+                               'usage': 'set <attr> <value>',
+                               'method': self._setCmd,
+            },
+            'ls-attrs':      { 'desc': 'list attributes',
+                               'usage': 'ls-attrs',
+                               'method': self._lsAttrsCmd,
+            },
+            'ls':            { 'desc': 'list filesets',
+                               'usage': 'ls',
+                               'method': self._lsCmd,
+            },
+            'ls-caches':     { 'desc': 'list caches',
+                               'usage': 'ls-caches',
+                               'method': self._lsCachesCmd,
+            },
+            'fileset':       { 'desc': 'define a fileset',
+                               'usage': 'fileset find.gnu.out|find|filter|union <name> <spec>',
+                               'method': self._filesetCmd,
+            },
+            'info':          { 'desc': 'show summary information for a fileset',
+                               'usage': 'info <fileset>',
+                               'method': self._infoCmd,
+            },
+            'print':         { 'desc': 'print files in a fileset, optionally filtered, via $PAGER',
+                               'usage': 'print <fileset> [<filter-params>] [-by-size]',
+                               'method': self._printCmd,
+            },
+            'delete':        { 'desc': 'delete all files in a fileset',
+                               'usage': 'delete <fileset>',
+                               'method': self._deleteCmd,
+            },
+            'update-cache':  { 'desc': 'update all caches, by rescanning source filelists',
+                               'usage': 'update-cache',
+                               'method': self._updateCacheCmd,
+            },
+        }
         initialize(args)
 
     def _cached(self, name, fileset):
@@ -126,116 +156,28 @@ class CLI:
                     raise
 
     def _process(self, line):
+        done = False
         toks = shlex.split(line, comments=True)
         self._expandVars(toks)
         if len(toks) >= 1:
             cmd = toks[0]
-            if cmd == "help":
-                for cmdname in sorted(self.__class__.commands.keys()):
-                    cmd = self.__class__.commands[cmdname]
-                    print("%-10s - %s\n             %s\n" % (cmdname, cmd['desc'], cmd['usage']))
-            elif cmd == "echo":
-                print(' '.join(toks[1:]))
-            elif cmd == "set":
-                if len(toks) != 3:
-                    raise CLIError("usage: %s <attr> <value>" % cmd)
-                name = toks[1]
-                value = toks[2]
-                self._attrs[name] = value
-            elif cmd == "ls-attrs":
-                if len(toks) != 1:
-                    raise CLIError("usage: %s" % cmd)
-                for name in sorted(self._attrs.keys()):
-                    print("%s=%s" % (name, self._attrs[name]))
-            elif cmd == "ls":
-                if len(toks) != 1:
-                    raise CLIError("usage: %s" % cmd)
-                for name in self._filesetNames:
-                    print(self._filesets[name].description())
-            elif cmd == "ls-caches":
-                if len(toks) != 1:
-                    raise CLIError("usage: %s" % cmd)
-                for name in self._filesetNames:
-                    if self._caches.has_key(name):
-                        print(self._filesets[name].description())
-            elif cmd == "fileset":
-                if len(toks) < 3:
-                    raise CLIError("usage: %s <name> <spec>" % cmd)
-                name = toks[1]
-                type = toks[2]
-                if self._filesets.has_key(name):
-                    raise CLIError("duplicate fileset %s" % name)
-                if type == "find.gnu.out":
-                    fileset = self._cached(name, GnuFindOutFileset.parse(self._idMapper, name, toks[3:]))
-                elif type == "find":
-                    fileset = self._cached(name, FindFileset.parse(self._idMapper, name, toks[3:]))
-                elif type == "filter":
-                    if len(toks) < 4:
-                        raise CLIError("filter requires fileset, criteria")
-                    fileset = FilterFileset(name, self._fileset(toks[3]), Filter.parse(self._now, toks[4:]))
-                elif type == "union":
-                    if len(toks) < 4:
-                        raise CLIError("union requires at least two filesets")
-                    filesets = []
-                    for filesetName in toks[3:]:
-                        filesets.append(self._fileset(filesetName))
-                    fileset = UnionFileset(name, filesets)
-                else:
-                    raise CLIError("unknown fileset type %s" % type)
-                self._filesets[name] = fileset
-                self._filesetNames.append(name)
-            elif cmd == "info":
-                if len(toks) < 2 or len(toks) > 3 or len(toks) == 3 and toks[1] != '-u':
-                    raise CLIError("usage: %s [-u] <fileset>" % cmd)
-                if len(toks) == 2:
-                    print(self._fileset(toks[1]).info())
-                else:
-                    print(self._fileset(toks[2]).info().users())
-            elif cmd == "print":
-                if len(toks) < 2:
-                    raise CLIError("usage: %s <fileset> [<filter>]" % cmd)
-                name = toks[1]
-                fileset = self._fileset(name)
-                if len(toks) > 2:
-                    filter = Filter.parse(self._now, toks[2:])
-                else:
-                    filter = None
-                pager = Pager()
-                width = 0
-                try:
-                    for filespec in fileset.select(filter):
-                        s, width = filespec.format(width)
-                        pager.file.write("%s\n" % s)
-                except IOError as e:
-                    if e.errno == errno.EPIPE:
-                        pass
-                    else:
-                        raise
-                finally:
-                    pager.close()
-            elif cmd == "delete":
-                if len(toks) != 2 :
-                    raise CLIError("usage: %s <fileset>" % cmd)
-                name = toks[1]
-                self._delete(self._fileset(name))
-            elif cmd == "update-cache":
-                if len(toks) == 1:
-                    for name in self._caches.keys():
-                        #print("updating cache %s" % name)
-                        self._caches[name].update()
-                else:
-                    for name in toks[1:]:
-                        self._cache(name).update()
+            if self.commands.has_key(cmd):
+                method = self.commands[cmd]['method']
+                method(toks)
+                done = method == self._quitCmd
             else:
                 raise CLIError("unknown command %s, try help" % cmd)
+        return done
 
     def _handleProcess(self, line):
+        done = False
         try:
-            self._process(line)
+            done = self._process(line)
         except CLIError as e:
             stderr("ERROR %s\n" % e.msg)
         except KeyboardInterrupt:
             stderr("\n")
+        return done
 
     def startup(self):
         for rc in ["/etc/filebutlerrc",
@@ -256,9 +198,120 @@ class CLI:
         while not done:
             try:
                 line = raw_input("fb: ")
-                self._handleProcess(line)
+                done = self._handleProcess(line)
             except EOFError:
                 print("bye")
                 done = True
             except KeyboardInterrupt:
                 stderr("^C\n")
+
+    def _helpCmd(self, toks):
+        for cmdname in sorted(self.commands.keys()):
+            cmd = self.commands[cmdname]
+            print("%-10s - %s\n               %s\n" % (cmdname, cmd['desc'], cmd['usage']))
+
+    def _quitCmd(self, toks):
+        pass
+
+    def _echoCmd(self, toks):
+        print(' '.join(toks[1:]))
+
+    def _setCmd(self, toks):
+        if len(toks) != 3:
+            raise CLIError("usage: %s <attr> <value>" % cmd)
+        name = toks[1]
+        value = toks[2]
+        self._attrs[name] = value
+
+    def _lsAttrsCmd(self, toks):
+        if len(toks) != 1:
+            raise CLIError("usage: %s" % cmd)
+        for name in sorted(self._attrs.keys()):
+            print("%s=%s" % (name, self._attrs[name]))
+
+    def _lsCmd(self, toks):
+        if len(toks) != 1:
+            raise CLIError("usage: %s" % cmd)
+        for name in self._filesetNames:
+            print(self._filesets[name].description())
+
+    def _lsCachesCmd(self, toks):
+        if len(toks) != 1:
+            raise CLIError("usage: %s" % cmd)
+        for name in self._filesetNames:
+            if self._caches.has_key(name):
+                print(self._filesets[name].description())
+
+    def _filesetCmd(self, toks):
+        if len(toks) < 3:
+            raise CLIError("usage: %s <name> <spec>" % cmd)
+        name = toks[1]
+        type = toks[2]
+        if self._filesets.has_key(name):
+            raise CLIError("duplicate fileset %s" % name)
+        if type == "find.gnu.out":
+            fileset = self._cached(name, GnuFindOutFileset.parse(self._idMapper, name, toks[3:]))
+        elif type == "find":
+            fileset = self._cached(name, FindFileset.parse(self._idMapper, name, toks[3:]))
+        elif type == "filter":
+            if len(toks) < 4:
+                raise CLIError("filter requires fileset, criteria")
+            filter, _ = parseCommandOptions(self._now, toks[4:], filter=True)
+            fileset = FilterFileset(name, self._fileset(toks[3]), filter)
+        elif type == "union":
+            if len(toks) < 4:
+                raise CLIError("union requires at least two filesets")
+            filesets = []
+            for filesetName in toks[3:]:
+                filesets.append(self._fileset(filesetName))
+            fileset = UnionFileset(name, filesets)
+        else:
+            raise CLIError("unknown fileset type %s" % type)
+        self._filesets[name] = fileset
+        self._filesetNames.append(name)
+
+    def _infoCmd(self, toks):
+        if len(toks) < 2 or len(toks) > 3 or len(toks) == 3 and toks[1] != '-u':
+            raise CLIError("usage: %s [-u] <fileset>" % cmd)
+        if len(toks) == 2:
+            print(self._fileset(toks[1]).info())
+        else:
+            print(self._fileset(toks[2]).info().users())
+
+    def _printCmd(self, toks):
+        if len(toks) < 2:
+            raise CLIError("usage: %s <fileset> [<filter>]" % cmd)
+        name = toks[1]
+        fileset = self._fileset(name)
+        if len(toks) > 2:
+            filter, sorter = parseCommandOptions(self._now, toks[2:], filter=True, sorter=True)
+        else:
+            filter, sorter = None, None
+        pager = Pager()
+        width = 0
+        try:
+            for filespec in fileset.sorted(filter, sorter):
+                s, width = filespec.format(width)
+                pager.file.write("%s\n" % s)
+        except IOError as e:
+            if e.errno == errno.EPIPE:
+                pass
+            else:
+                raise
+        finally:
+            pager.close()
+
+    def _deleteCmd(self, toks):
+        if len(toks) != 2 :
+            raise CLIError("usage: %s <fileset>" % cmd)
+        name = toks[1]
+        self._delete(self._fileset(name))
+
+    def _updateCacheCmd(self, toks):
+        if len(toks) == 1:
+            for name in self._caches.keys():
+                #print("updating cache %s" % name)
+                self._caches[name].update()
+        else:
+            for name in toks[1:]:
+                self._cache(name).update()

@@ -19,9 +19,31 @@ from util import size2str
 from UserInfo import UserInfo
 
 class FilesetInfo(object):
-    def __init__(self):
-        self.nFiles = 0
-        self.totalSize = 0
+
+    @classmethod
+    def fromFile(cls, f):
+        fi = None
+        for line in f:
+            try:
+                fields = line.rstrip().split(None)
+                if fi is None and len(fields) == 2:
+                    nFiles = int(fields[0])
+                    totalSize = int(fields[1])
+                    fi = cls(nFiles, totalSize)
+                elif fi is not None and len(fields) == 3:
+                    username = fields[0]
+                    nFiles = int(fields[1])
+                    totalSize = int(fields[2])
+                    fi._users[username] = UserInfo(nFiles, totalSize)
+                else:
+                    raise ValueError
+            except ValueError:
+                stderr("ignoring bad info line: %s" % line.rstrip())
+        return fi
+
+    def __init__(self, nFiles=0, totalSize=0):
+        self.nFiles = nFiles
+        self.totalSize = totalSize
         self._users = {}
 
     def add(self, filespec):
@@ -32,7 +54,19 @@ class FilesetInfo(object):
         else:
             user = UserInfo()
             self._users[filespec.user] = user
-        user.add(filespec)
+        user.add(1, filespec.size)
+
+    def merge(self, inf1):
+        self.nFiles += inf1.nFiles
+        self.totalSize += inf1.totalSize
+        for u in inf1._users.keys():
+            user1 = inf1._users[u]
+            if not self._users.has_key(u):
+                user0 = UserInfo()
+                self._users[u] = user0
+            else:
+                user0 = self._users[u]
+            user0.add(user1.nFiles, user1.totalSize)
 
     def __str__(self):
         return "total %s over %d files" % (size2str(self.totalSize), self.nFiles)
@@ -46,3 +80,8 @@ class FilesetInfo(object):
             if info.totalSize > 1024:
                 lines.append("%s %s over %d files" % (name, size2str(info.totalSize), info.nFiles))
         return '\n'.join(lines)
+
+    def write(self, f):
+        f.write("%d %d\n" % (self.nFiles, self.totalSize))
+        for u, user in self._users.iteritems():
+            f.write("%s %d %d\n" % (u, user.nFiles, user.totalSize))

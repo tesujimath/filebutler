@@ -46,8 +46,10 @@ Print files in a fileset, optionally filtered, via `$PAGER`.
 
 Usage:
 ```
-print <fileset> [<filter-params>]
+print <fileset> [<filter-params>] [-by-size]
 ```
+
+The `filter-params` are as described for the filter fileset type.
 
 ## fileset
 

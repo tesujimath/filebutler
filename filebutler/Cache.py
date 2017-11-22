@@ -23,7 +23,7 @@ from Fileset import Fileset
 from SimpleFilesetCache import SimpleFilesetCache
 from UserFilesetCache import UserFilesetCache
 from WeeklyFilesetCache import WeeklyFilesetCache
-from util import filedatestr, filetimestr, verbose_stderr, debug_stderr, stderr
+from util import filedatestr, filetimestr, verbose_stderr, debug_stderr, progress_stderr, stderr
 
 # Stack up the caches we support, so that each cache can instantiate
 # its next one, via its next parameter.
@@ -34,26 +34,36 @@ class Cache(Fileset):
         self.name = name
         self._fileset = fileset
         self._path = path
+        self._cache0 = None
         self._caches = [WeeklyFilesetCache, UserFilesetCache]
 
     def description(self):
         return "%s cached on %s" % (self._fileset.description(), filedatestr(self._path))
 
-    def _cache(self, path, level):
+    def _cache(self):
+        if self._cache0 is None:
+            self._cache0 = self._newcache(self._path, 0)
+        return self._cache0
+
+    def _newcache(self, path, level):
         if level < len(self._caches):
-            return self._caches[level](path, functools.partial(self._cache, level = level + 1))
+            return self._caches[level](path, functools.partial(self._newcache, level = level + 1))
         else:
             return SimpleFilesetCache(path)
 
     def select(self, filter=None):
-        cache = self._cache(self._path, 0)
+        cache = self._cache()
         filterStr = " " + str(filter) if filter is not None else ""
         verbose_stderr("fileset %s%s reading from %s cache at %s\n" % (self.name, filterStr, filetimestr(self._path), self._path))
         for filespec in cache.select(filter):
             yield filespec
 
+    def merge_info(self, inf, filter=None):
+        cache = self._cache()
+        cache.merge_info(inf, filter)
+
     def update(self):
-        cache = self._cache(self._path, 0)
+        cache = self._cache()
         try:
             cache.create()
         except OSError as e:
@@ -74,4 +84,5 @@ class Cache(Fileset):
                 else:
                     raise
         cache.flush()
-        stderr("updated %s\n" % self.name)
+        cache.writeInfo()
+        progress_stderr("updated %s\n" % self.name)
