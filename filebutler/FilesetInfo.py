@@ -69,7 +69,7 @@ class FilesetInfo(object):
             user0.add(user1.nFiles, user1.totalSize)
 
     def __str__(self):
-        return "total %s over %d files" % (size2str(self.totalSize), self.nFiles)
+        return "total %s in %d files" % (size2str(self.totalSize), self.nFiles)
 
     def users(self):
         lines = [str(self)]
@@ -78,7 +78,7 @@ class FilesetInfo(object):
             info = user[1]
             # exclude trivial small stuff
             if info.totalSize > 1024:
-                lines.append("%s %s over %d files" % (name, size2str(info.totalSize), info.nFiles))
+                lines.append("%s %s in %d files" % (name, size2str(info.totalSize), info.nFiles))
         return '\n'.join(lines)
 
     def write(self, f):
