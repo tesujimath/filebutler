@@ -129,32 +129,6 @@ class CLI:
             raise CLIError("no such cache %s" % name)
         return self._caches[name]
 
-    def _delete(self, fileset):
-        # delete directories after their contents
-        dirs = []
-        mtimes = {}
-        for filespec in fileset.select():
-            # preserve mtime for parent directory
-            parent = os.path.dirname(filespec.path)
-            if not mtimes.has_key(parent):
-                mtimes[parent] = os.stat(parent).st_mtime
-            if filespec.isdir():
-                dirs.append(filespec)
-            else:
-                filespec.delete()
-        for filespec in sorted(dirs, key=lambda d: d.path, reverse=True):
-            filespec.delete()
-        # now reset mtimes of anything that's left
-        for path, mtime in mtimes.iteritems():
-            try:
-                os.utime(path, (mtime, mtime))
-            except OSError as e:
-                if e.errno == errno.EACCES:
-                    # silently do nothing if we don't have permission to fix mtime
-                    pass
-                else:
-                    raise
-
     def _process(self, line):
         done = False
         toks = shlex.split(line, comments=True)
@@ -305,7 +279,34 @@ class CLI:
         if len(toks) != 2 :
             raise CLIError("usage: %s <fileset>" % cmd)
         name = toks[1]
-        self._delete(self._fileset(name))
+        fileset = self._fileset(name)
+        # delete directories after their contents
+        dirs = []
+        mtimes = {}
+        for filespec in fileset.select():
+            # preserve mtime for parent directory
+            parent = os.path.dirname(filespec.path)
+            if not mtimes.has_key(parent):
+                mtimes[parent] = os.stat(parent).st_mtime
+            if filespec.isdir():
+                dirs.append(filespec)
+            else:
+                filespec.delete()
+        for filespec in sorted(dirs, key=lambda d: d.path, reverse=True):
+            filespec.delete()
+        # now reset mtimes of anything that's left
+        for path, mtime in mtimes.iteritems():
+            try:
+                os.utime(path, (mtime, mtime))
+            except OSError as e:
+                if e.errno == errno.ENOENT:
+                    # silently do nothing if there's no directory left
+                    pass
+                elif e.errno == errno.EACCES:
+                    # silently do nothing if we don't have permission to fix mtime
+                    pass
+                else:
+                    raise
 
     def _updateCacheCmd(self, toks):
         if len(toks) == 1:
