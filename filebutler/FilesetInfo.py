@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
-from util import size2str
+from util import size2str, warning
 from UserInfo import UserInfo
 
 class FilesetInfo(object):
@@ -38,7 +38,7 @@ class FilesetInfo(object):
                 else:
                     raise ValueError
             except ValueError:
-                stderr("ignoring bad info line: %s" % line.rstrip())
+                warning("ignoring bad info line: %s" % line.rstrip())
         return fi
 
     def __init__(self, nFiles=0, totalSize=0):

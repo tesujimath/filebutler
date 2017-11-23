@@ -50,6 +50,8 @@ def progress_stderr(msg):
 def verbose_stderr(msg):
     if verbose:
         stderr(msg)
+def warning(msg):
+    stderr("warning: %s\n" % msg)
 
 fbTimeFmt = "%Y%m%d-%H%M%S"
 fbDateFmt = "%Y-%m-%d"

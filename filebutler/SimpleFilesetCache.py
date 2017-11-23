@@ -19,7 +19,7 @@ import os.path
 
 from Filespec import Filespec
 from FilesetInfo import FilesetInfo
-from util import verbose_stderr, debug_stderr
+from util import verbose_stderr, debug_stderr, warning
 
 class SimpleFilesetCache(object):
 
@@ -41,13 +41,16 @@ class SimpleFilesetCache(object):
         if self._filespecs is None:
             #debug_stderr("SimpleFilesetCache select %s from file cache %s\n" % (str(filter), self._path))
             self._filespecs = []
-            with open(self.filelistpath(), 'r') as f:
-                #debug_stderr("SimpleFilesetCache select %s opened file cache\n" % str(filter))
-                for filespec in Filespec.fromFile(f):
-                    self._filespecs.append(filespec)
-                    if filter is None or filter.selects(filespec):
-                        #debug_stderr("SimpleFilesetCache read from file %s\n" % filespec)
-                        yield filespec
+            try:
+                with open(self.filelistpath(), 'r') as f:
+                    #debug_stderr("SimpleFilesetCache select %s opened file cache\n" % str(filter))
+                    for filespec in Filespec.fromFile(f):
+                        self._filespecs.append(filespec)
+                        if filter is None or filter.selects(filespec):
+                            #debug_stderr("SimpleFilesetCache read from file %s\n" % filespec)
+                            yield filespec
+            except IOError:
+                warning("can't read filelist %s, ignoring" % self._path)
         else:
             #debug_stderr("SimpleFilesetCache select %s from memory cache\n" % str(filter))
             for filespec in self._filespecs:
@@ -60,8 +63,12 @@ class SimpleFilesetCache(object):
             #debug_stderr("SimpleFilesetCache(%s)::merge_info(None)\n" % self._path)
             if self._fileinfo is None:
                 #debug_stderr("SimpleFilesetCache(%s)::merge_info(None) reading info file\n" % self._path)
-                with open(self.infopath(), 'r') as f:
-                    self._fileinfo = FilesetInfo.fromFile(f)
+                try:
+                    with open(self.infopath(), 'r') as f:
+                        self._fileinfo = FilesetInfo.fromFile(f)
+                except IOError:
+                    warning("can't read info %s, ignoring" % self._path)
+                    self._fileinfo = FilesetInfo()
             inf0 = self._fileinfo
         else:
             f = str(filter)
