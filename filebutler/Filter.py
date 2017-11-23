@@ -18,7 +18,6 @@
 import datetime
 import fnmatch
 
-from CLIError import CLIError
 from util import Giga, date2str, debug_stderr
 
 def liberal(fn, a, b):

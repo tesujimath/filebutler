@@ -24,6 +24,7 @@ from Fileset import Fileset
 from Filespec import Filespec
 from Localtime import Localtime
 from PercentageProgress import PercentageProgress
+from CLIError import CLIError
 from util import verbose_stderr
 
 class GnuFindOutFileset(Fileset):

@@ -21,6 +21,7 @@ import pwd
 import re
 import stat
 
+from CLIError import CLIError
 from Fileset import Fileset
 from Filespec import Filespec
 from util import filemode, verbose_stderr
