@@ -100,7 +100,11 @@ class CLI:
     def _cached(self, name, fileset):
         if not self._attrs.has_key('cachedir'):
             raise CLIError("missing attr cachedir")
-        cache = Cache(name, fileset, os.path.join(self._attrs['cachedir'], name))
+        if not self._attrs.has_key('logdir'):
+            raise CLIError("missing attr logdir")
+        cache = Cache(name, fileset,
+                      os.path.join(self._attrs['cachedir'], name),
+                      os.path.join(self._attrs['logdir'], name))
         self._caches[name] = cache
         return cache
 
@@ -307,6 +311,9 @@ class CLI:
                     pass
                 else:
                     raise
+        # finally save deletions lists for all caches
+        for name in self._caches:
+            self._caches[name].saveDeletions()
 
     def _updateCacheCmd(self, toks):
         if len(toks) == 1:

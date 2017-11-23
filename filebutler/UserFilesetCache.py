@@ -22,8 +22,9 @@ from util import debug_stderr
 
 class UserFilesetCache(object):
 
-    def __init__(self, path, next):
+    def __init__(self, path, logdir, next):
         self._path = path
+        self._logdir = logdir
         self._next = next
         self._users = {}        # of fileset, indexed by integer user
 
@@ -35,6 +36,9 @@ class UserFilesetCache(object):
     def _subpath(self, u):
         return os.path.join(self._path, u)
 
+    def _sublogdir(self, u):
+        return os.path.join(self._logdir, u)
+
     def _fileset(self, u):
         """On demand creation of child filesets."""
         if self._users.has_key(u):
@@ -42,7 +46,7 @@ class UserFilesetCache(object):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(u))
+            fileset = self._next(self._subpath(u), self._sublogdir(u))
             self._users[u] = fileset
         return fileset
 
@@ -75,3 +79,9 @@ class UserFilesetCache(object):
         for u in self._users.itervalues():
             if u is not None:
                 u.writeInfo()
+
+    def saveDeletions(self):
+        #debug_stderr("UserFilesetCache(%s)::saveDeletions\n" % self._path)
+        for u in self._users.itervalues():
+            if u is not None:
+                u.saveDeletions()

@@ -56,6 +56,16 @@ class FilesetInfo(object):
             self._users[filespec.user] = user
         user.add(1, filespec.size)
 
+    def remove(self, filespec):
+        self.nFiles -= 1
+        self.totalSize -= filespec.size
+        if self._users.has_key(filespec.user):
+            user0 = self._users[filespec.user]
+            user0.remove(1, filespec.size)
+            if user0.nFiles == 0:
+                # remove user, since no files left
+                self._users.pop(u, None)
+
     def merge(self, inf1):
         self.nFiles += inf1.nFiles
         self.totalSize += inf1.totalSize
@@ -67,6 +77,18 @@ class FilesetInfo(object):
             else:
                 user0 = self._users[u]
             user0.add(user1.nFiles, user1.totalSize)
+
+    def unmerge(self, inf1):
+        self.nFiles -= inf1.nFiles
+        self.totalSize -= inf1.totalSize
+        for u in inf1._users.keys():
+            user1 = inf1._users[u]
+            if self._users.has_key(u):
+                user0 = self._users[u]
+                user0.remove(user1.nFiles, user1.totalSize)
+                if user0.nFiles == 0:
+                    # remove user, since no files left
+                    self._users.pop(u, None)
 
     def __str__(self):
         return "total %s in %d files" % (size2str(self.totalSize), self.nFiles)

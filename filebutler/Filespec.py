@@ -32,20 +32,22 @@ from util import fbTimeFmt, time2str, date2str, size2str
 class Filespec(object):
 
     @classmethod
-    def fromFile(cls, f):
+    def fromFile(cls, f, fileset):
         for line in f:
             fields = line.rstrip().split(None, 5)
             if len(fields) != 6:
                 print("bad filespec: %s" % line.rstrip())
             else:
-                yield Filespec(fields[5],
+                yield Filespec(fileset,
+                               fields[5],
                                fields[0],
                                fields[1],
                                int(fields[2]),
                                calendar.timegm(time.strptime(fields[3], fbTimeFmt)),
                                fields[4])
 
-    def __init__(self, path, user, group, size, mtime, perms):
+    def __init__(self, fileset, path, user, group, size, mtime, perms):
+        self.fileset = fileset  # fileset whicih owns this filespec
         self.path = path
         self.user = user
         self.group = group
@@ -62,6 +64,8 @@ class Filespec(object):
                 os.rmdir(self.path)
             else:
                 os.remove(self.path)
+            # tell owning fileset we're deleted
+            self.fileset.delete(self)
         except OSError as e:
             if e.errno == errno.ENOENT:
                 # deleted already, don't care

@@ -23,51 +23,93 @@ from util import verbose_stderr, debug_stderr, warning
 
 class SimpleFilesetCache(object):
 
-    def __init__(self, path):
+    def __init__(self, path, logdir):
         #debug_stderr("SimpleFilesetCache(%s)::__init__)\n" % path)
         self._path = path
+        self._logdir = logdir
         self._filespecs = None  # in-memory read cache
         self._info = {}         # indexed by filter string
         self._file = None
         self._fileinfo = None
+        self._deletedFilelist = {}    # paths of deleted files
+        self._deletedInfo = FilesetInfo()
 
-    def filelistpath(self):
-        return os.path.join(self._path, "filelist")
+    def filelistpath(self, deleted=False):
+        if deleted:
+            return os.path.join(self._logdir, "deleted.filelist")
+        else:
+            return os.path.join(self._path, "filelist")
 
-    def infopath(self):
-        return os.path.join(self._path, "info")
+    def infopath(self, deleted=False):
+        if deleted:
+            return os.path.join(self._logdir, "deleted.info")
+        else:
+            return os.path.join(self._path, "info")
 
-    def select(self, filter=None):
+    def select(self, filter=None, includeDeleted=False):
         if self._filespecs is None:
             #debug_stderr("SimpleFilesetCache select %s from file cache %s\n" % (str(filter), self._path))
             self._filespecs = []
+            self._deletedFilelist = {}
+            filelist = self.filelistpath()
+            deletedFilelist = self.filelistpath(deleted=True)
             try:
-                with open(self.filelistpath(), 'r') as f:
-                    #debug_stderr("SimpleFilesetCache select %s opened file cache\n" % str(filter))
-                    for filespec in Filespec.fromFile(f):
-                        self._filespecs.append(filespec)
-                        if filter is None or filter.selects(filespec):
-                            #debug_stderr("SimpleFilesetCache read from file %s\n" % filespec)
-                            yield filespec
+                if os.path.exists(deletedFilelist):
+                    # if deleted filelist is older than cache, remove it
+                    if os.stat(deletedFilelist).st_mtime < os.stat(filelist).st_mtime:
+                        #debug_stderr("removing obsolete deleted filelist %s\n" % deletedFilelist)
+                        os.remove(deletedFilelist)
+                    else:
+                        #debug_stderr("reading deleted filelist %s\n" % deletedFilelist)
+                        with open(deletedFilelist, 'r') as f:
+                            for line in f:
+                                self._deletedFilelist[line.rstrip('\n')] = True
             except IOError:
-                warning("can't read filelist %s, ignoring" % self._path)
+                warning("can't read deleted filelist %s, ignoring" % deletedFilelist)
+            try:
+                with open(filelist, 'r') as f:
+                    #debug_stderr("SimpleFilesetCache select %s opened file cache\n" % str(filter))
+                    for filespec in Filespec.fromFile(f, self):
+                        self._filespecs.append(filespec)
+                        if includeDeleted or not self._deletedFilelist.has_key(filespec.path):
+                            if filter is None or filter.selects(filespec):
+                                #debug_stderr("SimpleFilesetCache read from file %s\n" % filespec)
+                                yield filespec
+            except IOError:
+                warning("can't read filelist %s, ignoring" % filelist)
         else:
             #debug_stderr("SimpleFilesetCache select %s from memory cache\n" % str(filter))
             for filespec in self._filespecs:
-                if filter is None or filter.selects(filespec):
-                    #debug_stderr("SimpleFilesetCache read from memory %s\n" % filespec)
-                    yield filespec
+                if includeDeleted or not self._deletedFilelist.has_key(filespec.path):
+                    if filter is None or filter.selects(filespec):
+                        #debug_stderr("SimpleFilesetCache read from memory %s\n" % filespec)
+                        yield filespec
 
     def merge_info(self, inf1, filter=None):
         if filter is None:
             #debug_stderr("SimpleFilesetCache(%s)::merge_info(None)\n" % self._path)
             if self._fileinfo is None:
                 #debug_stderr("SimpleFilesetCache(%s)::merge_info(None) reading info file\n" % self._path)
+                infofile = self.infopath()
+                deletedInfofile = self.infopath(deleted=True)
                 try:
-                    with open(self.infopath(), 'r') as f:
+                    if os.path.exists(deletedInfofile):
+                        # if deleted filelist is older than cache, remove it
+                        if os.stat(deletedInfofile).st_mtime < os.stat(infofile).st_mtime:
+                            #debug_stderr("removing obsolete deleted infofile %s\n" % deletedInfofile)
+                            os.remove(deletedInfofile)
+                        else:
+                            #debug_stderr("reading deleted infofile %s\n" % deletedInfofile)
+                            with open(deletedInfofile, 'r') as f:
+                                self._deletedInfo = FilesetInfo.fromFile(f)
+                except IOError:
+                    warning("can't read deleted info %s, ignoring" % deletedInfofile)
+                    self._deletedInfo = FilesetInfo()
+                try:
+                    with open(infofile, 'r') as f:
                         self._fileinfo = FilesetInfo.fromFile(f)
                 except IOError:
-                    warning("can't read info %s, ignoring" % self._path)
+                    warning("can't read info %s, ignoring" % infofile)
                     self._fileinfo = FilesetInfo()
             inf0 = self._fileinfo
         else:
@@ -79,9 +121,10 @@ class SimpleFilesetCache(object):
                 #debug_stderr("SimpleFilesetCache(%s)::merge_info(%s) scanning\n" % (self._path, f))
                 inf0 = FilesetInfo()
                 self._info[f] = inf0
-                for filespec in self.select(filter):
+                for filespec in self.select(filter, includeDeleted=True):
                     inf0.add(filespec)
         inf1.merge(inf0)
+        inf1.unmerge(self._deletedInfo)
 
     def add(self, filespec):
         if self._fileinfo is None:
@@ -107,3 +150,31 @@ class SimpleFilesetCache(object):
         with open(self.infopath(), 'w') as infofile:
             if self._fileinfo is not None:
                 self._fileinfo.write(infofile)
+
+    def delete(self, filespec):
+        #debug_stderr("SimpleFilesetCache(%s) delete %s\n" % (self._path, filespec.path))
+        self._deletedFilelist[filespec.path] = True
+        self._deletedInfo.add(filespec)
+
+    def saveDeletions(self):
+        if len(self._deletedFilelist) > 0:
+            deletedFilelist = self.filelistpath(deleted=True)
+            #debug_stderr("SimpleFilesetCache(%s)::saveDeletions deletedFilelist\n" % self._path)
+            try:
+                if not os.path.exists(self._logdir):
+                    os.makedirs(self._logdir)
+                with open(deletedFilelist, 'w') as f:
+                    for path in self._deletedFilelist:
+                        f.write("%s\n" % path)
+            except IOError:
+                warning("can't write deleted filelist %s, ignoring" % deletedFilelist)
+
+        if self._deletedInfo.nFiles > 0:
+            deletedInfofile = self.infopath(deleted=True)
+            #debug_stderr("SimpleFilesetCache(%s)::saveDeletions deletedInfo\n" % self._path)
+            try:
+                with open(deletedInfofile, 'w') as f:
+                    self._deletedInfo.write(f)
+            except IOError:
+                warning("can't write deleted info %s, ignoring" % deletedInfofile)
+                self._deletedInfo = FilesetInfo()

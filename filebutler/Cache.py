@@ -29,11 +29,12 @@ from util import filedatestr, filetimestr, verbose_stderr, debug_stderr, progres
 # its next one, via its next parameter.
 class Cache(Fileset):
 
-    def __init__(self, name, fileset, path):
+    def __init__(self, name, fileset, path, logdir):
         Fileset.__init__(self)
         self.name = name
         self._fileset = fileset
         self._path = path
+        self._logdir = logdir
         self._cache0 = None
         self._caches = [WeeklyFilesetCache, UserFilesetCache]
 
@@ -42,14 +43,14 @@ class Cache(Fileset):
 
     def _cache(self):
         if self._cache0 is None:
-            self._cache0 = self._newcache(self._path, 0)
+            self._cache0 = self._newcache(self._path, self._logdir, 0)
         return self._cache0
 
-    def _newcache(self, path, level):
+    def _newcache(self, path, logdir, level):
         if level < len(self._caches):
-            return self._caches[level](path, functools.partial(self._newcache, level = level + 1))
+            return self._caches[level](path, logdir, functools.partial(self._newcache, level = level + 1))
         else:
-            return SimpleFilesetCache(path)
+            return SimpleFilesetCache(path, logdir)
 
     def select(self, filter=None):
         cache = self._cache()
@@ -86,3 +87,8 @@ class Cache(Fileset):
         cache.flush()
         cache.writeInfo()
         progress_stderr("updated %s\n" % self.name)
+
+    def saveDeletions(self):
+        #debug_stderr("Cache(%s)::saveDeletions\n" % self.name)
+        cache = self._cache()
+        cache.saveDeletions()

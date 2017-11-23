@@ -23,3 +23,7 @@ class UserInfo(object):
     def add(self, n, size):
         self.nFiles += n
         self.totalSize += size
+
+    def remove(self, n, size):
+        self.nFiles -= n
+        self.totalSize -= size

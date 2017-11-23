@@ -57,7 +57,8 @@ class FindFileset(Fileset):
     def _filespec(self, path):
         s = os.lstat(path)
 
-        return Filespec(path=path,
+        return Filespec(fileset=self,
+                        path=path,
                         user=self._idMapper.usernameFromId(s.st_uid),
                         group=self._idMapper.groupnameFromId(s.st_gid),
                         size=s.st_size,

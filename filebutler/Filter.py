@@ -88,7 +88,7 @@ class Filter(object):
         mtimeBefore = liberal(min, self.mtimeBefore, f1.mtimeBefore)
         notPaths = self.notPaths + f1.notPaths
         f2 = self.__class__(owner, sizeGeq, mtimeBefore, notPaths)
-        debug_stderr("Filter(%s).intersect(%s)=%s\n" % (self, f1, f2))
+        #debug_stderr("Filter(%s).intersect(%s)=%s\n" % (self, f1, f2))
         return f2
 
     def selects(self, filespec):

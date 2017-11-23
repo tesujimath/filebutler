@@ -43,3 +43,6 @@ class Fileset:
             filespecs.sort(key=sorter.key())
             for filespec in filespecs:
                 yield filespec
+
+    def delete(self, filespec):
+        pass
