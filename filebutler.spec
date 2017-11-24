@@ -1,5 +1,5 @@
 Name:           filebutler
-Version:        0.2.1
+Version:        0.3.0
 Release:        1%{?dist}
 Summary:        Utility for managing old files in large directory structures.
 
@@ -39,6 +39,9 @@ make install DESTDIR=%{buildroot}
 %{python_sitelib}/*
 
 %changelog
+* Fri Nov 24 2017 Simon Guest <simon.guest@tesujimath.org> 0.3.0-1
+- track deleted files in user logdir
+
 * Thu Nov 23 2017 Simon Guest <simon.guest@tesujimath.org> 0.2.1-1
 - cache info files
 
