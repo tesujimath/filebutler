@@ -60,7 +60,7 @@ class Filter(object):
             else:
                 return s1
         if self.owner is not None:
-            s = append(s, "owner:%s " % self.owner)
+            s = append(s, "owner:%s" % self.owner)
         if self.sizeGeq is not None:
             s = append(s, "size:+%dG" % (self.sizeGeq / Giga))
         if self.mtimeBefore is not None:
