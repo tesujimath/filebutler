@@ -15,7 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
-class UnionFileset(object):
+from Fileset import Fileset
+
+class UnionFileset(Fileset):
 
     def __init__(self, name, filesets):
         self.name = name
