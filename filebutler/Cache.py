@@ -86,6 +86,8 @@ class Cache(Fileset):
                     raise
         cache.flush()
         cache.writeInfo()
+        # touch cache rootdir, to show updated
+        os.utime(self._path, None)
         progress_stderr("updated %s\n" % self.name)
 
     def saveDeletions(self):
