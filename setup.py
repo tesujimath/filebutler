@@ -5,7 +5,7 @@
 from distutils.core import setup
 
 setup(name='filebutler',
-      version='0.3.0',
+      version='0.4.0',
       description='Utility for managing old files in large directory structures',
       author='Simon Guest',
       author_email='simon.guest@tesujimath.org',
