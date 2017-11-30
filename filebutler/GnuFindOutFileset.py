@@ -88,8 +88,13 @@ class GnuFindOutFileset(Fileset):
             for line in f:
                 progress.report(f.tell() * 1.0 / filesize)
                 fields = line.rstrip().split(None, 10)
+                path = re.sub(self._match, self._replace, fields[10])
+                # strip out symlink destination
+                symlink = path.find(' -> ')
+                if symlink >= 0:
+                    path = path[:symlink]
                 filespec = Filespec(fileset=self,
-                                    path=re.sub(self._match, self._replace, fields[10]),
+                                    path=path,
                                     user=self._idMapper.usernameFromString(fields[4]),
                                     group=self._idMapper.groupnameFromString(fields[5]),
                                     size=int(fields[6]),
