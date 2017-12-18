@@ -43,6 +43,7 @@ info <fileset>
 ## print
 
 Print files in a fileset, optionally filtered, via `$PAGER`.
+If defined, the attribute `print-options` is appended to the command.
 
 Usage:
 ```
@@ -148,6 +149,15 @@ Set attribute, e.g. cachedir
 Example
 ```
 set cachedir $HOME/.filebutler.cache
+```
+
+## clear
+
+Clear attribute, e.g. print-options
+
+Example
+```
+clear print-options
 ```
 
 # OPTIONS

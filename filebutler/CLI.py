@@ -62,6 +62,10 @@ class CLI:
                                'usage': 'set <attr> <value>',
                                'method': self._setCmd,
             },
+            'clear':         { 'desc': 'clear attribute, e.g. print-options',
+                               'usage': 'clear <attr>',
+                               'method': self._clearCmd,
+            },
             'ls-attrs':      { 'desc': 'list attributes',
                                'usage': 'ls-attrs',
                                'method': self._lsAttrsCmd,
@@ -201,6 +205,12 @@ class CLI:
         value = toks[2]
         self._attrs[name] = value
 
+    def _clearCmd(self, toks):
+        if len(toks) != 2:
+            raise CLIError("usage: %s <attr>" % cmd)
+        name = toks[1]
+        del self._attrs[name]
+
     def _lsAttrsCmd(self, toks):
         if len(toks) != 1:
             raise CLIError("usage: %s" % cmd)
@@ -261,8 +271,12 @@ class CLI:
             raise CLIError("usage: %s <fileset> [<filter>]" % cmd)
         name = toks[1]
         fileset = self._fileset(name)
-        if len(toks) > 2:
-            filter, sorter = parseCommandOptions(self._now, toks[2:], filter=True, sorter=True)
+        if self._attrs.has_key('print-options'):
+            printOptions = toks[2:] + self._attrs['print-options'].split()
+        else:
+            printOptions = toks[2:]
+        if printOptions != []:
+            filter, sorter = parseCommandOptions(self._now, printOptions, filter=True, sorter=True)
         else:
             filter, sorter = None, None
         pager = Pager()
