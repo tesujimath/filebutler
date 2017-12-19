@@ -24,6 +24,7 @@ class FilesetInfoAccumulator(object):
         self.nFiles = nFiles
         self.totalSize = totalSize
         self._users = {}
+        self._datasets = {}
 
     def add(self, filespec):
         self.nFiles += 1
@@ -34,6 +35,12 @@ class FilesetInfoAccumulator(object):
             user = FilesetInfo()
             self._users[filespec.user] = user
         user.add(1, filespec.size)
+        if self._datasets.has_key(filespec.dataset):
+            dataset = self._datasets[filespec.dataset]
+        else:
+            dataset = FilesetInfo()
+            self._datasets[filespec.dataset] = dataset
+        dataset.add(1, filespec.size)
 
     def accumulate(self, info, sel):
         self.nFiles += info.nFiles
@@ -45,6 +52,13 @@ class FilesetInfoAccumulator(object):
             else:
                 user0 = self._users[sel.owner]
             user0.add(info.nFiles, info.totalSize)
+        if sel.dataset is not None:
+            if not self._datasets.has_key(sel.dataset):
+                dataset0 = FilesetInfo()
+                self._datasets[sel.dataset] = dataset0
+            else:
+                dataset0 = self._datasets[sel.dataset]
+            dataset0.add(info.nFiles, info.totalSize)
 
     def decumulate(self, info, sel):
         self.nFiles -= info.nFiles
@@ -56,6 +70,13 @@ class FilesetInfoAccumulator(object):
                 if user0.nFiles == 0:
                     # remove user, since no files left
                     self._users.pop(sel.owner, None)
+        if sel.dataset is not None:
+            if self._datasets.has_key(sel.dataset):
+                dataset0 = self._datasets[sel.dataset]
+                dataset0.remove(info.nFiles, info.totalSize)
+                if dataset0.nFiles == 0:
+                    # remove dataset, since no files left
+                    self._datasets.pop(sel.dataset, None)
 
     def __str__(self):
         return "total %s in %d files" % (size2str(self.totalSize), self.nFiles)
@@ -65,6 +86,16 @@ class FilesetInfoAccumulator(object):
         for user in sorted(self._users.items(), key=lambda u: u[1].totalSize, reverse=True):
             name = user[0]
             info = user[1]
+            # exclude trivial small stuff
+            if info.totalSize > 1024:
+                lines.append("%s %s in %d files" % (name, size2str(info.totalSize), info.nFiles))
+        return '\n'.join(lines)
+
+    def datasets(self):
+        lines = [str(self)]
+        for dataset in sorted(self._datasets.items(), key=lambda u: u[1].totalSize, reverse=True):
+            name = dataset[0]
+            info = dataset[1]
             # exclude trivial small stuff
             if info.totalSize > 1024:
                 lines.append("%s %s in %d files" % (name, size2str(info.totalSize), info.nFiles))
