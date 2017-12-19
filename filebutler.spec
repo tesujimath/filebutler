@@ -1,5 +1,5 @@
 Name:           filebutler
-Version:        0.4.1
+Version:        0.5.1
 Release:        1%{?dist}
 Summary:        Utility for managing old files in large directory structures.
 
@@ -39,6 +39,9 @@ make install DESTDIR=%{buildroot}
 %{python_sitelib}/*
 
 %changelog
+* Wed Dec 20 2017 Simon Guest <simon.guest@tesujimath.org> 0.5.1-1
+- datasets added as a first class grouping/filtering construct
+
 * Thu Dec 14 2017 Simon Guest <simon.guest@tesujimath.org> 0.4.1-1
 - cope with bad input in GnuFindOutFileset
 
