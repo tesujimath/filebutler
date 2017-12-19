@@ -30,18 +30,18 @@ from util import verbose_stderr
 class GnuFindOutFileset(Fileset):
 
     @classmethod
-    def parse(cls, idMapper, name, toks):
+    def parse(cls, mapper, name, toks):
         if len(toks) != 3:
             raise CLIError("find.gnu.out requires path, match-re, replace-str")
         path = toks[0]
         match = toks[1]
         replace = toks[2]
-        return cls(idMapper, name, path, match, replace)
+        return cls(mapper, name, path, match, replace)
 
-    def __init__(self, idMapper, name, path, match, replace):
+    def __init__(self, mapper, name, path, match, replace):
         #print("GnuFindOutFileset init %s %s %s" % (path, match, replace))
         Fileset.__init__(self)
-        self._idMapper = idMapper
+        self._mapper = mapper
         self.name = name
         self._path = path
         self._match = match
@@ -95,9 +95,10 @@ class GnuFindOutFileset(Fileset):
                     if symlink >= 0:
                         path = path[:symlink]
                     filespec = Filespec(fileset=self,
+                                        dataset=self._mapper.datasetFromPath(path),
                                         path=path,
-                                        user=self._idMapper.usernameFromString(fields[4]),
-                                        group=self._idMapper.groupnameFromString(fields[5]),
+                                        user=self._mapper.usernameFromString(fields[4]),
+                                        group=self._mapper.groupnameFromString(fields[5]),
                                         size=int(fields[6]),
                                         mtime=self._dateParser.t(fields),
                                         perms=fields[2])

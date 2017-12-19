@@ -40,14 +40,16 @@ class Filespec(object):
             else:
                 yield Filespec(fileset,
                                fields[5],
+                               fields[6],
                                fields[0],
                                fields[1],
                                int(fields[2]),
                                calendar.timegm(time.strptime(fields[3], fbTimeFmt)),
                                fields[4])
 
-    def __init__(self, fileset, path, user, group, size, mtime, perms):
+    def __init__(self, fileset, dataset, path, user, group, size, mtime, perms):
         self.fileset = fileset  # fileset whicih owns this filespec
+        self.dataset = dataset
         self.path = path
         self.user = user
         self.group = group
@@ -94,10 +96,11 @@ class Filespec(object):
         return s, width
 
     def write(self, f):
-        f.write("%s %s %d %s %s %s\n" % (
+        f.write("%s %s %d %s %s %s %s\n" % (
             self.user,
             self.group,
             self.size,
             time2str(self.mtime),
             self.perms,
+            self.dataset,
             self.path))

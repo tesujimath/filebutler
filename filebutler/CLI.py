@@ -30,7 +30,7 @@ from Filter import Filter
 from FilterFileset import FilterFileset
 from FindFileset import FindFileset
 from GnuFindOutFileset import GnuFindOutFileset
-from IdMapper import IdMapper
+from Mapper import Mapper
 from Pager import Pager
 from UnionFileset import UnionFileset
 from options import parseCommandOptions
@@ -44,7 +44,7 @@ class CLI:
         self._filesets = {}
         self._caches = {}
         self._now = time.time() # for consistency between all filters
-        self._idMapper = IdMapper()
+        self._mapper = Mapper()
         self.commands = {
             'help':          { 'desc': 'provide help',
                                'usage': 'help',
@@ -59,7 +59,7 @@ class CLI:
                                'method': self._echoCmd,
             },
             'set':           { 'desc': 'set attribute, e.g. cachedir',
-                               'usage': 'set <attr> <value>',
+                               'usage': 'set <attr> <values>',
                                'method': self._setCmd,
             },
             'clear':         { 'desc': 'clear attribute, e.g. print-options',
@@ -104,11 +104,19 @@ class CLI:
     def _cached(self, name, fileset):
         if not self._attrs.has_key('cachedir'):
             raise CLIError("missing attr cachedir")
+        cachedirs = self._attrs['cachedir']
+        if len(cachedirs) != 1:
+            raise CLIError("botched attr cachedir")
+        cachedir = cachedirs[0]
         if not self._attrs.has_key('logdir'):
             raise CLIError("missing attr logdir")
+        logdirs = self._attrs['logdir']
+        if len(logdirs) != 1:
+            raise CLIError("botched attr logdir")
+        logdir = logdirs[0]
         cache = Cache(name, fileset,
-                      os.path.join(self._attrs['cachedir'], name),
-                      os.path.join(self._attrs['logdir'], name))
+                      os.path.join(cachedir, name),
+                      os.path.join(logdir, name))
         self._caches[name] = cache
         return cache
 
@@ -142,13 +150,15 @@ class CLI:
         toks = shlex.split(line, comments=True)
         self._expandVars(toks)
         if len(toks) >= 1:
-            cmd = toks[0]
-            if self.commands.has_key(cmd):
-                method = self.commands[cmd]['method']
-                method(toks)
+            cmdName = toks[0]
+            if self.commands.has_key(cmdName):
+                cmd = self.commands[cmdName]
+                method = cmd['method']
+                usage = cmd['usage']
+                method(toks, usage)
                 done = method == self._quitCmd
             else:
-                raise CLIError("unknown command %s, try help" % cmd)
+                raise CLIError("unknown command %s, try help" % cmdName)
         return done
 
     def _handleProcess(self, line):
@@ -187,60 +197,66 @@ class CLI:
             except KeyboardInterrupt:
                 stderr("^C\n")
 
-    def _helpCmd(self, toks):
+    def _helpCmd(self, toks, usage):
         for cmdname in sorted(self.commands.keys()):
             cmd = self.commands[cmdname]
             print("%-10s - %s\n               %s\n" % (cmdname, cmd['desc'], cmd['usage']))
 
-    def _quitCmd(self, toks):
+    def _quitCmd(self, toks, usage):
         pass
 
-    def _echoCmd(self, toks):
+    def _echoCmd(self, toks, usage):
         print(' '.join(toks[1:]))
 
-    def _setCmd(self, toks):
-        if len(toks) != 3:
-            raise CLIError("usage: %s <attr> <value>" % cmd)
+    def _setCmd(self, toks, usage):
+        if len(toks) < 3:
+            raise CLIError("usage: %s" % usage)
         name = toks[1]
-        value = toks[2]
-        self._attrs[name] = value
+        values = toks[2:]
+        self._attrs[name] = values
+        if name == 'dataset':
+            if len(values) != 2:
+                raise CLIError("botched attr dataset")
+            self._mapper.setDatasetRegex(values[0], values[1])
 
-    def _clearCmd(self, toks):
+    def _clearCmd(self, toks, usage):
         if len(toks) != 2:
-            raise CLIError("usage: %s <attr>" % cmd)
+            raise CLIError("usage: %s" % usage)
         name = toks[1]
         del self._attrs[name]
+        if name == 'dataset':
+            self._mapper.clearDatasetRegex()
 
-    def _lsAttrsCmd(self, toks):
+    def _lsAttrsCmd(self, toks, usage):
         if len(toks) != 1:
-            raise CLIError("usage: %s" % cmd)
+            raise CLIError("usage: %s" % usage)
         for name in sorted(self._attrs.keys()):
-            print("%s=%s" % (name, self._attrs[name]))
+            print("%s = %s" % (name, ' '.join(self._attrs[name])))
 
-    def _lsCmd(self, toks):
+    def _lsCmd(self, toks, usage):
         if len(toks) != 1:
-            raise CLIError("usage: %s" % cmd)
+            raise CLIError("usage: %s" % usage)
         for name in self._filesetNames:
             print(self._filesets[name].description())
 
-    def _lsCachesCmd(self, toks):
+    def _lsCachesCmd(self, toks, usage):
         if len(toks) != 1:
-            raise CLIError("usage: %s" % cmd)
+            raise CLIError("usage: %s" % usage)
         for name in self._filesetNames:
             if self._caches.has_key(name):
                 print(self._filesets[name].description())
 
-    def _filesetCmd(self, toks):
+    def _filesetCmd(self, toks, usage):
         if len(toks) < 3:
-            raise CLIError("usage: %s <name> <spec>" % cmd)
+            raise CLIError("usage: %s" % usage)
         name = toks[1]
         type = toks[2]
         if self._filesets.has_key(name):
             raise CLIError("duplicate fileset %s" % name)
         if type == "find.gnu.out":
-            fileset = self._cached(name, GnuFindOutFileset.parse(self._idMapper, name, toks[3:]))
+            fileset = self._cached(name, GnuFindOutFileset.parse(self._mapper, name, toks[3:]))
         elif type == "find":
-            fileset = self._cached(name, FindFileset.parse(self._idMapper, name, toks[3:]))
+            fileset = self._cached(name, FindFileset.parse(self._mapper, name, toks[3:]))
         elif type == "filter":
             if len(toks) < 4:
                 raise CLIError("filter requires fileset, criteria")
@@ -258,21 +274,21 @@ class CLI:
         self._filesets[name] = fileset
         self._filesetNames.append(name)
 
-    def _infoCmd(self, toks):
+    def _infoCmd(self, toks, usage):
         if len(toks) < 2 or len(toks) > 3 or len(toks) == 3 and toks[1] != '-u':
-            raise CLIError("usage: %s [-u] <fileset>" % cmd)
+            raise CLIError("usage: %s" % usage)
         if len(toks) == 2:
             print(self._fileset(toks[1]).info())
         else:
             print(self._fileset(toks[2]).info().users())
 
-    def _printCmd(self, toks):
+    def _printCmd(self, toks, usage):
         if len(toks) < 2:
-            raise CLIError("usage: %s <fileset> [<filter>]" % cmd)
+            raise CLIError("usage: %s" % usage)
         name = toks[1]
         fileset = self._fileset(name)
         if self._attrs.has_key('print-options'):
-            printOptions = toks[2:] + self._attrs['print-options'].split()
+            printOptions = toks[2:] + self._attrs['print-options']
         else:
             printOptions = toks[2:]
         if printOptions != []:
@@ -293,9 +309,9 @@ class CLI:
         finally:
             pager.close()
 
-    def _deleteCmd(self, toks):
+    def _deleteCmd(self, toks, usage):
         if len(toks) != 2 :
-            raise CLIError("usage: %s <fileset>" % cmd)
+            raise CLIError("usage: %s" % usage)
         name = toks[1]
         fileset = self._fileset(name)
         # delete directories after their contents
@@ -329,7 +345,7 @@ class CLI:
         for name in self._caches:
             self._caches[name].saveDeletions()
 
-    def _updateCacheCmd(self, toks):
+    def _updateCacheCmd(self, toks, usage):
         if len(toks) == 1:
             for name in self._caches.keys():
                 #print("updating cache %s" % name)

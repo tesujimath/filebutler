@@ -17,12 +17,15 @@
 
 import grp
 import pwd
+import re
 
-class IdMapper(object):
+class Mapper(object):
 
     def __init__(self):
         self._usernames = {}
         self._groupnames = {}
+        self._datasetRegex = None
+        self._datasetReplace = None
 
     def usernameFromId(self, uid):
         if not self._usernames.has_key(uid):
@@ -61,3 +64,21 @@ class IdMapper(object):
             return self.groupnameFromId(gid)
         except ValueError:
             return s
+
+    def setDatasetRegex(self, datasetRegex, datasetReplace):
+        self._datasetRegex = datasetRegex
+        self._datasetReplace = datasetReplace
+
+    def clearDatasetRegex(self):
+        self._datasetRegex = None
+        self._datasetReplace = None
+
+    def datasetFromPath(self, path):
+        noDatasetFound = '-'
+        if self._datasetRegex is None:
+            return noDatasetFound
+        dataset, n = re.subn(self._datasetRegex, self._datasetReplace, path, 1)
+        if n == 1:
+            return dataset
+        else:
+            return noDatasetFound

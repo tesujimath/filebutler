@@ -22,6 +22,7 @@ import os.path
 from Fileset import Fileset
 from SimpleFilesetCache import SimpleFilesetCache
 from UserFilesetCache import UserFilesetCache
+from DatasetFilesetCache import DatasetFilesetCache
 from WeeklyFilesetCache import WeeklyFilesetCache
 from util import filedatestr, filetimestr, verbose_stderr, debug_stderr, progress_stderr, warning
 
@@ -36,7 +37,7 @@ class Cache(Fileset):
         self._path = path
         self._logdir = logdir
         self._cache0 = None
-        self._caches = [WeeklyFilesetCache, UserFilesetCache]
+        self._caches = [WeeklyFilesetCache, DatasetFilesetCache, UserFilesetCache]
 
     def description(self):
         return "%s cached on %s" % (self._fileset.description(), filedatestr(self._path))
