@@ -34,6 +34,7 @@ def parseCommandOptions(now, toks, filter=False, sorter=False):
 
     # filter options
     owner = None
+    dataset = None
     sizeGeq = None
     mtimeBefore = None
     notPaths = []
@@ -51,6 +52,13 @@ def parseCommandOptions(now, toks, filter=False, sorter=False):
             if owner is not None:
                 raise CLIError("duplicate -user")
             owner = toks[i + 1]
+            i += 1
+        elif tok == '-dataset' and filter:
+            if i + 1 >= len(toks):
+                raise CLIError("-dataset missing parameter")
+            if dataset is not None:
+                raise CLIError("duplicate -dataset")
+            dataset = toks[i + 1]
             i += 1
         elif tok == '-size' and filter:
             if i + 1 >= len(toks):
@@ -103,8 +111,8 @@ def parseCommandOptions(now, toks, filter=False, sorter=False):
             raise CLIError("unknown %sparameter %s" % (category, tok))
         i += 1
 
-    if filter and (owner is not None or sizeGeq is not None or mtimeBefore is not None or notPaths != []):
-        f0 = Filter(owner=owner, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore, notPaths=notPaths)
+    if filter and (owner is not None or dataset is not None or sizeGeq is not None or mtimeBefore is not None or notPaths != []):
+        f0 = Filter(owner=owner, dataset=dataset, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore, notPaths=notPaths)
     else:
         f0 = None
     if sorter and (byPath or bySize):

@@ -33,21 +33,30 @@ class Filter(object):
     @classmethod
     def clearOwner(cls, f0):
         """Return a copy of f0 with no owner specified, or None if f0 is None."""
-        if f0 is None or f0.sizeGeq is None and f0.mtimeBefore is None and f0.notPaths == []:
+        if f0 is None or f0.dataset is None and f0.sizeGeq is None and f0.mtimeBefore is None and f0.notPaths == []:
             return None
         else:
-            return cls(None, f0.sizeGeq, f0.mtimeBefore, f0.notPaths)
+            return cls(None, f0.dataset, f0.sizeGeq, f0.mtimeBefore, f0.notPaths)
+
+    @classmethod
+    def clearDataset(cls, f0):
+        """Return a copy of f0 with no dataset specified, or None if f0 is None."""
+        if f0 is None or f0.owner is None and f0.sizeGeq is None and f0.mtimeBefore is None and f0.notPaths == []:
+            return None
+        else:
+            return cls(f0.owner, None, f0.sizeGeq, f0.mtimeBefore, f0.notPaths)
 
     @classmethod
     def clearMtime(cls, f0):
         """Return a copy of f0 with no mtime specified, or None if f0 is None."""
-        if f0 is None or f0.owner is None and f0.sizeGeq is None and f0.notPaths == []:
+        if f0 is None or f0.owner is None and f0.dataset is None and f0.sizeGeq is None and f0.notPaths == []:
             return None
         else:
-            return cls(f0.owner, f0.sizeGeq, None, f0.notPaths)
+            return cls(f0.owner, f0.dataset, f0.sizeGeq, None, f0.notPaths)
 
-    def __init__(self, owner=None, sizeGeq=None, mtimeBefore=None, notPaths=[]):
+    def __init__(self, owner=None, dataset=None, sizeGeq=None, mtimeBefore=None, notPaths=[]):
         self.owner = owner
+        self.dataset = dataset
         self.sizeGeq = sizeGeq
         self.mtimeBefore = mtimeBefore
         self.notPaths = notPaths
@@ -61,6 +70,8 @@ class Filter(object):
                 return s1
         if self.owner is not None:
             s = append(s, "owner:%s" % self.owner)
+        if self.dataset is not None:
+            s = append(s, "dataset:%s" % self.dataset)
         if self.sizeGeq is not None:
             s = append(s, "size:+%dG" % (self.sizeGeq / Giga))
         if self.mtimeBefore is not None:
@@ -84,10 +95,20 @@ class Filter(object):
                 owner = "%s+%s" % (self.owner, f1.owner)
         else:
             owner = self.owner
+        if self.dataset is None:
+            dataset = f1.dataset
+        elif f1.dataset is not None:
+            if self.dataset == f1.dataset:
+                dataset = self.dataset
+            else:
+                # incompatible, so set to something impossible, which we test for in selects()
+                dataset = '/'
+        else:
+            dataset = self.dataset
         sizeGeq = liberal(max, self.sizeGeq, f1.sizeGeq)
         mtimeBefore = liberal(min, self.mtimeBefore, f1.mtimeBefore)
         notPaths = self.notPaths + f1.notPaths
-        f2 = self.__class__(owner, sizeGeq, mtimeBefore, notPaths)
+        f2 = self.__class__(owner, dataset, sizeGeq, mtimeBefore, notPaths)
         #debug_stderr("Filter(%s).intersect(%s)=%s\n" % (self, f1, f2))
         return f2
 
@@ -95,6 +116,10 @@ class Filter(object):
         if self.owner is not None and '+' in self.owner:
             return False
         if self.owner is not None and filespec.user != self.owner:
+            return False
+        if self.dataset == '/':
+            return False
+        if self.dataset is not None and filespec.dataset != self.dataset:
             return False
         if self.sizeGeq is not None and filespec.size < self.sizeGeq:
             return False

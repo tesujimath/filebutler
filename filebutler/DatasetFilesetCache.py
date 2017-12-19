@@ -54,15 +54,15 @@ class DatasetFilesetCache(object):
     def select(self, filter=None):
         datasets = sorted(self._datasets.keys())
         for d in datasets:
-            if filter is None or filter.owner is None or d == filter.owner:
+            if filter is None or filter.dataset is None or d == filter.dataset:
                 # no yield from in python 2, so:
-                for filespec in self._fileset(d).select(Filter.clearOwner(filter)):
+                for filespec in self._fileset(d).select(Filter.clearDataset(filter)):
                     yield filespec
 
     def merge_info(self, acc, filter=None):
         for d in self._datasets.keys():
-            if filter is None or filter.owner is None or d == filter.owner:
-                self._fileset(d).merge_info(acc, Filter.clearOwner(filter))
+            if filter is None or filter.dataset is None or d == filter.dataset:
+                self._fileset(d).merge_info(acc, Filter.clearDataset(filter))
 
     def create(self):
         if not os.path.exists(self._path):
