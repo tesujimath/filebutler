@@ -32,9 +32,10 @@ class WeeklyFilesetCache(object):
         isoyear,isoweek,isoweekday = dt.isocalendar()
         return isoyear * 100 + isoweek
 
-    def __init__(self, path, logdir, next):
+    def __init__(self, path, logdir, sel, next):
         self._path = path
         self._logdir = logdir
+        self._sel = sel
         self._next = next
         self._weeks = {}        # of fileset, indexed by integer week
 
@@ -57,7 +58,7 @@ class WeeklyFilesetCache(object):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(w), self._sublogdir(w))
+            fileset = self._next(self._subpath(w), self._sublogdir(w), self._sel)
             self._weeks[w] = fileset
         if create:
             fileset.create()
@@ -75,14 +76,14 @@ class WeeklyFilesetCache(object):
                 for filespec in self._fileset(w).select(f1):
                     yield filespec
 
-    def merge_info(self, acc, sel, filter=None):
+    def merge_info(self, acc, filter=None):
         for w in self._weeks.keys():
             if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
                 if filter is not None and filter.mtimeBefore is not None and w < self.__class__.week(filter.mtimeBefore):
                     f1 = Filter.clearMtime(filter)
                 else:
                     f1 = filter
-                self._fileset(w).merge_info(acc, sel, f1)
+                self._fileset(w).merge_info(acc, f1)
 
     def create(self):
         """Create empty cache on disk, purging any previous."""

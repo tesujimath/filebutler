@@ -22,9 +22,10 @@ from util import debug_stderr
 
 class DatasetFilesetCache(object):
 
-    def __init__(self, path, logdir, next):
+    def __init__(self, path, logdir, sel, next):
         self._path = path
         self._logdir = logdir
+        self._sel = sel
         self._next = next
         self._datasets = {}        # of fileset, indexed by dataset
 
@@ -46,7 +47,7 @@ class DatasetFilesetCache(object):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(d), self._sublogdir(d))
+            fileset = self._next(self._subpath(d), self._sublogdir(d), self._sel.withDataset(d))
             self._datasets[d] = fileset
         return fileset
 
@@ -58,10 +59,10 @@ class DatasetFilesetCache(object):
                 for filespec in self._fileset(d).select(Filter.clearOwner(filter)):
                     yield filespec
 
-    def merge_info(self, acc, sel, filter=None):
+    def merge_info(self, acc, filter=None):
         for d in self._datasets.keys():
             if filter is None or filter.owner is None or d == filter.owner:
-                self._fileset(d).merge_info(acc, sel.withDataset(d), Filter.clearOwner(filter))
+                self._fileset(d).merge_info(acc, Filter.clearOwner(filter))
 
     def create(self):
         if not os.path.exists(self._path):

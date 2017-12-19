@@ -23,10 +23,11 @@ from util import verbose_stderr, debug_stderr, warning
 
 class SimpleFilesetCache(object):
 
-    def __init__(self, path, logdir):
+    def __init__(self, path, logdir, sel):
         #debug_stderr("SimpleFilesetCache(%s)::__init__)\n" % path)
         self._path = path
         self._logdir = logdir
+        self._sel = sel
         self._filespecs = None  # in-memory read cache
         self._info = {}         # indexed by filter string
         self._file = None
@@ -69,7 +70,7 @@ class SimpleFilesetCache(object):
             try:
                 with open(filelist, 'r') as f:
                     #debug_stderr("SimpleFilesetCache select %s opened file cache\n" % str(filter))
-                    for filespec in Filespec.fromFile(f, self):
+                    for filespec in Filespec.fromFile(f, self, self._sel):
                         self._filespecs.append(filespec)
                         if includeDeleted or not self._deletedFilelist.has_key(filespec.path):
                             if filter is None or filter.selects(filespec):
@@ -85,7 +86,7 @@ class SimpleFilesetCache(object):
                         #debug_stderr("SimpleFilesetCache read from memory %s\n" % filespec)
                         yield filespec
 
-    def merge_info(self, acc, sel, filter=None):
+    def merge_info(self, acc, filter=None):
         if filter is None:
             #debug_stderr("SimpleFilesetCache(%s)::merge_info(None)\n" % self._path)
             if self._fileinfo is None:
@@ -123,8 +124,8 @@ class SimpleFilesetCache(object):
                 self._info[f] = info
                 for filespec in self.select(filter, includeDeleted=True):
                     info.add(filespec)
-        acc.accumulate(info, sel)
-        acc.decumulate(self._deletedInfo, sel)
+        acc.accumulate(info, self._sel)
+        acc.decumulate(self._deletedInfo, self._sel)
 
     def add(self, filespec):
         if self._fileinfo is None:

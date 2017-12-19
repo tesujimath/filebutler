@@ -22,9 +22,10 @@ from util import debug_stderr
 
 class UserFilesetCache(object):
 
-    def __init__(self, path, logdir, next):
+    def __init__(self, path, logdir, sel, next):
         self._path = path
         self._logdir = logdir
+        self._sel = sel
         self._next = next
         self._users = {}        # of fileset, indexed by integer user
 
@@ -46,7 +47,7 @@ class UserFilesetCache(object):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(u), self._sublogdir(u))
+            fileset = self._next(self._subpath(u), self._sublogdir(u), self._sel.withOwner(u))
             self._users[u] = fileset
         return fileset
 
@@ -58,10 +59,10 @@ class UserFilesetCache(object):
                 for filespec in self._fileset(u).select(Filter.clearOwner(filter)):
                     yield filespec
 
-    def merge_info(self, acc, sel, filter=None):
+    def merge_info(self, acc, filter=None):
         for u in self._users.keys():
             if filter is None or filter.owner is None or u == filter.owner:
-                self._fileset(u).merge_info(acc, sel.withOwner(u), Filter.clearOwner(filter))
+                self._fileset(u).merge_info(acc, Filter.clearOwner(filter))
 
     def create(self):
         if not os.path.exists(self._path):

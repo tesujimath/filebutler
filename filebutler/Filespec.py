@@ -32,20 +32,20 @@ from util import fbTimeFmt, time2str, date2str, size2str
 class Filespec(object):
 
     @classmethod
-    def fromFile(cls, f, fileset):
+    def fromFile(cls, f, fileset, sel):
         for line in f:
-            fields = line.rstrip().split(None, 5)
-            if len(fields) != 6:
+            fields = line.rstrip().split(None, 4)
+            if len(fields) != 5:
                 print("bad filespec: %s" % line.rstrip())
             else:
                 yield Filespec(fileset,
-                               fields[5],
-                               fields[6],
+                               sel.dataset,
+                               fields[4],
+                               sel.owner,
                                fields[0],
-                               fields[1],
-                               int(fields[2]),
-                               calendar.timegm(time.strptime(fields[3], fbTimeFmt)),
-                               fields[4])
+                               int(fields[1]),
+                               calendar.timegm(time.strptime(fields[2], fbTimeFmt)),
+                               fields[3])
 
     def __init__(self, fileset, dataset, path, user, group, size, mtime, perms):
         self.fileset = fileset  # fileset whicih owns this filespec
@@ -96,11 +96,9 @@ class Filespec(object):
         return s, width
 
     def write(self, f):
-        f.write("%s %s %d %s %s %s %s\n" % (
-            self.user,
+        f.write("%s %d %s %s %s\n" % (
             self.group,
             self.size,
             time2str(self.mtime),
             self.perms,
-            self.dataset,
             self.path))

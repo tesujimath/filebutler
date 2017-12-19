@@ -16,7 +16,7 @@
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
 from FilesetInfoAccumulator import FilesetInfoAccumulator
-from FilesetInfoSelector import FilesetInfoSelector
+from FilesetSelector import FilesetSelector
 
 class Fileset:
     """Fileset is a base class."""
@@ -26,8 +26,7 @@ class Fileset:
 
     def info(self):
         acc = FilesetInfoAccumulator()
-        sel = FilesetInfoSelector()
-        self.merge_info(acc, sel)
+        self.merge_info(acc)
         return acc
 
     def merge_info(self, acc, sel, filter=None):

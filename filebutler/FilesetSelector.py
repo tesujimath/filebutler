@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
-class FilesetInfoSelector(object):
+class FilesetSelector(object):
 
     def __init__(self, owner=None, dataset=None):
         self.owner = owner

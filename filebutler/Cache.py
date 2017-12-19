@@ -20,6 +20,7 @@ import functools
 import os.path
 
 from Fileset import Fileset
+from FilesetSelector import FilesetSelector
 from SimpleFilesetCache import SimpleFilesetCache
 from UserFilesetCache import UserFilesetCache
 from DatasetFilesetCache import DatasetFilesetCache
@@ -44,14 +45,14 @@ class Cache(Fileset):
 
     def _cache(self):
         if self._cache0 is None:
-            self._cache0 = self._newcache(self._path, self._logdir, 0)
+            self._cache0 = self._newcache(self._path, self._logdir, FilesetSelector(), 0)
         return self._cache0
 
-    def _newcache(self, path, logdir, level):
+    def _newcache(self, path, logdir, sel, level):
         if level < len(self._caches):
-            return self._caches[level](path, logdir, functools.partial(self._newcache, level = level + 1))
+            return self._caches[level](path, logdir, sel, functools.partial(self._newcache, level = level + 1))
         else:
-            return SimpleFilesetCache(path, logdir)
+            return SimpleFilesetCache(path, logdir, sel)
 
     def select(self, filter=None):
         cache = self._cache()
@@ -60,9 +61,9 @@ class Cache(Fileset):
         for filespec in cache.select(filter):
             yield filespec
 
-    def merge_info(self, acc, sel, filter=None):
+    def merge_info(self, acc, filter=None):
         cache = self._cache()
-        cache.merge_info(acc, sel, filter)
+        cache.merge_info(acc, filter)
 
     def update(self):
         cache = self._cache()
