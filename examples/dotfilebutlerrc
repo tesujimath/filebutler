@@ -1,4 +1,6 @@
 set cachedir /bifo/support/admin/filebutler/cache
+set logdir $HOME/.filebutler/log
+set dataset ^/dataset/([^/]*)/.*$ \\1
 #fileset gypsy-home find.gnu.out /mirror/gypsy/z202/home/all-home-files
 #fileset integrity-home find.gnu.out /mirror/integrity/z102/home/all-home-files
 fileset gypsy-active find.gnu.out /mirror/gypsy/z202/active/all-active-files ^([^/]*) /dataset/\\1/active

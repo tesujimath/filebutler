@@ -12,7 +12,11 @@ Filebutler is a utility for managing large directory structures.  It is focused
 on finding and removing old files.  The motivation is that find is far too slow
 on directory trees with several million files.  Even using the cache output of find
 can be rather slow for interactive queries.  Filebutler improves on this by
-structuring filelists by age, and by user.
+structuring filelists by age, by user, and by dataset.
+
+Dataset is an optional concept, which is perhaps most usefully regarded as the
+top-level directory in any path.  It is defined by the dataset attribute in the
+config file.
 
 # COMMANDS
 
@@ -37,8 +41,12 @@ Show summary information for a fileset.
 
 Usage:
 ```
-info <fileset>
+info <fileset> [-u|-d]
 ```
+
+With `-u`, shows breakdown by user, sorted by size.
+
+With `-d`, shows breakdown by dataset, sorted by size.
 
 ## print
 
@@ -47,7 +55,7 @@ If defined, the attribute `print-options` is appended to the command.
 
 Usage:
 ```
-print <fileset> [<filter-params>] [-by-size]
+print <fileset> [<filter-params>] [-by-size|-by-path]
 ```
 
 The `filter-params` are as described for the filter fileset type.
@@ -117,7 +125,7 @@ Defines a new fileset which is the union of arbitrary many others.
 
 ## ls-attrs
 
-List attributes, of which cachedir is the only one currently supported.
+List attributes.
 
 Usage:
 ```
