@@ -129,7 +129,7 @@ class SimpleFilesetCache(object):
     def add(self, filespec):
         if self._fileinfo is None:
             self._fileinfo = FilesetInfo()
-        self._fileinfo.add(filespec)
+        self._fileinfo.add(1, filespec.size)
         # don't cache writes, as this would mean caching the whole of the filelist
         if self._file is None:
             #debug_stderr("SimpleFilesetCache writing file cache at %s\n" % self._path)
