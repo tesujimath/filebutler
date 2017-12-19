@@ -58,10 +58,10 @@ class UserFilesetCache(object):
                 for filespec in self._fileset(u).select(Filter.clearOwner(filter)):
                     yield filespec
 
-    def merge_info(self, inf, filter=None):
+    def merge_info(self, acc, sel, filter=None):
         for u in self._users.keys():
             if filter is None or filter.owner is None or u == filter.owner:
-                self._fileset(u).merge_info(inf, Filter.clearOwner(filter))
+                self._fileset(u).merge_info(acc, sel.withOwner(u), Filter.clearOwner(filter))
 
     def create(self):
         if not os.path.exists(self._path):

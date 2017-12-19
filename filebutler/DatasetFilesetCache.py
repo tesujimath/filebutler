@@ -58,10 +58,10 @@ class DatasetFilesetCache(object):
                 for filespec in self._fileset(d).select(Filter.clearOwner(filter)):
                     yield filespec
 
-    def merge_info(self, inf, filter=None):
+    def merge_info(self, acc, sel, filter=None):
         for d in self._datasets.keys():
             if filter is None or filter.owner is None or d == filter.owner:
-                self._fileset(d).merge_info(inf, Filter.clearOwner(filter))
+                self._fileset(d).merge_info(acc, sel.withDataset(d), Filter.clearOwner(filter))
 
     def create(self):
         if not os.path.exists(self._path):

@@ -85,7 +85,7 @@ class SimpleFilesetCache(object):
                         #debug_stderr("SimpleFilesetCache read from memory %s\n" % filespec)
                         yield filespec
 
-    def merge_info(self, inf1, filter=None):
+    def merge_info(self, acc, sel, filter=None):
         if filter is None:
             #debug_stderr("SimpleFilesetCache(%s)::merge_info(None)\n" % self._path)
             if self._fileinfo is None:
@@ -111,20 +111,20 @@ class SimpleFilesetCache(object):
                 except IOError:
                     warning("can't read info %s, ignoring" % infofile)
                     self._fileinfo = FilesetInfo()
-            inf0 = self._fileinfo
+            info = self._fileinfo
         else:
             f = str(filter)
             #debug_stderr("SimpleFilesetCache(%s)::merge_info(%s)\n" % (self._path, f))
             if self._info.has_key(f):
-                inf0 = self._info[f]
+                info = self._info[f]
             else:
                 #debug_stderr("SimpleFilesetCache(%s)::merge_info(%s) scanning\n" % (self._path, f))
-                inf0 = FilesetInfo()
-                self._info[f] = inf0
+                info = FilesetInfo()
+                self._info[f] = info
                 for filespec in self.select(filter, includeDeleted=True):
-                    inf0.add(filespec)
-        inf1.merge(inf0)
-        inf1.unmerge(self._deletedInfo)
+                    info.add(filespec)
+        acc.accumulate(info, sel)
+        acc.decumulate(self._deletedInfo, sel)
 
     def add(self, filespec):
         if self._fileinfo is None:

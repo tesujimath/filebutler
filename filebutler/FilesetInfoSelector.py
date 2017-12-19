@@ -15,15 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
-class FileInfo(object):
-    def __init__(self, nFiles=0, totalSize=0):
-        self.nFiles = nFiles
-        self.totalSize = totalSize
+class FilesetInfoSelector(object):
 
-    def add(self, n, size):
-        self.nFiles += n
-        self.totalSize += size
+    def __init__(self, owner=None, dataset=None):
+        self.owner = owner
+        self.dataset = dataset
 
-    def remove(self, n, size):
-        self.nFiles -= n
-        self.totalSize -= size
+    def withOwner(self, owner):
+        return self.__class__(owner, self.dataset)
+
+    def withDataset(self, dataset):
+        return self.__class__(self.owner, dataset)

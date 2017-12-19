@@ -36,7 +36,7 @@ class FilterFileset(Fileset):
         for filespec in self._fileset.select(f1):
             yield filespec
 
-    def merge_info(self, inf, filter=None):
+    def merge_info(self, acc, sel, filter=None):
         f1 = self._filter.intersect(filter)
         #debug_stderr("FilterFileset(%s)::select filter=%s\n" % (self.name, f1))
-        self._fileset.merge_info(inf, f1)
+        self._fileset.merge_info(acc, sel, f1)

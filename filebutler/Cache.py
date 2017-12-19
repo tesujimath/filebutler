@@ -60,9 +60,9 @@ class Cache(Fileset):
         for filespec in cache.select(filter):
             yield filespec
 
-    def merge_info(self, inf, filter=None):
+    def merge_info(self, acc, sel, filter=None):
         cache = self._cache()
-        cache.merge_info(inf, filter)
+        cache.merge_info(acc, sel, filter)
 
     def update(self):
         cache = self._cache()

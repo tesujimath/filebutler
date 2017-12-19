@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
-from FilesetInfo import FilesetInfo
+from FilesetInfoAccumulator import FilesetInfoAccumulator
+from FilesetInfoSelector import FilesetInfoSelector
 
 class Fileset:
     """Fileset is a base class."""
@@ -24,13 +25,14 @@ class Fileset:
         pass
 
     def info(self):
-        inf = FilesetInfo()
-        self.merge_info(inf)
-        return inf
+        acc = FilesetInfoAccumulator()
+        sel = FilesetInfoSelector()
+        self.merge_info(acc, sel)
+        return acc
 
-    def merge_info(self, inf, filter=None):
+    def merge_info(self, acc, sel, filter=None):
         for filespec in self.select(filter):
-            inf.add(filespec)
+            acc.add(filespec)
 
     def sorted(self, filter=None, sorter=None):
         if sorter is None:
