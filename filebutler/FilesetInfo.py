@@ -16,7 +16,7 @@
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
 from util import size2str, warning
-from UserInfo import UserInfo
+from FileInfo import FileInfo
 
 class FilesetInfo(object):
 
@@ -34,7 +34,7 @@ class FilesetInfo(object):
                     username = fields[0]
                     nFiles = int(fields[1])
                     totalSize = int(fields[2])
-                    fi._users[username] = UserInfo(nFiles, totalSize)
+                    fi._users[username] = FileInfo(nFiles, totalSize)
                 else:
                     raise ValueError
             except ValueError:
@@ -52,7 +52,7 @@ class FilesetInfo(object):
         if self._users.has_key(filespec.user):
             user = self._users[filespec.user]
         else:
-            user = UserInfo()
+            user = FileInfo()
             self._users[filespec.user] = user
         user.add(1, filespec.size)
 
@@ -72,7 +72,7 @@ class FilesetInfo(object):
         for u in inf1._users.keys():
             user1 = inf1._users[u]
             if not self._users.has_key(u):
-                user0 = UserInfo()
+                user0 = FileInfo()
                 self._users[u] = user0
             else:
                 user0 = self._users[u]
