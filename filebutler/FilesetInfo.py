@@ -48,7 +48,7 @@ class FilesetInfo(object):
         self.totalSize -= totalSize
 
     def __str__(self):
-        return "total %s in %d files" % (size2str(self.totalSize), self.nFiles)
+        return "%s in %d files" % (size2str(self.totalSize), self.nFiles)
 
     def write(self, f):
         f.write("%d %d\n" % (self.nFiles, self.totalSize))
