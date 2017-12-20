@@ -41,7 +41,7 @@ Show summary information for a fileset.
 
 Usage:
 ```
-info <fileset> [-u|-d]
+info <fileset> [-u|-d] [<filter-params>]
 ```
 
 With `-u`, shows breakdown by user, sorted by size.
@@ -56,6 +56,17 @@ If defined, the attribute `print-options` is appended to the command.
 Usage:
 ```
 print <fileset> [<filter-params>] [-by-size|-by-path]
+```
+
+The `filter-params` are as described for the filter fileset type.
+
+## delete
+
+Delete all files in a fileset.
+
+Usage:
+```
+delete <fileset>
 ```
 
 The `filter-params` are as described for the filter fileset type.
@@ -166,6 +177,25 @@ Clear attribute, e.g. print-options
 Example
 ```
 clear print-options
+```
+
+## update-cache
+
+Update all or named caches, by rescanning source filelists
+
+Example
+```
+update-cache
+update-cache old-scratch old-home
+```
+
+## quit
+
+Exit filebutler.  Equivalent to C-d.
+
+Example
+```
+quit
 ```
 
 ## time

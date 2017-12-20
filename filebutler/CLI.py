@@ -96,8 +96,8 @@ class CLI:
                                'usage': 'delete <fileset>',
                                'method': self._deleteCmd,
             },
-            'update-cache':  { 'desc': 'update all caches, by rescanning source filelists',
-                               'usage': 'update-cache',
+            'update-cache':  { 'desc': 'update all or named caches, by rescanning source filelists',
+                               'usage': 'update-cache [<fileset> ...]',
                                'method': self._updateCacheCmd,
             },
         }
