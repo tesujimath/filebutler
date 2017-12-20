@@ -85,7 +85,7 @@ class CLI:
                                'method': self._filesetCmd,
             },
             'info':          { 'desc': 'show summary information for a fileset',
-                               'usage': 'info <fileset> [-u|-d]',
+                               'usage': 'info [-u|-d] <fileset> [<filter-params>]',
                                'method': self._infoCmd,
             },
             'print':         { 'desc': 'print files in a fileset, optionally filtered, via $PAGER',
@@ -284,14 +284,26 @@ class CLI:
         self._filesetNames.append(name)
 
     def _infoCmd(self, toks, usage):
-        if len(toks) < 2 or len(toks) > 3:
+        if len(toks) < 2:
             raise CLIError("usage: %s" % usage)
-        if len(toks) == 2:
-            print(self._fileset(toks[1]).info())
-        elif toks[1] == '-u':
-            print(self._fileset(toks[2]).info().users())
-        elif toks[1] == '-d':
-            print(self._fileset(toks[2]).info().datasets())
+        if toks[1] == '-u' or toks[1] == '-d':
+            mode = toks[1][1]
+            i_fileset = 2
+        else:
+            mode = 'a'          # all
+            i_fileset = 1
+        name = toks[i_fileset]
+        if len(toks) > i_fileset:
+            filter, _ = parseCommandOptions(self._now, toks[i_fileset + 1:], filter=True)
+        else:
+            filter = None
+        info = self._fileset(name).info(filter)
+        if mode == 'a':
+            print(info)
+        elif mode == 'u':
+            print(info.users())
+        elif mode == 'd':
+            print(info.datasets())
         else:
             raise CLIError("usage: %s" % usage)
 

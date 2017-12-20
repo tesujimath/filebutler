@@ -24,9 +24,9 @@ class Fileset:
     def __init__(self):
         pass
 
-    def info(self):
+    def info(self, filter=None):
         acc = FilesetInfoAccumulator()
-        self.merge_info(acc)
+        self.merge_info(acc, filter)
         return acc
 
     def sorted(self, filter=None, sorter=None):
