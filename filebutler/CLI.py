@@ -100,6 +100,11 @@ class CLI:
                                'usage': 'update-cache [<fileset> ...]',
                                'method': self._updateCacheCmd,
             },
+            'send-emails':   { 'privileged': True,
+                               'desc': 'update all or named caches, by rescanning source filelists',
+                               'usage': 'update-cache [<fileset> ...]',
+                               'method': self._sendEmailsCmd,
+            },
         }
         initialize(args)
 
@@ -160,6 +165,9 @@ class CLI:
                 cmd = self.commands[cmdName]
                 method = cmd['method']
                 usage = cmd['usage']
+                privileged = cmd['privileged'] if cmd.has_key('privileged') else False
+                if privileged and os.geteuid() != 0:
+                    raise CLIError("attempt to use privileged command %s" % toks[0])
                 if profile():
                     pr = cProfile.Profile()
                     pr.enable()
@@ -216,7 +224,9 @@ class CLI:
     def _helpCmd(self, toks, usage):
         for cmdname in sorted(self.commands.keys()):
             cmd = self.commands[cmdname]
-            print("%-12s - %s\n               %s\n" % (cmdname, cmd['desc'], cmd['usage']))
+            privileged = cmd['privileged'] if cmd.has_key('privileged') else False
+            if not privileged or os.geteuid() == 0:
+                print("%-12s - %s\n               %s\n" % (cmdname, cmd['desc'], cmd['usage']))
         cmdname = 'time'
         cmd = { 'desc': 'time a command',
                 'usage': 'time <cmd> <args>' }
@@ -389,3 +399,6 @@ class CLI:
         else:
             for name in toks[1:]:
                 self._cache(name).update()
+
+    def _sendEmailsCmd(self, toks, usage):
+        print("%s not yet implemented" % toks[0])
