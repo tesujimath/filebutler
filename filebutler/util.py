@@ -21,37 +21,46 @@ import time
 from stat import *
 import sys
 
-debug = False
-progress = True
-verbose = False
+_debug = False
+_profile = False
+_progress = True
+_verbose = False
 def initialize(args):
-    global debug
-    global verbose
-    global progress
+    global _debug
+    global _profile
+    global _verbose
+    global _progress
     if args.debug:
-        debug = True
-        verbose = True
+        _debug = True
+        _verbose = True
         debug_stderr("debug mode\n")
+    if args.profile:
+        _profile = True
+        _verbose = True
+        verbose_stderr("profile mode\n")
     if args.batch:
-        progress = False
+        _progress = False
         debug_stderr("batch mode\n")
     if args.verbose:
-        verbose = True
+        _verbose = True
         debug_stderr("verbose mode\n")
 
 def stderr(msg):
     sys.stderr.write(msg)
 def debug_stderr(msg):
-    if debug:
+    if _debug:
         stderr(msg)
 def progress_stderr(msg):
-    if progress:
+    if _progress:
         stderr(msg)
 def verbose_stderr(msg):
-    if verbose:
+    if _verbose or _debug:
         stderr(msg)
 def warning(msg):
     stderr("warning: %s\n" % msg)
+
+def profile():
+    return _profile
 
 fbTimeFmt = "%Y%m%d-%H%M%S"
 fbDateFmt = "%Y-%m-%d"

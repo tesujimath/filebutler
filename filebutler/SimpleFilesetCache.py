@@ -19,7 +19,7 @@ import os.path
 
 from Filespec import Filespec
 from FilesetInfo import FilesetInfo
-from util import verbose_stderr, debug_stderr, warning
+from util import filetimestr, verbose_stderr, debug_stderr, warning
 
 class SimpleFilesetCache(object):
 
@@ -49,6 +49,7 @@ class SimpleFilesetCache(object):
 
     def select(self, filter=None, includeDeleted=False):
         if self._filespecs is None:
+            debug_stderr("reading filelist from %s cache at %s\n" % (filetimestr(self._path), self._path))
             #debug_stderr("SimpleFilesetCache select %s from file cache %s\n" % (str(filter), self._path))
             self._filespecs = []
             self._deletedFilelist = {}
@@ -87,6 +88,7 @@ class SimpleFilesetCache(object):
                         yield filespec
 
     def merge_info(self, acc, filter=None):
+        #debug_stderr("SimpleFilesetCache(%s) merge_info\n" % self._path)
         if filter is None:
             #debug_stderr("SimpleFilesetCache(%s)::merge_info(None)\n" % self._path)
             if self._fileinfo is None:
@@ -119,7 +121,7 @@ class SimpleFilesetCache(object):
             if self._info.has_key(f):
                 info = self._info[f]
             else:
-                #debug_stderr("SimpleFilesetCache(%s)::merge_info(%s) scanning\n" % (self._path, f))
+                debug_stderr("SimpleFilesetCache(%s)::merge_info(%s) scanning\n" % (self._path, f))
                 info = FilesetInfo()
                 self._info[f] = info
                 for filespec in self.select(filter, includeDeleted=True):

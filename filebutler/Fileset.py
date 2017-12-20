@@ -29,10 +29,6 @@ class Fileset:
         self.merge_info(acc)
         return acc
 
-    def merge_info(self, acc, sel, filter=None):
-        for filespec in self.select(filter):
-            acc.add(filespec)
-
     def sorted(self, filter=None, sorter=None):
         if sorter is None:
             for filespec in self.select(filter):

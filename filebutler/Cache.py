@@ -62,6 +62,7 @@ class Cache(Fileset):
             yield filespec
 
     def merge_info(self, acc, filter=None):
+        #debug_stderr("Cache(%s) merge_info\n" % self.name)
         cache = self._cache()
         cache.merge_info(acc, filter)
 

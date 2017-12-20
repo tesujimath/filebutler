@@ -60,6 +60,7 @@ class UserFilesetCache(object):
                     yield filespec
 
     def merge_info(self, acc, filter=None):
+        #debug_stderr("UserFilesetCache(%s) merge_info\n" % self._path)
         for u in self._users.keys():
             if filter is None or filter.owner is None or u == filter.owner:
                 self._fileset(u).merge_info(acc, Filter.clearOwner(filter))

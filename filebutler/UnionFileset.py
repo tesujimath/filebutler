@@ -30,3 +30,7 @@ class UnionFileset(Fileset):
         for fileset in self._filesets:
             for filespec in fileset.select(filter):
                 yield filespec
+
+    def merge_info(self, acc, filter=None):
+        for fileset in self._filesets:
+            fileset.merge_info(acc, filter)

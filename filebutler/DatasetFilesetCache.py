@@ -60,6 +60,7 @@ class DatasetFilesetCache(object):
                     yield filespec
 
     def merge_info(self, acc, filter=None):
+        #debug_stderr("DatasetFilesetCache(%s) merge_info\n" % self._path)
         for d in self._datasets.keys():
             if filter is None or filter.dataset is None or d == filter.dataset:
                 self._fileset(d).merge_info(acc, Filter.clearDataset(filter))

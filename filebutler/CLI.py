@@ -15,9 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+import cProfile
 import errno
 import os
 import os.path
+import pstats
 import re
 import readline
 import shlex
@@ -34,7 +36,7 @@ from Mapper import Mapper
 from Pager import Pager
 from UnionFileset import UnionFileset
 from options import parseCommandOptions
-from util import stderr, debug_stderr, initialize
+from util import stderr, verbose_stderr, debug_stderr, initialize, profile
 
 class CLI:
 
@@ -155,7 +157,14 @@ class CLI:
                 cmd = self.commands[cmdName]
                 method = cmd['method']
                 usage = cmd['usage']
+                if profile():
+                    pr = cProfile.Profile()
+                    pr.enable()
                 method(toks, usage)
+                if profile():
+                    pr.disable()
+                    ps = pstats.Stats(pr).sort_stats('cumulative')
+                    ps.print_stats()
                 done = method == self._quitCmd
             else:
                 raise CLIError("unknown command %s, try help" % cmdName)
