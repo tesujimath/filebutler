@@ -29,9 +29,6 @@ class FilesetInfo(object):
                     nFiles = int(fields[0])
                     totalSize = int(fields[1])
                     fi = cls(nFiles, totalSize)
-                elif len(fields) == 3:
-                    # TODO remove this, was previous info file format
-                    pass
                 else:
                     raise ValueError
             except ValueError:
