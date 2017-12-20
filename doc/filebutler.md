@@ -168,6 +168,15 @@ Example
 clear print-options
 ```
 
+## time
+
+Time a command
+
+Example
+```
+time info old-scratch
+```
+
 # OPTIONS
 
 `-c` *commands*

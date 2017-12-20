@@ -36,7 +36,7 @@ from Mapper import Mapper
 from Pager import Pager
 from UnionFileset import UnionFileset
 from options import parseCommandOptions
-from util import stderr, verbose_stderr, debug_stderr, initialize, profile
+from util import stderr, verbose_stderr, debug_stderr, initialize, profile, unix_time
 
 class CLI:
 
@@ -152,6 +152,9 @@ class CLI:
         toks = shlex.split(line, comments=True)
         self._expandVars(toks)
         if len(toks) >= 1:
+            timeCommand = toks[0] == 'time'
+            if timeCommand:
+                toks = toks[1:]
             cmdName = toks[0]
             if self.commands.has_key(cmdName):
                 cmd = self.commands[cmdName]
@@ -160,7 +163,11 @@ class CLI:
                 if profile():
                     pr = cProfile.Profile()
                     pr.enable()
-                method(toks, usage)
+                if timeCommand:
+                    t = unix_time(method, (toks, usage))
+                    print("time: real %.2fs, user %.2fs, sys %.2fs" % (t['real'], t['user'], t['sys']))
+                else:
+                    method(toks, usage)
                 if profile():
                     pr.disable()
                     ps = pstats.Stats(pr).sort_stats('cumulative')
@@ -210,6 +217,10 @@ class CLI:
         for cmdname in sorted(self.commands.keys()):
             cmd = self.commands[cmdname]
             print("%-10s - %s\n               %s\n" % (cmdname, cmd['desc'], cmd['usage']))
+        cmdname = 'time'
+        cmd = { 'desc': 'time a command',
+                'usage': 'time <cmd> <args>' }
+        print("%-10s - %s\n               %s\n" % (cmdname, cmd['desc'], cmd['usage']))
 
     def _quitCmd(self, toks, usage):
         pass
