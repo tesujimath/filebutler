@@ -216,11 +216,11 @@ class CLI:
     def _helpCmd(self, toks, usage):
         for cmdname in sorted(self.commands.keys()):
             cmd = self.commands[cmdname]
-            print("%-10s - %s\n               %s\n" % (cmdname, cmd['desc'], cmd['usage']))
+            print("%-12s - %s\n               %s\n" % (cmdname, cmd['desc'], cmd['usage']))
         cmdname = 'time'
         cmd = { 'desc': 'time a command',
                 'usage': 'time <cmd> <args>' }
-        print("%-10s - %s\n               %s\n" % (cmdname, cmd['desc'], cmd['usage']))
+        print("%-12s - %s\n               %s\n" % (cmdname, cmd['desc'], cmd['usage']))
 
     def _quitCmd(self, toks, usage):
         pass

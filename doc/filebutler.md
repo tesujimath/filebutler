@@ -8,15 +8,9 @@ filebutler - utility for managing old files in large directory structures
 
 # DESCRIPTION
 
-Filebutler is a utility for managing large directory structures.  It is focused
-on finding and removing old files.  The motivation is that find is far too slow
-on directory trees with several million files.  Even using the cache output of find
-can be rather slow for interactive queries.  Filebutler improves on this by
-structuring filelists by age, by user, and by dataset.
+Filebutler is a utility for managing large directory structures.  It is focused on finding and removing old files.  The motivation is that find is far too slow on directory trees with several million files.  Even using the cache output of find can be rather slow for interactive queries.  Filebutler improves on this by structuring filelists by age, by user, and by dataset.
 
-Dataset is an optional concept, which is perhaps most usefully regarded as the
-top-level directory in any path.  It is defined by the dataset attribute in the
-config file.
+Dataset is an optional concept, which is perhaps most usefully regarded as the top-level directory in any path.  It is defined by the dataset attribute in the config file.
 
 # COMMANDS
 
@@ -50,8 +44,7 @@ With `-d`, shows breakdown by dataset, sorted by size.
 
 ## print
 
-Print files in a fileset, optionally filtered, via `$PAGER`.
-If defined, the attribute `print-options` is appended to the command.
+Print files in a fileset, optionally filtered, via `$PAGER`.  If defined, the attribute `print-options` is appended to the command.
 
 Usage:
 ```
@@ -85,14 +78,9 @@ fileset some-files find.gnu.out $HOME/junk/some-files ^ /full/path/prefix/
 fileset some-scratch find.gnu.out $HOME/junk/some-scratch-files ^([^/]*) /dataset/\\1/scratch
 ```
 
-This is a file containing output from GNU find -ls, with relative pathnames.
-The first parameter is the full pathname to the file in question.  Optionally,
-match and replace regular expressions may be used to turn the relative paths in
-the find output into absolute paths in the filesystem.
+This is a file containing output from GNU find -ls, with relative pathnames.  The first parameter is the full pathname to the file in question.  Optionally, match and replace regular expressions may be used to turn the relative paths in the find output into absolute paths in the filesystem.
 
-The reason for regex support here is to cater for any path munging required, if for
-example filebutler is run on a different server, with multiple filesystems being
-automounted in different places.  Usually, the first example is sufficient.
+The reason for regex support here is to cater for any path munging required, if for example filebutler is run on a different server, with multiple filesystems being automounted in different places.  Usually, the first example is sufficient.
 
 ### fileset type find
 
@@ -119,9 +107,7 @@ fileset my-big-old-scratch filter my-old-scratch -size +1G
 fileset my-junk filter my-old-scratch ! -path *important*
 ```
 
-Selects a subset of the underlying fileset, according to the filter parameters.
-Filter parameter syntax is modeled on find, albeit with very selective support
-for certain features.
+Selects a subset of the underlying fileset, according to the filter parameters.  Filter parameter syntax is modeled on find, albeit with very selective support for certain features.
 
 ### fileset type union
 
@@ -205,6 +191,42 @@ Time a command
 Example
 ```
 time info old-scratch
+```
+
+# PRIVILEGED COMMANDS
+
+Certain commands are available only to root.  As follows.
+
+## send-emails
+
+Send email to each user with files in the named fileset, using the named email template.  Email templates are found in the directory given by the `emaildir` attribute.  The emails are sent via localhost STMP, from the address specified by the `emailfrom` attribute.
+
+The template files for email subject and body use standard Python template syntax.  Any attribute is available as a mapping key, in addition to `fileset`, `fileset_descriptor`.
+
+Example
+```
+send-emails old-scratch deletion-warning
+```
+
+This requires two files in `emaildir`, namely `deletion-warning.subject` and `deletion-warning.body`, whose contents could be as follows.  These files use
+
+deletion-warning.subject:
+```
+Your files in ${fileset} will be autodeleted soon
+```
+
+deletion-warning.body:
+```
+Please note that your files in $fileset will be automatically deleted in one
+week.  These files were selected according to this criterion:
+$fileset_descriptor
+
+The following filebutler commands are recommended.
+$hostname$$ filebutler
+fb: help
+fb: ls
+fb: info -d $fileset
+fb: print $fileset -by-path
 ```
 
 # OPTIONS
