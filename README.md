@@ -37,11 +37,11 @@ will 27M in 58 files
 time: real 0.06s, user 0.04s, sys 0.01s
 
 fb: print very-old-scratch
--rw-r--r-- 2005-02-20 743k /dataset/blackpearl/scratch/maker_AR501/GeneMark.ES/mtx/human_00_43.mtx                                            will:crew
--rw-r--r-- 2005-02-20 743k /dataset/blackpearl/scratch/maker_AR501/GeneMark.ES/mtx/human_43_49.mtx                                            will:crew
--rw-r--r-- 2005-02-20 621k /dataset/blackpearl/scratch/maker_AR501/GeneMark.ES/mtx/wheat.mtx                                                  will:crew
--rw-r--r-- 2005-02-20 621k /dataset/blackpearl/scratch/maker_AR501/GeneMark.ES/mtx/barley.mtx                                                 will:crew
--rw-r--r-- 2005-02-20 621k /dataset/blackpearl/scratch/maker_AR501/GeneMark.ES/mtx/corn.mtx                                                   will:crew
+-rw-r--r-- 2005-02-20 743k /dataset/blackpearl/scratch/maker_AR501/GeneMark.ES/mtx/human_00_43.mtx  will:crew
+-rw-r--r-- 2005-02-20 743k /dataset/blackpearl/scratch/maker_AR501/GeneMark.ES/mtx/human_43_49.mtx  will:crew
+-rw-r--r-- 2005-02-20 621k /dataset/blackpearl/scratch/maker_AR501/GeneMark.ES/mtx/wheat.mtx        will:crew
+-rw-r--r-- 2005-02-20 621k /dataset/blackpearl/scratch/maker_AR501/GeneMark.ES/mtx/barley.mtx       will:crew
+-rw-r--r-- 2005-02-20 621k /dataset/blackpearl/scratch/maker_AR501/GeneMark.ES/mtx/corn.mtx         will:crew
 <snip>
 
 fb: delete very-old-scratch
