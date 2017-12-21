@@ -203,6 +203,8 @@ Certain commands are available only to root.  As follows.
 
 Send email to each user with files in the named fileset, using the named email template.  Email templates are found in the directory given by the `templatedir` attribute.  The emails are sent via localhost STMP, from the address specified by the `emailfrom` attribute, and only to users who have entries in `/etc/aliases`.
 
+For testing purposes, it is possible to further restrict the list of users to whom emails may be sent using the attribute `emailonly`, whose value is a list of usernames.
+
 The template files for email subject and body use standard Python template syntax.  Any attribute is available as a mapping key, in addition to `fileset`, `fileset_descriptor`, `info`, `info_datasets`.
 
 Example

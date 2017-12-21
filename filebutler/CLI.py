@@ -104,7 +104,7 @@ class CLI:
                                'usage': 'update-cache [<fileset> ...]',
                                'method': self._updateCacheCmd,
             },
-            'send-emails':   { 'privileged': False, # TODO should be True
+            'send-emails':   { 'privileged': True,
                                'desc': 'send emails to owners in fileset, using named template',
                                'usage': 'send-emails <fileset> <email-template>',
                                'method': self._sendEmailsCmd,
@@ -425,6 +425,7 @@ class CLI:
         if len(templatedirs) != 1:
             raise CLIError("botched attr templatedir")
         templatedir = templatedirs[0]
+        emailonly = self._attrs['emailonly'] if self._attrs.has_key('emailonly') else None
         name = toks[1]
         template = toks[2]
         subject_path = os.path.join(templatedir, "%s.subject" % template)
@@ -440,10 +441,11 @@ class CLI:
         s = smtplib.SMTP('localhost')
         sender = ' '.join(self._attrs['emailfrom'])
         for user, userfileinfo in fileset.info().iterusers():
-            if self._aliases.has_key(user):
-                recipient = 'simon.guest@agresearch.co.nz' # self._aliases[user]
+            if self._aliases.has_key(user) and (emailonly is None or user in emailonly):
+                recipient = self._aliases[user]
                 user_fileset = FilterFileset("%s-%s" % (name, user), fileset, Filter(owner=user))
                 user_info = user_fileset.info()
+                m['username'] = user
                 m['info'] = user_info.fmt_total()
                 m['info_datasets'] = user_info.fmt_datasets()
                 #print("==================== %s %s\n\n%s" % (user_email, subject, body))
@@ -451,6 +453,5 @@ class CLI:
                 msg['Subject'] = subject_template.substitute(m)
                 msg['From'] = sender
                 msg['To'] = recipient
-                if user == 'guestsi':
-                    s.sendmail(sender, [recipient], msg.as_string())
+                s.sendmail(sender, [recipient], msg.as_string())
         s.quit()
