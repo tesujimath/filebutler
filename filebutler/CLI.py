@@ -16,6 +16,7 @@
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
 import cProfile
+import email.mime.text
 import errno
 import os
 import os.path
@@ -23,6 +24,7 @@ import pstats
 import re
 import readline
 import shlex
+import smtplib
 import string
 import time
 
@@ -415,6 +417,8 @@ class CLI:
     def _sendEmailsCmd(self, toks, usage):
         if len(toks) != 3:
             raise CLIError("usage: %s" % usage)
+        if not self._attrs.has_key('emailfrom'):
+            raise CLIError("missing attr emailfrom")
         if not self._attrs.has_key('templatedir'):
             raise CLIError("missing attr templatedir")
         templatedirs = self._attrs['templatedir']
@@ -430,15 +434,23 @@ class CLI:
         with open(body_path, 'r') as f:
             body_template = string.Template(f.read())
         fileset = self._fileset(name)
-        s = self._attrsAsStringMap()
-        s['fileset'] = name
-        s['fileset_descriptor'] = str(fileset.description())
+        m = self._attrsAsStringMap()
+        m['fileset'] = name
+        m['fileset_descriptor'] = str(fileset.description())
+        s = smtplib.SMTP('localhost')
+        sender = ' '.join(self._attrs['emailfrom'])
         for user, userfileinfo in fileset.info().iterusers():
             if self._aliases.has_key(user):
+                recipient = 'simon.guest@agresearch.co.nz' # self._aliases[user]
                 user_fileset = FilterFileset("%s-%s" % (name, user), fileset, Filter(owner=user))
                 user_info = user_fileset.info()
-                s['info'] = user_info.fmt_total()
-                s['info_datasets'] = user_info.fmt_datasets()
-                subject = subject_template.substitute(s)
-                body = body_template.substitute(s)
-                print("==================== %s %s\n\n%s" % (user, subject, body))
+                m['info'] = user_info.fmt_total()
+                m['info_datasets'] = user_info.fmt_datasets()
+                #print("==================== %s %s\n\n%s" % (user_email, subject, body))
+                msg = email.mime.text.MIMEText(body_template.substitute(m))
+                msg['Subject'] = subject_template.substitute(m)
+                msg['From'] = sender
+                msg['To'] = recipient
+                if user == 'guestsi':
+                    s.sendmail(sender, [recipient], msg.as_string())
+        s.quit()
