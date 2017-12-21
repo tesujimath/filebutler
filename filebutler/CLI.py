@@ -36,6 +36,7 @@ from FindFileset import FindFileset
 from GnuFindOutFileset import GnuFindOutFileset
 from Mapper import Mapper
 from Pager import Pager
+from Pathway import Pathway
 from UnionFileset import UnionFileset
 from aliases import read_etc_aliases
 from options import parseCommandOptions
@@ -50,6 +51,7 @@ class CLI:
         self._caches = {}
         self._now = time.time() # for consistency between all filters
         self._mapper = Mapper()
+        self._pathway = Pathway()
         self._aliases = read_etc_aliases()
         self.commands = {
             'help':          { 'desc': 'provide help',
@@ -251,7 +253,7 @@ class CLI:
         if name == 'dataset':
             if len(values) != 2:
                 raise CLIError("botched attr dataset")
-            self._mapper.setDatasetRegex(values[0], values[1])
+            self._pathway.setDatasetRegex(values[0], values[1])
 
     def _clearCmd(self, toks, usage):
         if len(toks) != 2:
@@ -259,7 +261,7 @@ class CLI:
         name = toks[1]
         del self._attrs[name]
         if name == 'dataset':
-            self._mapper.clearDatasetRegex()
+            self._pathway.clearDatasetRegex()
 
     def _lsAttrsCmd(self, toks, usage):
         if len(toks) != 1:
@@ -288,9 +290,9 @@ class CLI:
         if self._filesets.has_key(name):
             raise CLIError("duplicate fileset %s" % name)
         if type == "find.gnu.out":
-            fileset = self._cached(name, GnuFindOutFileset.parse(self._mapper, name, toks[3:]))
+            fileset = self._cached(name, GnuFindOutFileset.parse(self._mapper, self._pathway, name, toks[3:]))
         elif type == "find":
-            fileset = self._cached(name, FindFileset.parse(self._mapper, name, toks[3:]))
+            fileset = self._cached(name, FindFileset.parse(self._mapper, self._pathway, name, toks[3:]))
         elif type == "filter":
             if len(toks) < 4:
                 raise CLIError("filter requires fileset, criteria")

@@ -29,7 +29,7 @@ from util import filemode, verbose_stderr
 class FindFileset(Fileset):
 
     @classmethod
-    def parse(cls, mapper, name, toks):
+    def parse(cls, mapper, pathway, name, toks):
         if len(toks) == 1:
             path = toks[0]
             match = '/'
@@ -40,12 +40,13 @@ class FindFileset(Fileset):
             replace = toks[2]
         else:
             raise CLIError("find requires path, and either both of match-re, replace-str or neither")
-        return cls(mapper, name, path, match, replace)
+        return cls(mapper, pathway, name, path, match, replace)
 
-    def __init__(self, mapper, name, path, match, replace):
+    def __init__(self, mapper, pathway, name, path, match, replace):
         #print("FindFileset init '%s' '%s' '%s'" % (path, match, replace))
         Fileset.__init__(self)
         self._mapper = mapper
+        self._pathway = pathway
         self.name = name
         self._path = path
         self._match = match
@@ -58,7 +59,7 @@ class FindFileset(Fileset):
         s = os.lstat(path)
 
         return Filespec(fileset=self,
-                        dataset=self._mapper.datasetFromPath(path),
+                        dataset=self._pathway.datasetFromPath(path),
                         path=path,
                         user=self._mapper.usernameFromId(s.st_uid),
                         group=self._mapper.groupnameFromId(s.st_gid),
