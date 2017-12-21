@@ -103,7 +103,7 @@ class GnuFindOutFileset(Fileset):
                                         size=int(fields[6]),
                                         mtime=self._dateParser.t(fields),
                                         perms=fields[2])
-                    if filter == None or filter.selects(filespec):
+                    if (filter == None or filter.selects(filespec)) and not self._pathway.ignored(filespec.path):
                         #print("GnuFindOutFileset read from file %s" % filespec)
                         yield filespec
         progress.complete()

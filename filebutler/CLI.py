@@ -252,8 +252,12 @@ class CLI:
         self._attrs[name] = values
         if name == 'dataset':
             if len(values) != 2:
-                raise CLIError("botched attr dataset")
+                raise CLIError("botched attr %s" % name)
             self._pathway.setDatasetRegex(values[0], values[1])
+        if name == 'ignorepathsfrom':
+            if len(values) != 1:
+                raise CLIError("botched attr %s" % name)
+            self._pathway.setIgnorePathsFrom(values[0])
 
     def _clearCmd(self, toks, usage):
         if len(toks) != 2:

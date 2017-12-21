@@ -12,6 +12,8 @@ Filebutler is a utility for managing large directory structures.  It is focused 
 
 Dataset is an optional concept, which is perhaps most usefully regarded as the top-level directory in any path.  It is defined by the dataset attribute in the config file.
 
+Throughout filebutler commands and auxiliary files, all regular expressions use standard Python regular expression syntax.
+
 # COMMANDS
 
 A line starting with a hash is a comment, and is ignored.
@@ -235,6 +237,73 @@ fb: print ${fileset} -by-path
 A summary of the files which will be deleted is as follows.
 
 ${info_datasets}
+```
+
+# Attributes
+
+Attributes may be set at any time, either in the startup file, or as a command, and generally affect subsequent commands.
+
+## cachedir
+
+Root directory of the filebutler cache tree.
+
+Example:
+```
+set cachedir /bifo/support/cache/filebutler
+```
+
+## logdir
+
+Directory where file deletion records are written.  Must be writable by the user running filebutler.
+
+Example:
+```
+set logdir $HOME/.filebutler/log
+```
+
+## templatedir
+
+Directory containing email templates.
+
+Example:
+```
+set templatedir /etc/filebutler/templates
+```
+
+## emailfrom
+
+Email address used as sender of filebutler emails.
+
+Example:
+```
+set emailfrom Filebutler <admin@mycompany.com>
+```
+
+## emailonly
+
+Generally used when testing email facility.  Space-separated list of users to whom filebutler may send emails.
+
+Example:
+```
+set emailonly captainjack will
+```
+
+## dataset
+
+Regular expression used to extract dataset component from a path.
+
+Example:
+```
+set dataset ^/dataset/([^/]*)/.*$ \\1
+```
+
+## ignorepathsfrom
+
+File containing regular expressions of paths which filebutler should ignore.  Within the file, comments begin with a hash character, until end-of-line, and whitespace around regular expressions is ignored.
+
+Example:
+```
+set ignorepathsfrom /etc/filebutler/ignorepaths
 ```
 
 # OPTIONS

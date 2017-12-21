@@ -18,15 +18,17 @@
 import grp
 import pwd
 import re
+import string
 
 class Pathway(object):
 
     def __init__(self):
         self._datasetRegex = None
         self._datasetReplace = None
+        self._ignorePathRegexes = []
 
     def setDatasetRegex(self, datasetRegex, datasetReplace):
-        self._datasetRegex = datasetRegex
+        self._datasetRegex = re.compile(datasetRegex)
         self._datasetReplace = datasetReplace
 
     def clearDatasetRegex(self):
@@ -42,3 +44,21 @@ class Pathway(object):
             return dataset
         else:
             return noDatasetFound
+
+    def setIgnorePathsFrom(self, ignorefilepath):
+        self._ignorePathRegexes = []
+        with open(ignorefilepath) as f:
+            for line in f:
+                i_hash = string.find(line, '#')
+                if i_hash != -1:
+                    regex = line[:i_hash].strip()
+                else:
+                    regex = line.strip()
+                if regex != '':
+                    self._ignorePathRegexes.append(re.compile(regex))
+
+    def ignored(self, path):
+        for r in self._ignorePathRegexes:
+            if re.search(r, path):
+                return True
+        return False
