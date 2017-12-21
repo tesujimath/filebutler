@@ -35,6 +35,7 @@ from GnuFindOutFileset import GnuFindOutFileset
 from Mapper import Mapper
 from Pager import Pager
 from UnionFileset import UnionFileset
+from aliases import read_etc_aliases
 from options import parseCommandOptions
 from util import stderr, verbose_stderr, debug_stderr, initialize, profile, unix_time
 
@@ -47,6 +48,7 @@ class CLI:
         self._caches = {}
         self._now = time.time() # for consistency between all filters
         self._mapper = Mapper()
+        self._aliases = read_etc_aliases()
         self.commands = {
             'help':          { 'desc': 'provide help',
                                'usage': 'help',
@@ -85,7 +87,7 @@ class CLI:
                                'method': self._filesetCmd,
             },
             'info':          { 'desc': 'show summary information for a fileset',
-                               'usage': 'info [-u|-d] <fileset> [<filter-params>]',
+                               'usage': 'info [-u|-d|-e] <fileset> [<filter-params>]',
                                'method': self._infoCmd,
             },
             'print':         { 'desc': 'print files in a fileset, optionally filtered, via $PAGER',
@@ -100,9 +102,9 @@ class CLI:
                                'usage': 'update-cache [<fileset> ...]',
                                'method': self._updateCacheCmd,
             },
-            'send-emails':   { 'privileged': True,
-                               'desc': 'update all or named caches, by rescanning source filelists',
-                               'usage': 'update-cache [<fileset> ...]',
+            'send-emails':   { 'privileged': False, # TODO should be True
+                               'desc': 'send emails to owners in fileset, using named template',
+                               'usage': 'send-emails <fileset> <email-template>',
                                'method': self._sendEmailsCmd,
             },
         }
@@ -307,7 +309,7 @@ class CLI:
     def _infoCmd(self, toks, usage):
         if len(toks) < 2:
             raise CLIError("usage: %s" % usage)
-        if toks[1] == '-u' or toks[1] == '-d':
+        if toks[1] == '-u' or toks[1] == '-d' or toks[1] == '-e':
             mode = toks[1][1]
             i_fileset = 2
         else:
@@ -320,11 +322,15 @@ class CLI:
             filter = None
         info = self._fileset(name).info(filter)
         if mode == 'a':
-            print(info)
+            print(info.fmt_total())
         elif mode == 'u':
-            print(info.users())
+            print(info.fmt_users())
         elif mode == 'd':
-            print(info.datasets())
+            print(info.fmt_datasets())
+        elif mode == 'e':
+            for user, userinfo in info.iterusers():
+                if not self._aliases.has_key(user):
+                    print("%s %s" % (user, str(userinfo)))
         else:
             raise CLIError("usage: %s" % usage)
 
@@ -356,7 +362,7 @@ class CLI:
             pager.close()
 
     def _deleteCmd(self, toks, usage):
-        if len(toks) != 2 :
+        if len(toks) != 2:
             raise CLIError("usage: %s" % usage)
         name = toks[1]
         fileset = self._fileset(name)
@@ -400,5 +406,39 @@ class CLI:
             for name in toks[1:]:
                 self._cache(name).update()
 
+    def _attrsAsStringMap(self):
+        s = {}
+        for key, values in self._attrs.iteritems():
+            s[key] = ' '.join(values)
+        return s
+
     def _sendEmailsCmd(self, toks, usage):
-        print("%s not yet implemented" % toks[0])
+        if len(toks) != 3:
+            raise CLIError("usage: %s" % usage)
+        if not self._attrs.has_key('templatedir'):
+            raise CLIError("missing attr templatedir")
+        templatedirs = self._attrs['templatedir']
+        if len(templatedirs) != 1:
+            raise CLIError("botched attr templatedir")
+        templatedir = templatedirs[0]
+        name = toks[1]
+        template = toks[2]
+        subject_path = os.path.join(templatedir, "%s.subject" % template)
+        with open(subject_path, 'r') as f:
+            subject_template = string.Template(f.read().replace('\n', '').strip())
+        body_path = os.path.join(templatedir, "%s.body" % template)
+        with open(body_path, 'r') as f:
+            body_template = string.Template(f.read())
+        fileset = self._fileset(name)
+        s = self._attrsAsStringMap()
+        s['fileset'] = name
+        s['fileset_descriptor'] = str(fileset.description())
+        for user, userfileinfo in fileset.info().iterusers():
+            if self._aliases.has_key(user):
+                user_fileset = FilterFileset("%s-%s" % (name, user), fileset, Filter(owner=user))
+                user_info = user_fileset.info()
+                s['info'] = user_info.fmt_total()
+                s['info_datasets'] = user_info.fmt_datasets()
+                subject = subject_template.substitute(s)
+                body = body_template.substitute(s)
+                print("==================== %s %s\n\n%s" % (user, subject, body))

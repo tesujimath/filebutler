@@ -125,7 +125,7 @@ class SimpleFilesetCache(object):
                 info = FilesetInfo()
                 self._info[f] = info
                 for filespec in self.select(filter, includeDeleted=True):
-                    info.add(filespec)
+                    info.add(1, filespec.size)
         acc.accumulate(info, self._sel)
         acc.decumulate(self._deletedInfo, self._sel)
 
@@ -157,7 +157,7 @@ class SimpleFilesetCache(object):
     def delete(self, filespec):
         #debug_stderr("SimpleFilesetCache(%s) delete %s\n" % (self._path, filespec.path))
         self._deletedFilelist[filespec.path] = True
-        self._deletedInfo.add(filespec)
+        self._deletedInfo.add(1, filespec.size)
 
     def saveDeletions(self):
         if len(self._deletedFilelist) > 0:

@@ -87,6 +87,9 @@ class FilesetInfoAccumulator(object):
                 lines.append("%s %s" % (name, str(info)))
         return '\n'.join(lines)
 
+    def iterusers(self):
+        return self._users.iteritems()
+
     def fmt_datasets(self):
         lines = [self.fmt_total()]
         for dataset in sorted(self._datasets.items(), key=lambda u: u[1].totalSize, reverse=True):

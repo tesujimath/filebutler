@@ -35,12 +35,14 @@ Show summary information for a fileset.
 
 Usage:
 ```
-info <fileset> [-u|-d] [<filter-params>]
+info <fileset> [-u|-d|-e] [<filter-params>]
 ```
 
 With `-u`, shows breakdown by user, sorted by size.
 
 With `-d`, shows breakdown by dataset, sorted by size.
+
+With `-e`, shows breakdown by user, sorted by size, only for users with no email alias.
 
 ## print
 
@@ -199,9 +201,9 @@ Certain commands are available only to root.  As follows.
 
 ## send-emails
 
-Send email to each user with files in the named fileset, using the named email template.  Email templates are found in the directory given by the `emaildir` attribute.  The emails are sent via localhost STMP, from the address specified by the `emailfrom` attribute.
+Send email to each user with files in the named fileset, using the named email template.  Email templates are found in the directory given by the `emaildir` attribute.  The emails are sent via localhost STMP, from the address specified by the `emailfrom` attribute, and only to users who have entries in `/etc/aliases`.
 
-The template files for email subject and body use standard Python template syntax.  Any attribute is available as a mapping key, in addition to `fileset`, `fileset_descriptor`.
+The template files for email subject and body use standard Python template syntax.  Any attribute is available as a mapping key, in addition to `fileset`, `fileset_descriptor`, `info`, `info_datasets`.
 
 Example
 ```
@@ -217,16 +219,20 @@ Your files in ${fileset} will be autodeleted soon
 
 deletion-warning.body:
 ```
-Please note that your files in $fileset will be automatically deleted in one
-week.  These files were selected according to this criterion:
-$fileset_descriptor
+Please note that your files in ${fileset} will be automatically deleted in one
+week.  These files were selected by this filter:
+${fileset_descriptor}
 
 The following filebutler commands are recommended.
-$hostname$$ filebutler
+${hostname}$$ filebutler
 fb: help
 fb: ls
-fb: info -d $fileset
-fb: print $fileset -by-path
+fb: info -d ${fileset}
+fb: print ${fileset} -by-path
+
+A summary of the files which will be deleted is as follows.
+
+${info_datasets}
 ```
 
 # OPTIONS
