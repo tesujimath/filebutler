@@ -1,25 +1,28 @@
-set cachedir /bifo/support/admin/filebutler/cache
+set templatedir /etc/filebutler/templates
+set ignorepathsfrom /etc/filebutler/ignorepaths
+set emailfrom Filebutler <bifoadmin@mycompany.com>
+set emailonly captainjack will
+set cachedir /bifo/support/cache/filebutler
 set logdir $HOME/.filebutler/log
 set dataset ^/dataset/([^/]*)/.*$ \\1
-#fileset gypsy-home find.gnu.out /mirror/gypsy/z202/home/all-home-files
-#fileset integrity-home find.gnu.out /mirror/integrity/z102/home/all-home-files
 fileset gypsy-active find.gnu.out /mirror/gypsy/z202/active/all-active-files ^([^/]*) /dataset/\\1/active
 fileset gypsy-archive find.gnu.out /mirror/gypsy/z202/archive/all-archive-files ^([^/]*) /dataset/\\1/archive
 fileset gypsy-scratch find.gnu.out /mirror/gypsy/z202/scratch/all-scratch-files ^([^/]*) /dataset/\\1/scratch
+fileset infernal-active find.gnu.out /mirror/infernal/z302/active/all-active-files ^([^/]*) /dataset/\\1/active
+fileset infernal-archive find.gnu.out /mirror/infernal/z302/archive/all-archive-files ^([^/]*) /dataset/\\1/archive
+fileset infernal-scratch find.gnu.out /mirror/infernal/z302/scratch/all-scratch-files ^([^/]*) /dataset/\\1/scratch
 fileset ignition-active find.gnu.out /mirror/ignition/z201/active/all-active-files ^([^/]*) /dataset/\\1/active
 fileset ignition-archive find.gnu.out /mirror/ignition/z201/archive/all-archive-files ^([^/]*) /dataset/\\1/archive
-fileset ignition-scratch find.gnu.out /mirror/ignition/z101/scratch/all-scratch-files ^([^/]*) /dataset/\\1/scratch
 fileset integrity-active find.gnu.out /mirror/integrity/z102/active/all-active-files ^([^/]*) /dataset/\\1/active
 fileset integrity-archive find.gnu.out /mirror/integrity/z102/archive/all-archive-files ^([^/]*) /dataset/\\1/archive
 fileset integrity-scratch find.gnu.out /mirror/integrity/z102/scratch/all-scratch-files ^([^/]*) /dataset/\\1/scratch
+fileset ivy-scratch find.gnu.out /mirror/ivy/z101/scratch/all-scratch-files ^([^/]*) /dataset/\\1/scratch
 fileset irawharau-01-ztmp find /bifo/ztmp ^([^/]*) /dataset/\\1/ztmp
-fileset scratch union gypsy-scratch ignition-scratch integrity-scratch
+fileset scratch union gypsy-scratch infernal-scratch integrity-scratch ivy-scratch
 fileset ztmp union irawharau-01-ztmp
 fileset old-scratch filter scratch -mtime +730
-fileset old-ztmp filter ztmp -mtime +30
+fileset old-ztmp filter ztmp -mtime +60
 fileset my-old-scratch filter old-scratch -user $USER
 fileset my-big-old-scratch filter my-old-scratch -size +1G
 fileset my-old-ztmp filter old-ztmp -user $USER
-set cachedir $HOME/.filebutler.cache
-fileset guestsi-junk find /home/guestsi/junk2
-fileset old-guestsi-junk filter guestsi-junk -mtime +700
+set cachedir $HOME/.filebutler/cache

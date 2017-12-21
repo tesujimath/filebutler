@@ -1,0 +1,15 @@
+Please note that files owned by ${username} among others in ${fileset}
+will be automatically deleted in one week.  These files were selected by this filter:
+${fileset_descriptor}
+
+The following filebutler commands are recommended.
+$$ filebutler
+fb: help
+fb: ls
+fb: info -u ${fileset}
+fb: info -d my-${fileset}
+fb: print my-${fileset} -by-path
+
+A summary of ${fileset} files owned by ${username} which will be deleted is as follows.
+
+${info_datasets}

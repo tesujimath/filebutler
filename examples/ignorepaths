@@ -1,0 +1,7 @@
+# regexes for paths to be ignored by filebutler
+
+# never delete toplevel dataset directory
+^/dataset/[^/]+/[^/]+$
+
+# never delete .permissions_done file
+^/dataset/[^/]+/[^/]+/\.permissions_done$
