@@ -87,7 +87,7 @@ class CLI:
                                'method': self._lsCachesCmd,
             },
             'fileset':       { 'desc': 'define a fileset',
-                               'usage': 'fileset find.gnu.out|find|filter|union <name> <spec>',
+                               'usage': 'fileset <name> find.gnu.out|find|filter|union <spec>',
                                'method': self._filesetCmd,
             },
             'info':          { 'desc': 'show summary information for a fileset',
