@@ -55,23 +55,23 @@ class FindFileset(Fileset):
     def description(self):
         return "%s directory %s" % (self.name, self._path)
 
-    def _filespec(self, path):
-        s = os.lstat(path)
-
-        return Filespec(fileset=self,
-                        dataset=self._pathway.datasetFromPath(path),
-                        path=path,
-                        user=self._mapper.usernameFromId(s.st_uid),
-                        group=self._mapper.groupnameFromId(s.st_gid),
-                        size=s.st_size,
-                        mtime=s.st_mtime,
-                        perms=filemode(s.st_mode))
-
     def select(self, filter=None):
         verbose_stderr("fileset %s scanning files under %s\n" % (self.name, self._path))
+        pathlen = len(self._path) + (0 if self._path[-1] == '/' else 1)
         for root,dirs,files in os.walk(self._path):
+            relroot = root[pathlen:]
             for x in dirs + files:
-                filespec = self._filespec(os.path.join(root, x))
+                s = os.lstat(os.path.join(root, x))
+                relpath = os.path.join(relroot, x)
+                path = re.sub(self._match, self._replace, relpath)
+                filespec = Filespec(fileset=self,
+                                    dataset=self._pathway.datasetFromPath(path),
+                                    path=path,
+                                    user=self._mapper.usernameFromId(s.st_uid),
+                                    group=self._mapper.groupnameFromId(s.st_gid),
+                                    size=s.st_size,
+                                    mtime=s.st_mtime,
+                                    perms=filemode(s.st_mode))
                 if filter == None or filter.selects(filespec):
                     #print("FindFileset scan found %s" % filespec)
                     yield filespec

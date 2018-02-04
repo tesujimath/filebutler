@@ -57,6 +57,9 @@ class Filespec(object):
         self.mtime = mtime
         self.perms = perms
 
+    def __str__(self):
+        return self.format(all=True)[0]
+
     def isdir(self):
         return self.perms[0] == 'd'
 
@@ -81,7 +84,7 @@ class Filespec(object):
             else:
                 raise
 
-    def format(self, width=50):
+    def format(self, width=50, all=False):
         if width < 50:
             width = 50
         if len(self.path) > width:
@@ -93,6 +96,8 @@ class Filespec(object):
             self.path,
             self.user,
             self.group)
+        if all:
+            s += " %s" % (self.dataset)
         return s, width
 
     def write(self, f):
