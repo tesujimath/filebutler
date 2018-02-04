@@ -149,7 +149,17 @@ class SimpleFilesetCache(object):
             self._file.close()
             self._file = None
 
-    def writeInfo(self):
+    def finalize(self):
+        """Flush and finalize writing the cache."""
+        self.flush()
+
+        # sort the filelist
+        with open(self.filelistpath()) as f:
+            sorted_filelist = sorted(f, key=Filespec.formattedToPath)
+        with open(self.filelistpath(), 'w') as f:
+            f.writelines(sorted_filelist)
+
+        # write info file
         with open(self.infopath(), 'w') as infofile:
             if self._fileinfo is not None:
                 self._fileinfo.write(infofile)

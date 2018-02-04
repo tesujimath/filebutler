@@ -84,6 +84,11 @@ class Filespec(object):
             else:
                 raise
 
+    @classmethod
+    def formattedToPath(cls, formatted):
+        """Return the file path from a formatted Filespec (with all=False)."""
+        return formatted.split(None, 4)[4]
+
     def format(self, width=50, all=False):
         if width < 50:
             width = 50

@@ -113,10 +113,10 @@ class WeeklyFilesetCache(object):
             if w is not None:
                 w.flush()
 
-    def writeInfo(self):
+    def finalize(self):
         for w in self._weeks.itervalues():
             if w is not None:
-                w.writeInfo()
+                w.finalize()
 
     def saveDeletions(self):
         #debug_stderr("WeeklyFilesetCache(%s)::saveDeletions\n" % self._path)

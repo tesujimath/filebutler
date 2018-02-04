@@ -77,10 +77,10 @@ class UserFilesetCache(object):
         for fileset in self._users.values():
             fileset.flush()
 
-    def writeInfo(self):
+    def finalize(self):
         for u in self._users.itervalues():
             if u is not None:
-                u.writeInfo()
+                u.finalize()
 
     def saveDeletions(self):
         #debug_stderr("UserFilesetCache(%s)::saveDeletions\n" % self._path)

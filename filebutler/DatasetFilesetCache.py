@@ -77,10 +77,10 @@ class DatasetFilesetCache(object):
         for fileset in self._datasets.values():
             fileset.flush()
 
-    def writeInfo(self):
+    def finalize(self):
         for d in self._datasets.itervalues():
             if d is not None:
-                d.writeInfo()
+                d.finalize()
 
     def saveDeletions(self):
         #debug_stderr("DatasetFilesetCache(%s)::saveDeletions\n" % self._path)

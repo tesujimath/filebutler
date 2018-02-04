@@ -87,8 +87,7 @@ class Cache(Fileset):
                     cache.add(filespec)
                 else:
                     raise
-        cache.flush()
-        cache.writeInfo()
+        cache.finalize()
         # touch cache rootdir, to show updated
         os.utime(self._path, None)
         progress_stderr("updated %s\n" % self.name)
