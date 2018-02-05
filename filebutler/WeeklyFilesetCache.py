@@ -111,11 +111,6 @@ class WeeklyFilesetCache(object):
         fileset = self._fileset(w, create=True)
         fileset.add(filespec)
 
-    def flush(self):
-        for w in self._weeks.itervalues():
-            if w is not None:
-                w.flush()
-
     def finalize(self):
         for w in self._weeks.itervalues():
             if w is not None:

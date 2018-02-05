@@ -76,10 +76,6 @@ class UserFilesetCache(object):
         fileset = self._fileset(filespec.user)
         fileset.add(filespec)
 
-    def flush(self):
-        for fileset in self._users.values():
-            fileset.flush()
-
     def finalize(self):
         for u in self._users.itervalues():
             if u is not None:

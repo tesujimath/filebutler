@@ -76,17 +76,7 @@ class Cache(Fileset):
                 warning("can't update system cache %s" % self.name)
                 return
         for filespec in self._fileset.select():
-            try:
-                cache.add(filespec)
-            except IOError as e:
-                if e.errno == errno.EMFILE:
-                    debug_stderr("open failed, flush all caches and redo on %s\n" % self._path)
-                    # It would be better to implement an LRU cache, but that
-                    # hardly seems worth it.  So simply close them all.
-                    cache.flush()
-                    cache.add(filespec)
-                else:
-                    raise
+            cache.add(filespec)
         cache.finalize()
         # touch cache rootdir, to show updated
         os.utime(self._path, None)

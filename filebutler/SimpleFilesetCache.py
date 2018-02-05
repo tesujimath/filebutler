@@ -139,20 +139,14 @@ class SimpleFilesetCache(object):
             #debug_stderr("SimpleFilesetCache writing file cache at %s\n" % self._path)
             if not os.path.exists(self._path):
                 os.makedirs(self._path)
-            self._file = open(self.filelistpath(), 'w')
+            self._file = PooledFile(self.filelistpath(), 'w')
         filespec.write(self._file)
 
-    def flush(self):
-        if not os.path.exists(self._path):
-            os.makedirs(self._path)
+    def finalize(self):
+        """Finalize writing the cache."""
         if self._file is not None:
-            #debug_stderr("flushing %s\n" % self.filelistpath())
             self._file.close()
             self._file = None
-
-    def finalize(self):
-        """Flush and finalize writing the cache."""
-        self.flush()
 
         # sort the filelist
         with open(self.filelistpath()) as f:

@@ -73,6 +73,11 @@ class PooledFile(object):
             else:
                 done = True
 
+    def write(self, s):
+        if self._file is None:
+            self._open()
+        self._file.write(s)
+
     def flush(self):
         if self._file is not None:
             if self._mode == 'r':

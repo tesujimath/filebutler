@@ -76,10 +76,6 @@ class DatasetFilesetCache(object):
         fileset = self._fileset(filespec.dataset)
         fileset.add(filespec)
 
-    def flush(self):
-        for fileset in self._datasets.values():
-            fileset.flush()
-
     def finalize(self):
         for d in self._datasets.itervalues():
             if d is not None:
