@@ -15,16 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from copy import copy
 import errno
 
 from FilesetInfo import FilesetInfo
+from Filespec import Filespec
 
 class Grouper(object):
 
     def __init__(self, collapse=None):
         self._collapse = collapse
-        self._collapsingPath = None
-        self._collapsingInfo = None
+        self._collapsing = None
 
     def setOutput(self, f):
         self._f = f
@@ -37,33 +38,27 @@ class Grouper(object):
             slash = path.find('/', slash + 1)
             n -= 1
         if slash >= 0:
-            return path[:slash + 1]
+            return path[:slash]
         else:
             return path
 
-    def _formatPath(self, path):
-        if self._width < 50:
-            self._width = 50
-        if len(path) > self._width:
-            self._width = (len(path) / 10 + 1) * 10
-        s = ("%-" + str(self._width) + "s") % path
-        return s
+    def _writeFilespec(self, filespec):
+        s, self._width = filespec.format(self._width)
+        self._f.write("%s\n" % s)
 
     def write(self, filespec):
         if self._collapse is None:
-            s, self._width = filespec.format(self._width)
-            self._f.write("%s\n" % s)
+            self._writeFilespec(filespec)
         else:
             p = self._collapsed(filespec.path)
-            if p != self._collapsingPath:
-                if self._collapsingPath is not None:
-                    s = self._formatPath(self._collapsingPath)
-                    self._f.write("%s %s\n" % (s, self._collapsingInfo))
-                self._collapsingPath = p
-                self._collapsingInfo = FilesetInfo()
-            self._collapsingInfo.add(1, filespec.size)
+            if self._collapsing is None or p != self._collapsing.path:
+                if self._collapsing is not None:
+                    self._writeFilespec(self._collapsing)
+                self._collapsing = copy(filespec)
+                self._collapsing.path = p
+                self._collapsing.perms = 'd' + self._collapsing.perms[1:]
+            self._collapsing.size += filespec.size
 
     def flush(self):
-        if self._collapse is not None and self._collapsingPath is not None:
-            s = self._formatPath(self._collapsingPath)
-            self._f.write("%s %s\n" % (s, self._collapsingInfo))
+        if self._collapse is not None and self._collapsing is not None:
+            self._writeFilespec(self._collapsing)
