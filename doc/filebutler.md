@@ -37,7 +37,7 @@ Show summary information for a fileset.
 
 Usage:
 ```
-info <fileset> [-u|-d|-e] [<filter-params>]
+info [-u|-d|-e] <fileset> [<filter-params>]
 ```
 
 With `-u`, shows breakdown by user, sorted by size.
@@ -52,7 +52,7 @@ Print files in a fileset, optionally filtered, via `$PAGER`.  If defined, the at
 
 Usage:
 ```
-print <fileset> [<filter-params>] [-by-size|-by-path]
+print <fileset> [<filter-params>] [-by-size] [-depth <depth>]
 ```
 
 The `filter-params` are as described for the filter fileset type.
@@ -232,7 +232,7 @@ ${hostname}$$ filebutler
 fb: help
 fb: ls
 fb: info -d ${fileset}
-fb: print ${fileset} -by-path
+fb: print ${fileset} -depth 2
 
 A summary of the files which will be deleted is as follows.
 

@@ -34,6 +34,7 @@ from Filter import Filter
 from FilterFileset import FilterFileset
 from FindFileset import FindFileset
 from GnuFindOutFileset import GnuFindOutFileset
+from Grouper import Grouper
 from Mapper import Mapper
 from Pager import Pager
 from Pathway import Pathway
@@ -95,7 +96,7 @@ class CLI:
                                'method': self._infoCmd,
             },
             'print':         { 'desc': 'print files in a fileset, optionally filtered, via $PAGER',
-                               'usage': 'print <fileset> [<filter-params>] [-by-size]',
+                               'usage': 'print <fileset> [<filter-params>] [-by-size] [-depth <depth>]',
                                'method': self._printCmd,
             },
             'delete':        { 'desc': 'delete all files in a fileset',
@@ -300,7 +301,7 @@ class CLI:
         elif type == "filter":
             if len(toks) < 4:
                 raise CLIError("filter requires fileset, criteria")
-            filter, _ = parseCommandOptions(self._now, toks[4:], filter=True)
+            filter, _, _ = parseCommandOptions(self._now, toks[4:], filter=True)
             fileset = FilterFileset(name, self._fileset(toks[3]), filter)
         elif type == "union":
             if len(toks) < 4:
@@ -325,7 +326,7 @@ class CLI:
             i_fileset = 1
         name = toks[i_fileset]
         if len(toks) > i_fileset:
-            filter, _ = parseCommandOptions(self._now, toks[i_fileset + 1:], filter=True)
+            filter, _, _ = parseCommandOptions(self._now, toks[i_fileset + 1:], filter=True)
         else:
             filter = None
         info = self._fileset(name).info(filter)
@@ -352,15 +353,16 @@ class CLI:
         else:
             printOptions = toks[2:]
         if printOptions != []:
-            filter, sorter = parseCommandOptions(self._now, printOptions, filter=True, sorter=True)
+            filter, sorter, grouper = parseCommandOptions(self._now, printOptions, filter=True, sorter=True, grouper=True)
         else:
-            filter, sorter = None, None
+            filter, sorter, grouper = None, None, Grouper()
+
         pager = Pager()
-        width = 0
+        grouper.setOutput(pager.file)
         try:
             for filespec in fileset.sorted(filter, sorter):
-                s, width = filespec.format(width)
-                pager.file.write("%s\n" % s)
+                grouper.write(filespec)
+            grouper.flush()
         except IOError as e:
             if e.errno == errno.EPIPE:
                 pass

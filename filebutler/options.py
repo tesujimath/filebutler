@@ -27,9 +27,10 @@ import time
 from CLIError import CLIError
 from Filter import Filter
 from Sorter import Sorter
+from Grouper import Grouper
 from util import Giga
 
-def parseCommandOptions(now, toks, filter=False, sorter=False):
+def parseCommandOptions(now, toks, filter=False, sorter=False, grouper=False):
     """Parse filter and/or sorter options."""
 
     # filter options
@@ -41,6 +42,9 @@ def parseCommandOptions(now, toks, filter=False, sorter=False):
 
     # sorter options
     bySize = False
+
+    # grouper options
+    collapse = None
 
     i = 0
     while i < len(toks):
@@ -95,12 +99,22 @@ def parseCommandOptions(now, toks, filter=False, sorter=False):
             i += 2
         elif tok == '-by-size' and sorter:
             bySize = True
+        elif tok == '-depth' and grouper:
+            if i + 1 >= len(toks):
+                raise CLIError("-depth missing parameter")
+            try:
+                collapse = int(toks[i + 1])
+            except ValueError:
+                raise CLIError("-depth requires integer parameter")
+            i += 1
         else:
             category = ""
-            if filter and not sorter:
+            if filter and not sorter and not grouper:
                 category = "filter "
-            if sorter and not filter:
+            if sorter and not filter and not grouper:
                 category = "sorter "
+            if grouper and not sorter and not filter:
+                category = "grouper "
             raise CLIError("unknown %sparameter %s" % (category, tok))
         i += 1
 
@@ -112,5 +126,9 @@ def parseCommandOptions(now, toks, filter=False, sorter=False):
         s0 = Sorter(bySize=bySize)
     else:
         s0 = None
+    if grouper:
+        g0 = Grouper(collapse=collapse)
+    else:
+        g0 = None
 
-    return f0, s0
+    return f0, s0, g0
