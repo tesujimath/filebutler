@@ -19,6 +19,7 @@ import os.path
 
 from Filespec import Filespec
 from FilesetInfo import FilesetInfo
+from PooledFile import PooledFile
 from util import filetimestr, verbose_stderr, debug_stderr, warning
 
 class SimpleFilesetCache(object):
@@ -49,7 +50,7 @@ class SimpleFilesetCache(object):
 
     def select(self, filter=None, includeDeleted=False):
         if self._filespecs is None:
-            debug_stderr("reading filelist from %s cache at %s\n" % (filetimestr(self._path), self._path))
+            #debug_stderr("reading filelist from %s cache at %s\n" % (filetimestr(self._path), self._path))
             #debug_stderr("SimpleFilesetCache select %s from file cache %s\n" % (str(filter), self._path))
             self._filespecs = []
             self._deletedFilelist = {}
@@ -69,8 +70,8 @@ class SimpleFilesetCache(object):
             except IOError:
                 warning("can't read deleted filelist %s, ignoring" % deletedFilelist)
             try:
-                with open(filelist, 'r') as f:
-                    #debug_stderr("SimpleFilesetCache select %s opened file cache\n" % str(filter))
+                with PooledFile(filelist, 'r') as f:
+                    #debug_stderr("SimpleFilesetCache select %s opened file cache as %s\n" % (filter, f))
                     for filespec in Filespec.fromFile(f, self, self._sel):
                         self._filespecs.append(filespec)
                         if includeDeleted or not self._deletedFilelist.has_key(filespec.path):
