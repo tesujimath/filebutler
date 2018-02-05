@@ -19,6 +19,7 @@ import os.path
 
 from Filter import Filter
 from FilespecMerger import FilespecMerger
+from PooledFile import listdir
 from util import debug_stderr
 
 class UserFilesetCache(object):
@@ -32,7 +33,7 @@ class UserFilesetCache(object):
 
         # load stubs for all users found
         if os.path.exists(self._path):
-            for u in os.listdir(self._path):
+            for u in listdir(self._path):
                 self._users[u] = None # stub
 
     def _subpath(self, u):

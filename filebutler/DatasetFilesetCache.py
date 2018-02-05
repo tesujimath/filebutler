@@ -19,6 +19,7 @@ import os.path
 
 from Filter import Filter
 from FilespecMerger import FilespecMerger
+from PooledFile import listdir
 from util import debug_stderr
 
 class DatasetFilesetCache(object):
@@ -32,7 +33,7 @@ class DatasetFilesetCache(object):
 
         # load stubs for all datasets found
         if os.path.exists(self._path):
-            for d in os.listdir(self._path):
+            for d in listdir(self._path):
                 self._datasets[d] = None # stub
 
     def _subpath(self, d):

@@ -16,8 +16,22 @@
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
 import errno
+import os
 
 from util import debug_stderr
+
+def listdir(path):
+    """Just like os.listdir, but close pooled files if hit too many open."""
+    try:
+        files = os.listdir(path)
+    except IOError as e:
+        if e.errno == errno.EMFILE:
+            debug_stderr("listdir failed for %s, flush all pooled files\n" % self._name)
+            PooledFile.flushAll()
+            files = os.listdir(path)
+        else:
+            raise
+    return files
 
 class PooledFile(object):
     """A File object in a pool, which catches too many open files."""

@@ -22,6 +22,7 @@ import shutil
 
 from Filter import Filter
 from FilespecMerger import FilespecMerger
+from PooledFile import listdir
 from util import verbose_stderr, debug_stderr
 
 class WeeklyFilesetCache(object):
@@ -42,7 +43,7 @@ class WeeklyFilesetCache(object):
 
         # load stubs for all weeks found
         if os.path.exists(self._path):
-            for wstr in os.listdir(self._path):
+            for wstr in listdir(self._path):
                 w = int(wstr)
                 self._weeks[w] = None # stub
 
@@ -96,7 +97,7 @@ class WeeklyFilesetCache(object):
             # Purge existing cache.
             # For safety in case of misconfiguration, we only delete directories in the format YYYYWW
             YYYYWW = re.compile(r"""^\d\d\d\d\d\d$""")
-            for x in os.listdir(self._path):
+            for x in listdir(self._path):
                 px = os.path.join(self._path, x)
                 if YYYYWW.match(x):
                     shutil.rmtree(px)
