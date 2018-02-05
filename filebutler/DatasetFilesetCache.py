@@ -18,6 +18,7 @@
 import os.path
 
 from Filter import Filter
+from FilespecMerger import FilespecMerger
 from util import debug_stderr
 
 class DatasetFilesetCache(object):
@@ -52,12 +53,14 @@ class DatasetFilesetCache(object):
         return fileset
 
     def select(self, filter=None):
+        merger = FilespecMerger()
         datasets = sorted(self._datasets.keys())
         for d in datasets:
             if filter is None or filter.dataset is None or d == filter.dataset:
-                # no yield from in python 2, so:
-                for filespec in self._fileset(d).select(Filter.clearDataset(filter)):
-                    yield filespec
+                merger.add(self._fileset(d).select(Filter.clearDataset(filter)))
+        # no yield from in python 2, so:
+        for filespec in merger.merge():
+            yield filespec
 
     def merge_info(self, acc, filter=None):
         #debug_stderr("DatasetFilesetCache(%s) merge_info\n" % self._path)

@@ -16,6 +16,7 @@
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
 from Fileset import Fileset
+from FilespecMerger import FilespecMerger
 
 class UnionFileset(Fileset):
 
@@ -27,9 +28,12 @@ class UnionFileset(Fileset):
         return "%s union %s" % (self.name, ' '.join(sorted([fileset.name for fileset in self._filesets])))
 
     def select(self, filter=None):
+        merger = FilespecMerger()
         for fileset in self._filesets:
-            for filespec in fileset.select(filter):
-                yield filespec
+            merger.add(fileset.select(filter))
+        # no yield from in python 2, so:
+        for filespec in merger.merge():
+            yield filespec
 
     def merge_info(self, acc, filter=None):
         for fileset in self._filesets:

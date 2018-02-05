@@ -18,6 +18,7 @@
 import os.path
 
 from Filter import Filter
+from FilespecMerger import FilespecMerger
 from util import debug_stderr
 
 class UserFilesetCache(object):
@@ -52,12 +53,14 @@ class UserFilesetCache(object):
         return fileset
 
     def select(self, filter=None):
+        merger = FilespecMerger()
         users = sorted(self._users.keys())
         for u in users:
             if filter is None or filter.owner is None or u == filter.owner:
-                # no yield from in python 2, so:
-                for filespec in self._fileset(u).select(Filter.clearOwner(filter)):
-                    yield filespec
+                merger.add(self._fileset(u).select(Filter.clearOwner(filter)))
+        # no yield from in python 2, so:
+        for filespec in merger.merge():
+            yield filespec
 
     def merge_info(self, acc, filter=None):
         #debug_stderr("UserFilesetCache(%s) merge_info\n" % self._path)

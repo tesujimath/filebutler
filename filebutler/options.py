@@ -40,7 +40,6 @@ def parseCommandOptions(now, toks, filter=False, sorter=False):
     notPaths = []
 
     # sorter options
-    byPath = False
     bySize = False
 
     i = 0
@@ -94,13 +93,7 @@ def parseCommandOptions(now, toks, filter=False, sorter=False):
                 raise CLIError("! requires -path <glob>")
             notPaths.append(toks[i + 2])
             i += 2
-        elif tok == '-by-path' and sorter:
-            if bySize:
-                raise CLIError("-by-path incompatible with -by-size")
-            byPath = True
         elif tok == '-by-size' and sorter:
-            if byPath:
-                raise CLIError("-by-size incompatible with -by-path")
             bySize = True
         else:
             category = ""
@@ -115,8 +108,8 @@ def parseCommandOptions(now, toks, filter=False, sorter=False):
         f0 = Filter(owner=owner, dataset=dataset, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore, notPaths=notPaths)
     else:
         f0 = None
-    if sorter and (byPath or bySize):
-        s0 = Sorter(byPath=byPath, bySize=bySize)
+    if sorter and bySize:
+        s0 = Sorter(bySize=bySize)
     else:
         s0 = None
 

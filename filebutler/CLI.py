@@ -95,7 +95,7 @@ class CLI:
                                'method': self._infoCmd,
             },
             'print':         { 'desc': 'print files in a fileset, optionally filtered, via $PAGER',
-                               'usage': 'print <fileset> [<filter-params>] [-by-path|-by-size]',
+                               'usage': 'print <fileset> [<filter-params>] [-by-size]',
                                'method': self._printCmd,
             },
             'delete':        { 'desc': 'delete all files in a fileset',

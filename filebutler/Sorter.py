@@ -17,14 +17,11 @@
 
 class Sorter(object):
 
-    def __init__(self, byPath=False, bySize=False):
-        self.byPath = byPath
+    def __init__(self, bySize=False):
         self.bySize = bySize
 
     def key(self):
-        if self.byPath:
-            return lambda fs: fs.path
-        elif self.bySize:
+        if self.bySize:
             # negate size, so we sort largest first
             return lambda fs: -fs.size
         else:

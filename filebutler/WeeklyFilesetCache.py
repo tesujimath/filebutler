@@ -21,6 +21,7 @@ import re
 import shutil
 
 from Filter import Filter
+from FilespecMerger import FilespecMerger
 from util import verbose_stderr, debug_stderr
 
 class WeeklyFilesetCache(object):
@@ -65,6 +66,7 @@ class WeeklyFilesetCache(object):
         return fileset
 
     def select(self, filter=None):
+        merger = FilespecMerger()
         weeks = sorted(self._weeks.keys())
         for w in weeks:
             if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
@@ -72,9 +74,10 @@ class WeeklyFilesetCache(object):
                     f1 = Filter.clearMtime(filter)
                 else:
                     f1 = filter
-                # no yield from in python 2, so:
-                for filespec in self._fileset(w).select(f1):
-                    yield filespec
+                merger.add(self._fileset(w).select(f1))
+        # no yield from in python 2, so:
+        for filespec in merger.merge():
+            yield filespec
 
     def merge_info(self, acc, filter=None):
         #debug_stderr("WeeklyFilesetCache(%s) merge_info\n" % self._path)
