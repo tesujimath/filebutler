@@ -16,6 +16,7 @@
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import os.path
 import grp
 import pwd
 import re
@@ -24,6 +25,7 @@ import stat
 from CLIError import CLIError
 from Fileset import Fileset
 from Filespec import Filespec
+from PooledFile import listdir
 from util import filemode, verbose_stderr
 
 class FindFileset(Fileset):
@@ -58,12 +60,19 @@ class FindFileset(Fileset):
     def select(self, filter=None):
         verbose_stderr("fileset %s scanning files under %s\n" % (self.name, self._path))
         pathlen = len(self._path) + (0 if self._path[-1] == '/' else 1)
-        for root,dirs,files in os.walk(self._path):
+        dirs = [self._path]
+        # can't use os.walk, as that fails if we hit too many open files
+        while dirs != []:
+            root = dirs[0]
             relroot = root[pathlen:]
-            for x in dirs + files:
-                s = os.lstat(os.path.join(root, x))
-                relpath = os.path.join(relroot, x)
-                path = re.sub(self._match, self._replace, relpath)
+            dirs = dirs[1:]
+            for x in listdir(root):
+                xpath = os.path.join(root, x)
+                xrel = os.path.join(relroot, x)
+                s = os.lstat(xpath)
+                if stat.S_ISDIR(s.st_mode):
+                    dirs.append(xpath)
+                path = re.sub(self._match, self._replace, xrel)
                 filespec = Filespec(fileset=self,
                                     dataset=self._pathway.datasetFromPath(path),
                                     path=path,
