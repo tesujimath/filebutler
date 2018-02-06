@@ -33,7 +33,7 @@ rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=%{buildroot}
 
 %files
-%doc LICENSE README.md
+%doc LICENSE README.md examples
 %{_bindir}/*
 %{_mandir}/man1/*
 %{python_sitelib}/*
