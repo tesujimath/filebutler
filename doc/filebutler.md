@@ -320,5 +320,14 @@ Run in batch mode, with no progress feedback
 `--debug`
 Run in debug mode
 
+# CONFIGURATION
+
+On startup, filebutler reads commands from `/etc/filebutlerrc` and then
+`~/.filebutlerrc`.  The former enables the system administrator to define
+site-wide filesets.  The latter enables any user to supplement the site-wide
+definitions with their own.
+
+See the README and examples for more details about configuration.
+
 # AUTHOR
 Simon Guest
