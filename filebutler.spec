@@ -1,5 +1,5 @@
 Name:           filebutler
-Version:        %{VERSION}
+Version:        %(echo $VERSION)
 Release:        1%{?dist}
 Summary:        Utility for managing old files in large directory structures.
 
