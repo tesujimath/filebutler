@@ -19,11 +19,12 @@ import errno
 import functools
 import os.path
 
+from DatasetFilesetCache import DatasetFilesetCache
 from Fileset import Fileset
 from FilesetSelector import FilesetSelector
+from PooledFile import PooledFile
 from SimpleFilesetCache import SimpleFilesetCache
 from UserFilesetCache import UserFilesetCache
-from DatasetFilesetCache import DatasetFilesetCache
 from WeeklyFilesetCache import WeeklyFilesetCache
 from util import filedatestr, filetimestr, verbose_stderr, debug_stderr, progress_stderr, warning
 
@@ -77,6 +78,8 @@ class Cache(Fileset):
                 return
         for filespec in self._fileset.select():
             cache.add(filespec)
+        # ensure from here on we don't hit open file problems
+        PooledFile.flushAll()
         cache.finalize()
         # touch cache rootdir, to show updated
         os.utime(self._path, None)

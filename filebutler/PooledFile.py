@@ -94,8 +94,11 @@ class PooledFile(object):
 
     def flush(self):
         if self._file is not None:
-            if self._mode == 'r':
+            if self._readmode():
                 self._readpos = self._file.tell()
+            else:
+                # subsequently need to append
+                self._mode = 'a'
             self._file.close()
             self._file = None
 
