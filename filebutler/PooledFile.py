@@ -18,6 +18,7 @@
 import errno
 import os
 
+from FatalError import FatalError
 from util import debug_log
 
 def listdir(path):
@@ -86,6 +87,22 @@ class PooledFile(object):
                 yield line
             else:
                 done = True
+
+    def seek(self, offset):
+        if self._file is not None:
+            self._file.seek(offset)
+        elif self._readmode():
+            self._readpos = offset
+        else:
+            raise FatalError("seek on closed PooledFile for write, unsupported")
+
+    def tell(self):
+        if self._file is not None:
+            return self._file.tell()
+        elif self._readmode():
+            return self._readpos
+        else:
+            raise FatalError("tell on closed PooledFile for write, unsupported")
 
     def write(self, s):
         if self._file is None:

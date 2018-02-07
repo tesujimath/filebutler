@@ -29,9 +29,10 @@ class SimpleFilesetCache(object):
         self._path = path
         self._logdir = logdir
         self._sel = sel
-        self._filespecs = None  # in-memory read cache
+        self._filespecs = []    # in-memory read cache
         self._info = {}         # indexed by filter string
         self._file = None
+        self._filepos = 0
         self._fileinfo = None
         self._deletedFilelist = {}    # paths of deleted files
         self._deletedInfo = FilesetInfo()
@@ -49,10 +50,18 @@ class SimpleFilesetCache(object):
             return os.path.join(self._path, "info")
 
     def select(self, filter=None, includeDeleted=False):
-        if self._filespecs is None:
+        # first read from in-memory cache, which may be empty, or partial if last file read was interrupted
+        #debug_log("SimpleFilesetCache select %s from memory cache\n" % str(filter))
+        for filespec in self._filespecs:
+            if includeDeleted or not self._deletedFilelist.has_key(filespec.path):
+                if filter is None or filter.selects(filespec):
+                    #debug_log("SimpleFilesetCache read from memory %s\n" % filespec)
+                    yield filespec
+
+        # now read from file, unless this is complete
+        if self._filepos is not None:
             #debug_log("reading filelist from %s cache at %s\n" % (filetimestr(self._path), self._path))
-            #debug_log("SimpleFilesetCache select %s from file cache %s\n" % (str(filter), self._path))
-            self._filespecs = []
+            #debug_log("SimpleFilesetCache(%s) select %s from file cache %s\n" % (self._path, str(filter), self._path))
             self._deletedFilelist = {}
             filelist = self.filelistpath()
             deletedFilelist = self.filelistpath(deleted=True)
@@ -71,22 +80,25 @@ class SimpleFilesetCache(object):
                 warning("can't read deleted filelist %s, ignoring" % deletedFilelist)
             try:
                 with PooledFile(filelist, 'r') as f:
-                    #debug_log("SimpleFilesetCache select %s opened file cache as %s\n" % (filter, f))
-                    for filespec in Filespec.fromFile(f, self, self._sel):
-                        self._filespecs.append(filespec)
-                        if includeDeleted or not self._deletedFilelist.has_key(filespec.path):
-                            if filter is None or filter.selects(filespec):
-                                #debug_log("SimpleFilesetCache read from file %s\n" % filespec)
-                                yield filespec
+                    if self._filepos != 0:
+                        f.seek(self._filepos)
+                    #debug_log("SimpleFilesetCache(%s) select %s opened file cache as %s at %d\n" % (self._path, filter, f, self._filepos))
+                    try:
+                        for filespec in Filespec.fromFile(f, self, self._sel):
+                            self._filespecs.append(filespec)
+                            if includeDeleted or not self._deletedFilelist.has_key(filespec.path):
+                                if filter is None or filter.selects(filespec):
+                                    #debug_log("SimpleFilesetCache read from file %s\n" % filespec)
+                                    yield filespec
+                    except:
+                        # on any error save the filepos
+                        self._filepos = f.tell()
+                        #debug_log("SimpleFilesetCache(%s) exception, saving filepos at %d\n" % (self._path, self._filepos))
+                        raise
+                    # reading file is complete
+                    self._filepos = None
             except IOError:
                 warning("can't read filelist %s, ignoring" % filelist)
-        else:
-            #debug_log("SimpleFilesetCache select %s from memory cache\n" % str(filter))
-            for filespec in self._filespecs:
-                if includeDeleted or not self._deletedFilelist.has_key(filespec.path):
-                    if filter is None or filter.selects(filespec):
-                        #debug_log("SimpleFilesetCache read from memory %s\n" % filespec)
-                        yield filespec
 
     def merge_info(self, acc, filter=None):
         #debug_log("SimpleFilesetCache(%s) merge_info\n" % self._path)
@@ -122,7 +134,7 @@ class SimpleFilesetCache(object):
             if self._info.has_key(f):
                 info = self._info[f]
             else:
-                debug_log("SimpleFilesetCache(%s)::merge_info(%s) scanning\n" % (self._path, f))
+                #debug_log("SimpleFilesetCache(%s)::merge_info(%s) scanning\n" % (self._path, f))
                 info = FilesetInfo()
                 self._info[f] = info
                 for filespec in self.select(filter, includeDeleted=True):
