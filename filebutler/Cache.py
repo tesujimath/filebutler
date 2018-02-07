@@ -26,7 +26,7 @@ from PooledFile import PooledFile
 from SimpleFilesetCache import SimpleFilesetCache
 from UserFilesetCache import UserFilesetCache
 from WeeklyFilesetCache import WeeklyFilesetCache
-from util import filedatestr, filetimestr, verbose_stderr, debug_stderr, progress_stderr, warning
+from util import filedatestr, filetimestr, verbose_stderr, debug_log, progress_stderr, warning
 
 # Stack up the caches we support, so that each cache can instantiate
 # its next one, via its next parameter.
@@ -63,7 +63,7 @@ class Cache(Fileset):
             yield filespec
 
     def merge_info(self, acc, filter=None):
-        #debug_stderr("Cache(%s) merge_info\n" % self.name)
+        #debug_log("Cache(%s) merge_info\n" % self.name)
         cache = self._cache()
         cache.merge_info(acc, filter)
 
@@ -86,6 +86,6 @@ class Cache(Fileset):
         progress_stderr("updated %s\n" % self.name)
 
     def saveDeletions(self):
-        #debug_stderr("Cache(%s)::saveDeletions\n" % self.name)
+        #debug_log("Cache(%s)::saveDeletions\n" % self.name)
         cache = self._cache()
         cache.saveDeletions()

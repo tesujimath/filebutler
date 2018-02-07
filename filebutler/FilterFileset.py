@@ -17,12 +17,12 @@
 
 from Fileset import Fileset
 from Filter import Filter
-from util import debug_stderr
+from util import debug_log
 
 class FilterFileset(Fileset):
 
     def __init__(self, name, fileset, filter):
-        #debug_stderr("FilterFileset(%s), filter=%s\n" % (name, filter))
+        #debug_log("FilterFileset(%s), filter=%s\n" % (name, filter))
         self.name = name
         self._fileset = fileset
         self._filter = filter
@@ -32,11 +32,11 @@ class FilterFileset(Fileset):
 
     def select(self, filter=None):
         f1 = self._filter.intersect(filter)
-        #debug_stderr("FilterFileset(%s)::select filter=%s\n" % (self.name, f1))
+        #debug_log("FilterFileset(%s)::select filter=%s\n" % (self.name, f1))
         for filespec in self._fileset.select(f1):
             yield filespec
 
     def merge_info(self, acc, filter=None):
         f1 = self._filter.intersect(filter)
-        #debug_stderr("FilterFileset(%s)::select filter=%s\n" % (self.name, f1))
+        #debug_log("FilterFileset(%s)::select filter=%s\n" % (self.name, f1))
         self._fileset.merge_info(acc, f1)

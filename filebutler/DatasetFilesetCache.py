@@ -20,7 +20,7 @@ import os.path
 from Filter import Filter
 from FilespecMerger import FilespecMerger
 from PooledFile import listdir
-from util import debug_stderr
+from util import debug_log
 
 class DatasetFilesetCache(object):
 
@@ -64,7 +64,7 @@ class DatasetFilesetCache(object):
             yield filespec
 
     def merge_info(self, acc, filter=None):
-        #debug_stderr("DatasetFilesetCache(%s) merge_info\n" % self._path)
+        #debug_log("DatasetFilesetCache(%s) merge_info\n" % self._path)
         for d in self._datasets.keys():
             if filter is None or filter.dataset is None or d == filter.dataset:
                 self._fileset(d).merge_info(acc, Filter.clearDataset(filter))
@@ -83,7 +83,7 @@ class DatasetFilesetCache(object):
                 d.finalize()
 
     def saveDeletions(self):
-        #debug_stderr("DatasetFilesetCache(%s)::saveDeletions\n" % self._path)
+        #debug_log("DatasetFilesetCache(%s)::saveDeletions\n" % self._path)
         for d in self._datasets.itervalues():
             if d is not None:
                 d.saveDeletions()

@@ -41,7 +41,7 @@ from Pathway import Pathway
 from UnionFileset import UnionFileset
 from aliases import read_etc_aliases
 from options import parseCommandOptions
-from util import stderr, verbose_stderr, debug_stderr, initialize, profile, unix_time
+from util import stderr, verbose_stderr, debug_log, initialize, profile, unix_time
 
 class CLI:
 

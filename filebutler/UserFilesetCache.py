@@ -20,7 +20,7 @@ import os.path
 from Filter import Filter
 from FilespecMerger import FilespecMerger
 from PooledFile import listdir
-from util import debug_stderr
+from util import debug_log
 
 class UserFilesetCache(object):
 
@@ -64,7 +64,7 @@ class UserFilesetCache(object):
             yield filespec
 
     def merge_info(self, acc, filter=None):
-        #debug_stderr("UserFilesetCache(%s) merge_info\n" % self._path)
+        #debug_log("UserFilesetCache(%s) merge_info\n" % self._path)
         for u in self._users.keys():
             if filter is None or filter.owner is None or u == filter.owner:
                 self._fileset(u).merge_info(acc, Filter.clearOwner(filter))
@@ -83,7 +83,7 @@ class UserFilesetCache(object):
                 u.finalize()
 
     def saveDeletions(self):
-        #debug_stderr("UserFilesetCache(%s)::saveDeletions\n" % self._path)
+        #debug_log("UserFilesetCache(%s)::saveDeletions\n" % self._path)
         for u in self._users.itervalues():
             if u is not None:
                 u.saveDeletions()

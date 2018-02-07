@@ -18,7 +18,7 @@
 import datetime
 import fnmatch
 
-from util import Giga, date2str, debug_stderr
+from util import Giga, date2str, debug_log
 
 def liberal(fn, a, b):
     if a is None:
@@ -109,7 +109,7 @@ class Filter(object):
         mtimeBefore = liberal(min, self.mtimeBefore, f1.mtimeBefore)
         notPaths = self.notPaths + f1.notPaths
         f2 = self.__class__(owner, dataset, sizeGeq, mtimeBefore, notPaths)
-        #debug_stderr("Filter(%s).intersect(%s)=%s\n" % (self, f1, f2))
+        #debug_log("Filter(%s).intersect(%s)=%s\n" % (self, f1, f2))
         return f2
 
     def selects(self, filespec):
@@ -129,5 +129,5 @@ class Filter(object):
             for notPath in self.notPaths:
                 if fnmatch.fnmatchcase(filespec.path, notPath):
                     return False
-        #debug_stderr("%s selects %s\n" % (self, filespec.path))
+        #debug_log("%s selects %s\n" % (self, filespec.path))
         return True

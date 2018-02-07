@@ -23,7 +23,7 @@ import shutil
 from Filter import Filter
 from FilespecMerger import FilespecMerger
 from PooledFile import listdir
-from util import verbose_stderr, debug_stderr
+from util import verbose_stderr, debug_log
 
 class WeeklyFilesetCache(object):
 
@@ -81,7 +81,7 @@ class WeeklyFilesetCache(object):
             yield filespec
 
     def merge_info(self, acc, filter=None):
-        #debug_stderr("WeeklyFilesetCache(%s) merge_info\n" % self._path)
+        #debug_log("WeeklyFilesetCache(%s) merge_info\n" % self._path)
         for w in self._weeks.keys():
             if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
                 if filter is not None and filter.mtimeBefore is not None and w < self.__class__.week(filter.mtimeBefore):
@@ -92,7 +92,7 @@ class WeeklyFilesetCache(object):
 
     def create(self):
         """Create empty cache on disk, purging any previous."""
-        #debug_stderr("WeeklyFilesetCache creating at %s\n" % self._path)
+        #debug_log("WeeklyFilesetCache creating at %s\n" % self._path)
         if os.path.exists(self._path):
             # Purge existing cache.
             # For safety in case of misconfiguration, we only delete directories in the format YYYYWW
@@ -118,7 +118,7 @@ class WeeklyFilesetCache(object):
                 w.finalize()
 
     def saveDeletions(self):
-        #debug_stderr("WeeklyFilesetCache(%s)::saveDeletions\n" % self._path)
+        #debug_log("WeeklyFilesetCache(%s)::saveDeletions\n" % self._path)
         for w in self._weeks.itervalues():
             if w is not None:
                 w.saveDeletions()

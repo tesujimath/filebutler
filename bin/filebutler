@@ -28,7 +28,7 @@ from filebutler.CLI import CLI
 def main():
     parser = argparse.ArgumentParser(description='View and prune old files.')
     parser.add_argument('--batch', action='store_true', dest='batch', help='batch mode')
-    parser.add_argument('--debug', action='store_true', dest='debug', help='debug mode')
+    parser.add_argument('--debug', type=argparse.FileType('w'), dest='debug', metavar='FILE', help='debug mode')
     parser.add_argument('--profile', action='store_true', dest='profile', help='profile mode')
     parser.add_argument('-v', action='store_true', dest='verbose', help='verbose mode')
     parser.add_argument('-c', dest='command', help='command to invoke')

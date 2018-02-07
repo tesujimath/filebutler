@@ -18,7 +18,7 @@
 import errno
 import os
 
-from util import debug_stderr
+from util import debug_log
 
 def listdir(path):
     """Just like os.listdir, but close pooled files if hit too many open."""
@@ -26,7 +26,7 @@ def listdir(path):
         files = os.listdir(path)
     except OSError as e:
         if e.errno == errno.EMFILE:
-            debug_stderr("listdir failed for %s, flush all pooled files\n" % path)
+            debug_log("listdir failed for %s, flush all pooled files\n" % path)
             PooledFile.flushAll()
             files = os.listdir(path)
         else:
@@ -65,7 +65,7 @@ class PooledFile(object):
             self._file = open(self._name, self._mode)
         except IOError as e:
             if e.errno == errno.EMFILE:
-                debug_stderr("open failed for %s, flush all pooled files\n" % self._name)
+                debug_log("open failed for %s, flush all pooled files\n" % self._name)
                 # It would be better to implement an LRU cache, but that
                 # hardly seems worth it.  So simply close them all.
                 self.__class__.flushAll()

@@ -22,7 +22,7 @@ import time
 from stat import *
 import sys
 
-_debug = False
+_debug = None
 _profile = False
 _progress = True
 _verbose = False
@@ -31,26 +31,23 @@ def initialize(args):
     global _profile
     global _verbose
     global _progress
-    if args.debug:
-        _debug = True
+    if args.verbose:
         _verbose = True
-        debug_stderr("debug mode\n")
     if args.profile:
         _profile = True
         _verbose = True
-        verbose_stderr("profile mode\n")
     if args.batch:
         _progress = False
-        debug_stderr("batch mode\n")
-    if args.verbose:
+    if args.debug:
+        _debug = args.debug
         _verbose = True
-        debug_stderr("verbose mode\n")
+        verbose_stderr("debug mode\n")
 
 def stderr(msg):
     sys.stderr.write(msg)
-def debug_stderr(msg):
-    if _debug:
-        stderr(msg)
+def debug_log(msg):
+    if _debug is not None:
+        _debug.write(msg)
 def progress_stderr(msg):
     if _progress:
         stderr(msg)
