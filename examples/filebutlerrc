@@ -4,6 +4,8 @@ set emailfrom Filebutler <bifoadmin@mycompany.com>
 set emailonly captainjack will
 set cachedir /bifo/support/cache/filebutler
 set deltadir $HOME/.filebutler/delta
+set userlogdir $HOME/.filebutler/log
+set syslogdir /bifo/support/admin/filebutler/log
 set dataset ^/dataset/([^/]*)/.*$ \\1
 fileset gypsy-active find.gnu.out /mirror/gypsy/z202/active/all-active-files ^([^/]*) /dataset/\\1/active
 fileset gypsy-archive find.gnu.out /mirror/gypsy/z202/archive/all-archive-files ^([^/]*) /dataset/\\1/archive

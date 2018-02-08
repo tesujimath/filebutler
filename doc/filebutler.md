@@ -261,6 +261,24 @@ Example:
 set deltadir $HOME/.filebutler/delta
 ```
 
+## syslogdir
+
+Directory where file deletions by root are logged.
+
+Example:
+```
+set syslogdir /bifo/support/admin/filebutler/log
+```
+
+## userlogdir
+
+Directory where file deletions by unprivileged users are logged.
+
+Example:
+```
+set userlogdir $HOME/.filebutler/log
+```
+
 ## templatedir
 
 Directory containing email templates.

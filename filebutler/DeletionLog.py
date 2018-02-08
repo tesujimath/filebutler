@@ -17,14 +17,47 @@
 
 import errno
 import os
+import time
 
-from util import debug_log
+from CLIError import CLIError
+from util import date2str, debug_log
 
 class DeletionLog(object):
     """A logfile for deleted files/directories."""
 
     def __init__(self, attrs):
-        self._file = open("/tmp/filebutler.log", 'a')
+        # first try the syslogdir, if we have permission
+        if not attrs.has_key('syslogdir'):
+            raise CLIError("missing attr syslogdir")
+        syslogdirs = attrs['syslogdir']
+        if len(syslogdirs) != 1:
+            raise CLIError("botched attr syslogdir")
+        syslogdir = syslogdirs[0]
+        if not attrs.has_key('userlogdir'):
+            raise CLIError("missing attr userlogdir")
+        userlogdirs = attrs['userlogdir']
+        if len(userlogdirs) != 1:
+            raise CLIError("botched attr userlogdir")
+        userlogdir = userlogdirs[0]
+        try:
+            os.makedirs(syslogdir)
+        except:
+            # ignore errors, we'll catch it in a moment
+            pass
+        datestamp = date2str(time.time())
+        try:
+            self._file = open(os.path.join(syslogdir, datestamp), 'a')
+        except IOError as e:
+            if e.errno == errno.EACCES or e.errno == errno.ENOENT:
+                # syslogdir no good, try userlogdir
+                try:
+                    os.makedirs(userlogdir)
+                except OSError as e:
+                    if e.errno != errno.EEXIST:
+                        raise
+                self._file = open(os.path.join(userlogdir, datestamp), 'a')
+            else:
+                raise
 
     def __enter__(self):
         return self._file
