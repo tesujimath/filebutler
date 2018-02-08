@@ -19,6 +19,7 @@ import errno
 import functools
 import os.path
 
+from CLIError import CLIError
 from DatasetFilesetCache import DatasetFilesetCache
 from Fileset import Fileset
 from FilesetSelector import FilesetSelector
@@ -41,8 +42,26 @@ class Cache(Fileset):
         self._cache0 = None
         self._caches = [WeeklyFilesetCache, DatasetFilesetCache, UserFilesetCache]
 
+    def _exists(self):
+        try:
+            s = os.stat(self._path)
+            exists = True
+        except OSError as e:
+            if e.errno == errno.ENOENT:
+                exists = False
+            else:
+                raise
+        return exists
+
+    def _abortIfMissingCache(self):
+        if not self._exists():
+            raise CLIError("<missing-cache>, use 'update-cache %s', or 'update-cache' for all" % self.name)
+
     def description(self):
-        return "%s cached on %s" % (self._fileset.description(), filedatestr(self._path))
+        if self._exists():
+            return "%s cached on %s" % (self._fileset.description(), filedatestr(self._path))
+        else:
+            return "%s <missing-cache>" % (self._fileset.description())
 
     def _cache(self):
         if self._cache0 is None:
@@ -56,6 +75,7 @@ class Cache(Fileset):
             return SimpleFilesetCache(path, deltadir, sel)
 
     def select(self, filter=None):
+        self._abortIfMissingCache()
         cache = self._cache()
         filterStr = " " + str(filter) if filter is not None else ""
         verbose_stderr("fileset %s%s reading from %s cache at %s\n" % (self.name, filterStr, filetimestr(self._path), self._path))
@@ -63,6 +83,7 @@ class Cache(Fileset):
             yield filespec
 
     def merge_info(self, acc, filter=None):
+        self._abortIfMissingCache()
         #debug_log("Cache(%s) merge_info\n" % self.name)
         cache = self._cache()
         cache.merge_info(acc, filter)
