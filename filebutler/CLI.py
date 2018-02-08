@@ -123,15 +123,15 @@ class CLI:
         if len(cachedirs) != 1:
             raise CLIError("botched attr cachedir")
         cachedir = cachedirs[0]
-        if not self._attrs.has_key('logdir'):
-            raise CLIError("missing attr logdir")
-        logdirs = self._attrs['logdir']
-        if len(logdirs) != 1:
-            raise CLIError("botched attr logdir")
-        logdir = logdirs[0]
+        if not self._attrs.has_key('deltadir'):
+            raise CLIError("missing attr deltadir")
+        deltadirs = self._attrs['deltadir']
+        if len(deltadirs) != 1:
+            raise CLIError("botched attr deltadir")
+        deltadir = deltadirs[0]
         cache = Cache(name, fileset,
                       os.path.join(cachedir, name),
-                      os.path.join(logdir, name))
+                      os.path.join(deltadir, name))
         self._caches[name] = cache
         return cache
 

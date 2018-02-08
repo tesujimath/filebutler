@@ -24,9 +24,9 @@ from util import debug_log
 
 class UserFilesetCache(object):
 
-    def __init__(self, path, logdir, sel, next):
+    def __init__(self, path, deltadir, sel, next):
         self._path = path
-        self._logdir = logdir
+        self._deltadir = deltadir
         self._sel = sel
         self._next = next
         self._users = {}        # of fileset, indexed by integer user
@@ -39,8 +39,8 @@ class UserFilesetCache(object):
     def _subpath(self, u):
         return os.path.join(self._path, u)
 
-    def _sublogdir(self, u):
-        return os.path.join(self._logdir, u)
+    def _subdeltadir(self, u):
+        return os.path.join(self._deltadir, u)
 
     def _fileset(self, u):
         """On demand creation of child filesets."""
@@ -49,7 +49,7 @@ class UserFilesetCache(object):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(u), self._sublogdir(u), self._sel.withOwner(u))
+            fileset = self._next(self._subpath(u), self._subdeltadir(u), self._sel.withOwner(u))
             self._users[u] = fileset
         return fileset
 

@@ -24,10 +24,10 @@ from util import filetimestr, verbose_stderr, debug_log, warning
 
 class SimpleFilesetCache(object):
 
-    def __init__(self, path, logdir, sel):
+    def __init__(self, path, deltadir, sel):
         #debug_log("SimpleFilesetCache(%s)::__init__)\n" % path)
         self._path = path
-        self._logdir = logdir
+        self._deltadir = deltadir
         self._sel = sel
         self._filespecs = []    # in-memory read cache
         self._info = {}         # indexed by filter string
@@ -39,13 +39,13 @@ class SimpleFilesetCache(object):
 
     def filelistpath(self, deleted=False):
         if deleted:
-            return os.path.join(self._logdir, "deleted.filelist")
+            return os.path.join(self._deltadir, "deleted.filelist")
         else:
             return os.path.join(self._path, "filelist")
 
     def infopath(self, deleted=False):
         if deleted:
-            return os.path.join(self._logdir, "deleted.info")
+            return os.path.join(self._deltadir, "deleted.info")
         else:
             return os.path.join(self._path, "info")
 
@@ -181,8 +181,8 @@ class SimpleFilesetCache(object):
             deletedFilelist = self.filelistpath(deleted=True)
             #debug_log("SimpleFilesetCache(%s)::saveDeletions deletedFilelist\n" % self._path)
             try:
-                if not os.path.exists(self._logdir):
-                    os.makedirs(self._logdir)
+                if not os.path.exists(self._deltadir):
+                    os.makedirs(self._deltadir)
                 with open(deletedFilelist, 'w') as f:
                     for path in self._deletedFilelist:
                         f.write("%s\n" % path)

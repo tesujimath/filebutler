@@ -34,9 +34,9 @@ class WeeklyFilesetCache(object):
         isoyear,isoweek,isoweekday = dt.isocalendar()
         return isoyear * 100 + isoweek
 
-    def __init__(self, path, logdir, sel, next):
+    def __init__(self, path, deltadir, sel, next):
         self._path = path
-        self._logdir = logdir
+        self._deltadir = deltadir
         self._sel = sel
         self._next = next
         self._weeks = {}        # of fileset, indexed by integer week
@@ -50,8 +50,8 @@ class WeeklyFilesetCache(object):
     def _subpath(self, w):
         return os.path.join(self._path, str(w))
 
-    def _sublogdir(self, w):
-        return os.path.join(self._logdir, str(w))
+    def _subdeltadir(self, w):
+        return os.path.join(self._deltadir, str(w))
 
     def _fileset(self, w, create=False):
         """On demand creation of child filesets."""
@@ -60,7 +60,7 @@ class WeeklyFilesetCache(object):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(w), self._sublogdir(w), self._sel)
+            fileset = self._next(self._subpath(w), self._subdeltadir(w), self._sel)
             self._weeks[w] = fileset
         if create:
             fileset.create()

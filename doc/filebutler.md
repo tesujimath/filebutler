@@ -252,13 +252,13 @@ Example:
 set cachedir /bifo/support/cache/filebutler
 ```
 
-## logdir
+## deltadir
 
-Directory where file deletion records are written.  Must be writable by the user running filebutler.
+Directory where file delta records are written.  Must be writable by the user running filebutler.
 
 Example:
 ```
-set logdir $HOME/.filebutler/log
+set deltadir $HOME/.filebutler/delta
 ```
 
 ## templatedir

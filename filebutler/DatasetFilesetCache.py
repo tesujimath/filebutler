@@ -24,9 +24,9 @@ from util import debug_log
 
 class DatasetFilesetCache(object):
 
-    def __init__(self, path, logdir, sel, next):
+    def __init__(self, path, deltadir, sel, next):
         self._path = path
-        self._logdir = logdir
+        self._deltadir = deltadir
         self._sel = sel
         self._next = next
         self._datasets = {}        # of fileset, indexed by dataset
@@ -39,8 +39,8 @@ class DatasetFilesetCache(object):
     def _subpath(self, d):
         return os.path.join(self._path, d)
 
-    def _sublogdir(self, d):
-        return os.path.join(self._logdir, d)
+    def _subdeltadir(self, d):
+        return os.path.join(self._deltadir, d)
 
     def _fileset(self, d):
         """On demand creation of child filesets."""
@@ -49,7 +49,7 @@ class DatasetFilesetCache(object):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(d), self._sublogdir(d), self._sel.withDataset(d))
+            fileset = self._next(self._subpath(d), self._subdeltadir(d), self._sel.withDataset(d))
             self._datasets[d] = fileset
         return fileset
 

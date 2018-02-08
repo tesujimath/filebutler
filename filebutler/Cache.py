@@ -32,12 +32,12 @@ from util import filedatestr, filetimestr, verbose_stderr, debug_log, progress_s
 # its next one, via its next parameter.
 class Cache(Fileset):
 
-    def __init__(self, name, fileset, path, logdir):
+    def __init__(self, name, fileset, path, deltadir):
         Fileset.__init__(self)
         self.name = name
         self._fileset = fileset
         self._path = path
-        self._logdir = logdir
+        self._deltadir = deltadir
         self._cache0 = None
         self._caches = [WeeklyFilesetCache, DatasetFilesetCache, UserFilesetCache]
 
@@ -46,14 +46,14 @@ class Cache(Fileset):
 
     def _cache(self):
         if self._cache0 is None:
-            self._cache0 = self._newcache(self._path, self._logdir, FilesetSelector(), 0)
+            self._cache0 = self._newcache(self._path, self._deltadir, FilesetSelector(), 0)
         return self._cache0
 
-    def _newcache(self, path, logdir, sel, level):
+    def _newcache(self, path, deltadir, sel, level):
         if level < len(self._caches):
-            return self._caches[level](path, logdir, sel, functools.partial(self._newcache, level = level + 1))
+            return self._caches[level](path, deltadir, sel, functools.partial(self._newcache, level = level + 1))
         else:
-            return SimpleFilesetCache(path, logdir, sel)
+            return SimpleFilesetCache(path, deltadir, sel)
 
     def select(self, filter=None):
         cache = self._cache()
