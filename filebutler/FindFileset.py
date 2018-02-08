@@ -34,8 +34,8 @@ class FindFileset(Fileset):
     def parse(cls, mapper, pathway, name, toks):
         if len(toks) == 1:
             path = toks[0]
-            match = '/'
-            replace = ''
+            match = '^'
+            replace = toks[0].rstrip('/') + '/'
         elif len(toks) == 3:
             path = toks[0]
             match = toks[1]
