@@ -20,7 +20,7 @@ import errno
 import os
 import time
 
-from util import fbTimeFmt, time2str, date2str, size2str
+from util import fbTimeFmt, time2str, date2str, size2str, debug_log
 
 # FileSpec fields:
 # path - string, relative to some (externally defined) rootdir
@@ -63,44 +63,50 @@ class Filespec(object):
     def isdir(self):
         return self.perms[0] == 'd'
 
-    def delete(self):
+    def delete(self, logf):
+        """Delete file or directory, logging path to logf on success."""
+        deleted = False
         try:
             if self.isdir():
                 os.rmdir(self.path)
             else:
                 os.remove(self.path)
+            deleted = True
             # tell owning fileset we're deleted
             self.fileset.delete(self)
         except OSError as e:
             if e.errno == errno.ENOENT:
                 # deleted already, don't care
-                pass
+                debug_log("failed to delete %s, ENOENT\n" % self.path)
             elif e.errno == errno.EACCES:
                 # silently refuse to delete where we don't have permission
-                pass
+                debug_log("failed to delete %s, EACCES\n" % self.path)
             elif e.errno == errno.ENOTEMPTY:
                 # silently refuse to delete non-empty directory
-                pass
+                debug_log("failed to delete %s, ENOTEMPTY\n" % self.path)
             else:
+                debug_log("failed to delete %s, %s\n" % (self.path, e))
                 raise
+        if deleted:
+            logf.write("%s%s\n" % self.format(pad=False))
 
     @classmethod
     def formattedToPath(cls, formatted):
         """Return the file path from a formatted Filespec (with all=False)."""
         return formatted.split(None, 4)[4]
 
-    def format(self, width=50, all=False):
-        if width < 50:
-            width = 50
-        if len(self.path) > width:
-            width = (len(self.path) / 10 + 1) * 10
-        s = ("%s %s %4s %-" + str(width) + "s %s:%s") % (
+    def format(self, width=0, all=False, pad=True):
+        usergroup = "%s:%s" % (self.user, self.group)
+        if len(usergroup) >= width:
+            width = len(usergroup) + 1
+        if not pad:
+            width = 0
+        s = ("%s %-" + str(width) + "s %s %4s %s") % (
             self.perms,
+            usergroup,
             date2str(self.mtime),
             size2str(self.size),
-            self.path,
-            self.user,
-            self.group)
+            self.path)
         if all:
             s += " %s" % (self.dataset)
         return s, width

@@ -30,6 +30,7 @@ import time
 
 from CLIError import CLIError
 from Cache import Cache
+from DeletionLog import DeletionLog
 from Filter import Filter
 from FilterFileset import FilterFileset
 from FindFileset import FindFileset
@@ -376,20 +377,21 @@ class CLI:
             raise CLIError("usage: %s" % usage)
         name = toks[1]
         fileset = self._fileset(name)
-        # delete directories after their contents
-        dirs = []
-        mtimes = {}
-        for filespec in fileset.select():
-            # preserve mtime for parent directory
-            parent = os.path.dirname(filespec.path)
-            if not mtimes.has_key(parent):
-                mtimes[parent] = os.stat(parent).st_mtime
-            if filespec.isdir():
-                dirs.append(filespec)
-            else:
-                filespec.delete()
-        for filespec in sorted(dirs, key=lambda d: d.path, reverse=True):
-            filespec.delete()
+        with DeletionLog(self._attrs) as logf:
+            # delete directories after their contents
+            dirs = []
+            mtimes = {}
+            for filespec in fileset.select():
+                # preserve mtime for parent directory
+                parent = os.path.dirname(filespec.path)
+                if not mtimes.has_key(parent):
+                    mtimes[parent] = os.stat(parent).st_mtime
+                if filespec.isdir():
+                    dirs.append(filespec)
+                else:
+                    filespec.delete(logf)
+            for filespec in sorted(dirs, key=lambda d: d.path, reverse=True):
+                filespec.delete(logf)
         # now reset mtimes of anything that's left
         for path, mtime in mtimes.iteritems():
             try:
