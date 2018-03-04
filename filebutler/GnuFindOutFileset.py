@@ -25,7 +25,7 @@ from Filespec import Filespec
 from Localtime import Localtime
 from PercentageProgress import PercentageProgress
 from CLIError import CLIError
-from util import verbose_stderr
+from util import warning, verbose_stderr
 
 class GnuFindOutFileset(Fileset):
 
@@ -82,7 +82,11 @@ class GnuFindOutFileset(Fileset):
 
     def select(self, filter=None):
         verbose_stderr("fileset %s reading from filelist %s\n" % (self.name, self._path))
-        filesize = os.stat(self._path).st_size
+        try:
+            filesize = os.stat(self._path).st_size
+        except OSError as e:
+            warning("fileset %s ignoring unreadable filelist %s: %s" % (self.name, self._path, e.strerror))
+            return
         progress = PercentageProgress("reading %s" % self._path)
         n = 0
         with open(self._path) as f:
