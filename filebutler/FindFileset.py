@@ -66,10 +66,26 @@ class FindFileset(Fileset):
             root = dirs[0]
             relroot = root[pathlen:]
             dirs = dirs[1:]
-            for x in listdir(root):
+            try:
+                entries = listdir(root)
+            except OSError as e:
+                if e.errno == errno.ENOENT:
+                    # ignore just-disappeared directory
+                    continue
+                else:
+                    raise
+
+            for x in entries:
                 xpath = os.path.join(root, x)
                 xrel = os.path.join(relroot, x)
-                s = os.lstat(xpath)
+                try:
+                    s = os.lstat(xpath)
+                except OSError as e:
+                    if e.errno == errno.ENOENT:
+                        # ignore just-disappeared path
+                        continue
+                    else:
+                        raise
                 if stat.S_ISDIR(s.st_mode):
                     dirs.append(xpath)
                 path = re.sub(self._match, self._replace, xrel)
