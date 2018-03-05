@@ -101,7 +101,7 @@ Match and replace munging of paths is as for `find.gnu.out`.
 
 ### fileset type filter
 
-Parameters: `<fileset> [-user <username] [-mtime +<n>] [-size +<n>G] [! -path <glob>]`
+Parameters: `<fileset> [-user <username] [-mtime +<n>] [-size +<n>[kMGT]] [! -path <glob>]`
 
 Example:
 ```
