@@ -54,6 +54,14 @@ class Filter(object):
         else:
             return cls(f0.owner, f0.dataset, f0.sizeGeq, None, f0.notPaths)
 
+    @classmethod
+    def clearSize(cls, f0):
+        """Return a copy of f0 with no size specified, or None if f0 is None."""
+        if f0 is None or f0.owner is None and f0.dataset is None and f0.mtimeBefore is None and f0.notPaths == []:
+            return None
+        else:
+            return cls(f0.owner, f0.dataset, None, f0.mtimeBefore, f0.notPaths)
+
     def __init__(self, owner=None, dataset=None, sizeGeq=None, mtimeBefore=None, notPaths=[]):
         self.owner = owner
         self.dataset = dataset

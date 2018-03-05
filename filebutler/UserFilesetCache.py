@@ -24,9 +24,10 @@ from util import debug_log
 
 class UserFilesetCache(object):
 
-    def __init__(self, path, deltadir, sel, next):
+    def __init__(self, path, deltadir, attrs, sel, next):
         self._path = path
         self._deltadir = deltadir
+        self._attrs = attrs
         self._sel = sel
         self._next = next
         self._users = {}        # of fileset, indexed by integer user
@@ -49,7 +50,7 @@ class UserFilesetCache(object):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(u), self._subdeltadir(u), self._sel.withOwner(u))
+            fileset = self._next(self._subpath(u), self._subdeltadir(u), self._attrs, self._sel.withOwner(u))
             self._users[u] = fileset
         return fileset
 

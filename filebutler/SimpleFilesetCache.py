@@ -24,10 +24,11 @@ from util import filetimestr, verbose_stderr, debug_log, warning
 
 class SimpleFilesetCache(object):
 
-    def __init__(self, path, deltadir, sel):
+    def __init__(self, path, deltadir, attrs, sel):
         #debug_log("SimpleFilesetCache(%s)::__init__)\n" % path)
         self._path = path
         self._deltadir = deltadir
+        self._attrs = attrs
         self._sel = sel
         self._filespecs = []    # in-memory read cache
         self._info = {}         # indexed by filter string
