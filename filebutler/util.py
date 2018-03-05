@@ -22,6 +22,8 @@ import time
 from stat import *
 import sys
 
+from CLIError import CLIError
+
 _debug = None
 _profile = False
 _progress = True
@@ -125,6 +127,20 @@ def size2str(n):
         return "%dG" % (n / Giga)
     else:
         return "%.1fT" % (n * 1.0 / Tera)
+
+def str2size(s):
+    unit = s[-1]
+    x = int(s[:-1])
+    if unit == 'k':
+        return x * Kilo
+    elif unit == 'M':
+        return x * Mega
+    elif unit == 'G':
+        return x * Giga
+    elif unit == 'T':
+        return x * Tera
+    else:
+        raise CLIError("unsupported filesize %s, must be n[kMGT]" % s)
 
 def filetimestr(path):
     try:

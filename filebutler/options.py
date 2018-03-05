@@ -28,7 +28,7 @@ from CLIError import CLIError
 from Filter import Filter
 from Sorter import Sorter
 from Grouper import Grouper
-from util import Giga
+from util import str2size
 
 def parseCommandOptions(now, toks, filter=False, sorter=False, grouper=False):
     """Parse filter and/or sorter options."""
@@ -67,12 +67,9 @@ def parseCommandOptions(now, toks, filter=False, sorter=False, grouper=False):
             if i + 1 >= len(toks):
                 raise CLIError("-size missing parameter")
             size = toks[i + 1]
-            if len(size) < 2 or size[-1] != 'G':
-                raise CLIError("-size only supports +nG format")
-            try:
-                n = int(size[:-1]) * Giga
-            except ValueError:
-                raise CLIError("-size only supports +nG format")
+            if len(size) < 2 or size[0] != '+':
+                raise CLIError("-size only supports +n[kMGT] format")
+            n = str2size(size[1:])
             if sizeGeq is not None:
                 raise CLIError("duplicate -size")
             sizeGeq = n
