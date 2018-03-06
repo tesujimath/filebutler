@@ -324,6 +324,18 @@ Example:
 set ignorepathsfrom /etc/filebutler/ignorepaths
 ```
 
+## sizebuckets
+
+List of sizes of the buckets to use for the by-size layer of the cache.
+
+Example:
+```
+set sizebuckets 1M 10M 100M 1G 10G 100G
+```
+
+In this example, there are separate trees in the cache for files of size < 1M,
+files of 1M <= size < 10M, etc.  This greatly speeds up filtering by size.
+
 # OPTIONS
 
 `-c` *commands*
