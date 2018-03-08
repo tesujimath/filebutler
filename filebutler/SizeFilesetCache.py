@@ -27,9 +27,10 @@ from util import str2size, verbose_stderr, debug_log
 
 class SizeFilesetCache(object):
 
-    def __init__(self, path, deltadir, attrs, sel, next):
+    def __init__(self, path, deltadir, mapper, attrs, sel, next):
         self._path = path
         self._deltadir = deltadir
+        self._mapper = mapper
         self._attrs = attrs
         self._sel = sel
         self._next = next
@@ -72,7 +73,7 @@ class SizeFilesetCache(object):
         w = self._sizes[i]
         fileset = self._buckets[i]
         if fileset is None:
-            fileset = self._next(self._subpath(w), self._subdeltadir(w), self._attrs, self._sel)
+            fileset = self._next(self._subpath(w), self._subdeltadir(w), self._mapper, self._attrs, self._sel)
             self._buckets[i] = fileset
         return fileset
 

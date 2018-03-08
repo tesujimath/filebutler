@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import os.path
 
 from Filter import Filter
@@ -24,18 +25,21 @@ from util import debug_log
 
 class UserFilesetCache(object):
 
-    def __init__(self, path, deltadir, attrs, sel, next):
+    def __init__(self, path, deltadir, mapper, attrs, sel, next):
         self._path = path
         self._deltadir = deltadir
+        self._mapper = mapper
         self._attrs = attrs
         self._sel = sel
         self._next = next
         self._users = {}        # of fileset, indexed by integer user
+        self._permissioned = {}        # of boolean, indexed by integer user
 
         # load stubs for all users found
         if os.path.exists(self._path):
             for u in listdir(self._path):
                 self._users[u] = None # stub
+                self._permissioned[u] = False
 
     def _subpath(self, u):
         return os.path.join(self._path, u)
@@ -50,8 +54,9 @@ class UserFilesetCache(object):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(u), self._subdeltadir(u), self._attrs, self._sel.withOwner(u))
+            fileset = self._next(self._subpath(u), self._subdeltadir(u), self._mapper, self._attrs, self._sel.withOwner(u))
             self._users[u] = fileset
+            self._permissioned[u] = False
         return fileset
 
     def select(self, filter=None):
@@ -73,6 +78,12 @@ class UserFilesetCache(object):
     def add(self, filespec):
         fileset = self._fileset(filespec.user)
         fileset.add(filespec)
+        if self._attrs.has_key('private') and os.geteuid() == 0 and not self._permissioned[filespec.user]:
+            # set permissions of fileset directory
+            upath = self._subpath(filespec.user)
+            os.chown(upath, self._mapper.uidFromUsername(filespec.user), -1)
+            os.chmod(upath, 0500)
+            self._permissioned[filespec.user] = True
 
     def finalize(self):
         for u in self._users.itervalues():

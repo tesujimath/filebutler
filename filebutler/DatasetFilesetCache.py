@@ -24,9 +24,10 @@ from util import debug_log
 
 class DatasetFilesetCache(object):
 
-    def __init__(self, path, deltadir, attrs, sel, next):
+    def __init__(self, path, deltadir, mapper, attrs, sel, next):
         self._path = path
         self._deltadir = deltadir
+        self._mapper = mapper
         self._attrs = attrs
         self._sel = sel
         self._next = next
@@ -50,7 +51,7 @@ class DatasetFilesetCache(object):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(d), self._subdeltadir(d), self._attrs, self._sel.withDataset(d))
+            fileset = self._next(self._subpath(d), self._subdeltadir(d), self._mapper, self._attrs, self._sel.withDataset(d))
             self._datasets[d] = fileset
         return fileset
 

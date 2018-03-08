@@ -22,10 +22,23 @@ import re
 class Mapper(object):
 
     def __init__(self):
+        self._uids = {}
         self._usernames = {}
         self._groupnames = {}
         self._datasetRegex = None
         self._datasetReplace = None
+
+    def uidFromUsername(self, username):
+        if not self._uids.has_key(username):
+            try:
+                pw = pwd.getpwnam(username)
+                uid = pw[2]
+            except KeyError:
+                uid = int(username)
+            self._uids[username] = uid
+        else:
+            uid = self._uids[username]
+        return uid
 
     def usernameFromId(self, uid):
         if not self._usernames.has_key(uid):

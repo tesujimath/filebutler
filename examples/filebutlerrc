@@ -7,6 +7,11 @@ set deltadir $HOME/.filebutler/delta
 set userlogdir $HOME/.filebutler/log
 set syslogdir /bifo/support/admin/filebutler/log
 set dataset ^/dataset/([^/]*)/.*$ \\1
+set sizebuckets 1M 10M 100M 1G 10G 100G
+set private
+fileset gypsy-home find.gnu.out /mirror/gypsy/z202/home/all-home-files
+fileset integrity-home find.gnu.out /mirror/integrity/z102/home/all-home-files
+clear private
 fileset gypsy-active find.gnu.out /mirror/gypsy/z202/active/all-active-files ^([^/]*) /dataset/\\1/active
 fileset gypsy-archive find.gnu.out /mirror/gypsy/z202/archive/all-archive-files ^([^/]*) /dataset/\\1/archive
 fileset gypsy-scratch find.gnu.out /mirror/gypsy/z202/scratch/all-scratch-files ^([^/]*) /dataset/\\1/scratch
@@ -22,9 +27,11 @@ fileset ivy-scratch find.gnu.out /mirror/ivy/z101/scratch/all-scratch-files ^([^
 fileset irawharau-01-ztmp find /bifo/ztmp ^([^/]*) /dataset/\\1/ztmp
 fileset scratch union gypsy-scratch infernal-scratch integrity-scratch ivy-scratch
 fileset ztmp union irawharau-01-ztmp
+fileset home union gypsy-home integrity-home
 fileset old-scratch filter scratch -mtime +730
 fileset old-ztmp filter ztmp -mtime +60
 fileset my-old-scratch filter old-scratch -user $USER
 fileset my-big-old-scratch filter my-old-scratch -size +1G
 fileset my-old-ztmp filter old-ztmp -user $USER
+fileset my-home filter home -user $USER
 set cachedir $HOME/.filebutler/cache

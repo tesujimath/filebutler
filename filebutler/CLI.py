@@ -132,6 +132,7 @@ class CLI:
         cache = Cache(name, fileset,
                       os.path.join(cachedir, name),
                       os.path.join(deltadir, name),
+                      self._mapper,
                       self._attrs)
         self._caches[name] = cache
         return cache

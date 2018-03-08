@@ -34,13 +34,14 @@ from util import filedatestr, filetimestr, verbose_stderr, debug_log, progress_s
 # its next one, via its next parameter.
 class Cache(Fileset):
 
-    def __init__(self, name, fileset, path, deltadir, attrs):
+    def __init__(self, name, fileset, path, deltadir, mapper, attrs):
         Fileset.__init__(self)
         self.name = name
         self._fileset = fileset
         self._path = path
         self._deltadir = deltadir
-        self._attrs = attrs
+        self._mapper = mapper
+        self._attrs = attrs.copy() # copy the dictionary, so we freeze its values
         self._cache0 = None
         self._caches = [WeeklyFilesetCache, SizeFilesetCache, DatasetFilesetCache, UserFilesetCache]
 
@@ -67,14 +68,14 @@ class Cache(Fileset):
 
     def _cache(self):
         if self._cache0 is None:
-            self._cache0 = self._newcache(self._path, self._deltadir, self._attrs, FilesetSelector(), 0)
+            self._cache0 = self._newcache(self._path, self._deltadir, self._mapper, self._attrs, FilesetSelector(), 0)
         return self._cache0
 
-    def _newcache(self, path, deltadir, attrs, sel, level):
+    def _newcache(self, path, deltadir, mapper, attrs, sel, level):
         if level < len(self._caches):
-            return self._caches[level](path, deltadir, attrs, sel, functools.partial(self._newcache, level = level + 1))
+            return self._caches[level](path, deltadir, mapper, attrs, sel, functools.partial(self._newcache, level = level + 1))
         else:
-            return SimpleFilesetCache(path, deltadir, attrs, sel)
+            return SimpleFilesetCache(path, deltadir, mapper, attrs, sel)
 
     def select(self, filter=None):
         self._abortIfMissingCache()

@@ -336,6 +336,18 @@ set sizebuckets 1M 10M 100M 1G 10G 100G
 In this example, there are separate trees in the cache for files of size < 1M,
 files of 1M <= size < 10M, etc.  This greatly speeds up filtering by size.
 
+## private
+
+Any cache created when the `private` attribute is set is created such that each
+user can only read their own filelists.
+
+Example:
+```
+set private
+fileset home find /home
+clear private
+```
+
 # OPTIONS
 
 `-c` *commands*
