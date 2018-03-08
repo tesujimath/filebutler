@@ -100,8 +100,8 @@ class CLI:
                                'usage': 'print <fileset> [<filter-params>] [-by-size] [-depth <depth>]',
                                'method': self._printCmd,
             },
-            'delete':        { 'desc': 'delete all files in a fileset',
-                               'usage': 'delete <fileset>',
+            'delete':        { 'desc': 'delete all files in a fileset, optionally filtered',
+                               'usage': 'delete <fileset> [<filter-params>]',
                                'method': self._deleteCmd,
             },
             'update-cache':  { 'desc': 'update all or named caches, by rescanning source filelists',
@@ -375,15 +375,20 @@ class CLI:
             pager.close()
 
     def _deleteCmd(self, toks, usage):
-        if len(toks) != 2:
+        if len(toks) < 2:
             raise CLIError("usage: %s" % usage)
         name = toks[1]
         fileset = self._fileset(name)
+        deleteOptions = toks[2:]
+        if deleteOptions != []:
+            filter, _, _ = parseCommandOptions(self._now, deleteOptions, filter=True)
+        else:
+            filter = None
         with DeletionLog(self._attrs) as logf:
             # delete directories after their contents
             dirs = []
             mtimes = {}
-            for filespec in fileset.select():
+            for filespec in fileset.select(filter):
                 # preserve mtime for parent directory
                 parent = os.path.dirname(filespec.path)
                 if not mtimes.has_key(parent):

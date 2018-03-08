@@ -59,11 +59,11 @@ The `filter-params` are as described for the filter fileset type.
 
 ## delete
 
-Delete all files in a fileset.
+Delete all files in a fileset, optionally filtered.
 
 Usage:
 ```
-delete <fileset>
+delete <fileset> [<filter-params>]
 ```
 
 The `filter-params` are as described for the filter fileset type.
