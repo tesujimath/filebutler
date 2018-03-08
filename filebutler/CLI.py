@@ -110,7 +110,7 @@ class CLI:
             },
             'send-emails':   { 'privileged': True,
                                'desc': 'send emails to owners in fileset, using named template',
-                               'usage': 'send-emails <fileset> <email-template>',
+                               'usage': 'send-emails <fileset> <email-template> [<override-recipient>]',
                                'method': self._sendEmailsCmd,
             },
         }
@@ -432,7 +432,7 @@ class CLI:
         return s
 
     def _sendEmailsCmd(self, toks, usage):
-        if len(toks) != 3:
+        if len(toks) < 3 or len(toks) > 4:
             raise CLIError("usage: %s" % usage)
         if not self._attrs.has_key('emailfrom'):
             raise CLIError("missing attr emailfrom")
@@ -445,6 +445,7 @@ class CLI:
         emailonly = self._attrs['emailonly'] if self._attrs.has_key('emailonly') else None
         name = toks[1]
         template = toks[2]
+        override_recipient = None if len(toks) == 3 else toks[3]
         subject_path = os.path.join(templatedir, "%s.subject" % template)
         with open(subject_path, 'r') as f:
             subject_template = string.Template(f.read().replace('\n', '').strip())
@@ -459,7 +460,7 @@ class CLI:
         sender = ' '.join(self._attrs['emailfrom'])
         for user, userfileinfo in fileset.info().iterusers():
             if self._aliases.has_key(user) and (emailonly is None or user in emailonly):
-                recipient = self._aliases[user]
+                recipient = self._aliases[user] if override_recipient is None else override_recipient
                 user_fileset = FilterFileset("%s-%s" % (name, user), fileset, Filter(owner=user))
                 user_info = user_fileset.info()
                 m['username'] = user
