@@ -248,7 +248,7 @@ class CLI:
         print(' '.join(toks[1:]))
 
     def _setCmd(self, toks, usage):
-        if len(toks) < 3:
+        if len(toks) < 2:
             raise CLIError("usage: %s" % usage)
         name = toks[1]
         values = toks[2:]
