@@ -29,12 +29,16 @@ class Mapper(object):
         self._datasetReplace = None
 
     def uidFromUsername(self, username):
+        """Returns -1 if can't resolve the username."""
         if not self._uids.has_key(username):
             try:
                 pw = pwd.getpwnam(username)
                 uid = pw[2]
             except KeyError:
-                uid = int(username)
+                try:
+                    uid = int(username)
+                except ValueError:
+                    uid = -1
             self._uids[username] = uid
         else:
             uid = self._uids[username]

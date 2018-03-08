@@ -81,7 +81,9 @@ class UserFilesetCache(object):
         if self._attrs.has_key('private') and os.geteuid() == 0 and not self._permissioned[filespec.user]:
             # set permissions of fileset directory
             upath = self._subpath(filespec.user)
-            os.chown(upath, self._mapper.uidFromUsername(filespec.user), -1)
+            uid = self._mapper.uidFromUsername(filespec.user)
+            if uid != -1:
+                os.chown(upath, uid, -1)
             os.chmod(upath, 0500)
             self._permissioned[filespec.user] = True
 
