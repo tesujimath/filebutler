@@ -16,7 +16,6 @@
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
 from copy import copy
-import errno
 
 from FilesetInfo import FilesetInfo
 from Filespec import Filespec

@@ -16,7 +16,6 @@
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
 import calendar
-import errno
 import os
 import time
 
