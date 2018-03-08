@@ -70,10 +70,6 @@ class UserFilesetCache(object):
             if filter is None or filter.owner is None or u == filter.owner:
                 self._fileset(u).merge_info(acc, Filter.clearOwner(filter))
 
-    def create(self):
-        if not os.path.exists(self._path):
-            os.makedirs(self._path)
-
     def add(self, filespec):
         fileset = self._fileset(filespec.user)
         fileset.add(filespec)

@@ -67,15 +67,13 @@ class SizeFilesetCache(object):
                 return i
         raise ValueError("no slot found for size %d, %s" % (w, str(self._sizes)))
 
-    def _fileset(self, i, create=False):
+    def _fileset(self, i):
         """On demand creation of child filesets."""
         w = self._sizes[i]
         fileset = self._buckets[i]
         if fileset is None:
             fileset = self._next(self._subpath(w), self._subdeltadir(w), self._attrs, self._sel)
             self._buckets[i] = fileset
-        if create:
-            fileset.create()
         return fileset
 
     def select(self, filter=None):
@@ -106,14 +104,8 @@ class SizeFilesetCache(object):
                     f1 = filter
                 self._fileset(i).merge_info(acc, f1)
 
-    def create(self):
-        """Create empty cache on disk, purging any previous."""
-        #debug_log("SizeFilesetCache creating at %s\n" % self._path)
-        if not os.path.exists(self._path):
-            os.makedirs(self._path)
-
     def add(self, filespec):
-        fileset = self._fileset(self._slot(filespec.size), create=True)
+        fileset = self._fileset(self._slot(filespec.size))
         fileset.add(filespec)
 
     def finalize(self):

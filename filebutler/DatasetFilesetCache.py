@@ -70,10 +70,6 @@ class DatasetFilesetCache(object):
             if filter is None or filter.dataset is None or d == filter.dataset:
                 self._fileset(d).merge_info(acc, Filter.clearDataset(filter))
 
-    def create(self):
-        if not os.path.exists(self._path):
-            os.makedirs(self._path)
-
     def add(self, filespec):
         fileset = self._fileset(filespec.dataset)
         fileset.add(filespec)

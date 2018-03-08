@@ -54,7 +54,7 @@ class WeeklyFilesetCache(object):
     def _subdeltadir(self, w):
         return os.path.join(self._deltadir, str(w))
 
-    def _fileset(self, w, create=False):
+    def _fileset(self, w):
         """On demand creation of child filesets."""
         if self._weeks.has_key(w):
             fileset = self._weeks[w]
@@ -63,8 +63,6 @@ class WeeklyFilesetCache(object):
         if fileset is None:
             fileset = self._next(self._subpath(w), self._subdeltadir(w), self._attrs, self._sel)
             self._weeks[w] = fileset
-        if create:
-            fileset.create()
         return fileset
 
     def select(self, filter=None):
@@ -110,7 +108,7 @@ class WeeklyFilesetCache(object):
 
     def add(self, filespec):
         w = self.__class__.week(filespec.mtime)
-        fileset = self._fileset(w, create=True)
+        fileset = self._fileset(w)
         fileset.add(filespec)
 
     def finalize(self):
