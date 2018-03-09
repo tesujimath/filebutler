@@ -1,3 +1,7 @@
 *~
 *.pyc
-doc/*.gz
+/doc/*.gz
+/build/
+/dist/
+*.egg-info/
+*.egg

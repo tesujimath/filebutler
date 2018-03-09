@@ -1,0 +1,4 @@
+include LICENSE Makefile README.md README.txt bin/filebutler
+recursive-include doc *.md
+recursive-include examples *
+recursive-include filebutler *.py
