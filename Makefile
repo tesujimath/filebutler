@@ -3,7 +3,10 @@
 .PHONY: all doc install
 .INTERMEDIATE: doc/filebutler.1
 
-all: doc
+all: README.rst doc
+
+README.rst: README.md
+	pandoc $< -o $@
 
 doc: doc/filebutler.1.gz
 
