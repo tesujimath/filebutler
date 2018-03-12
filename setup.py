@@ -2,7 +2,7 @@
 #
 # distutils setup script for filebutler package
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='filebutler',
       use_scm_version=True,
@@ -21,8 +21,12 @@ setup(name='filebutler',
           'Topic :: System :: Systems Administration',
           'Topic :: Utilities',
       ],
-      packages=['filebutler'],
-      scripts=['bin/filebutler'],
+      packages=find_packages(),
+      entry_points={
+        'console_scripts': [
+            'filebutler = filebutler.__main__:main',
+        ],
+      },
       license='GPLv3',
       install_requires=[
           'pytz',
