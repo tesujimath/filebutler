@@ -21,7 +21,7 @@ import subprocess
 class Pager:
 
     def __init__(self):
-        if os.environ.has_key('PAGER'):
+        if 'PAGER' in os.environ:
             pager = os.environ['PAGER']
         else:
             pager = 'less'

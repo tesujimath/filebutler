@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -20,7 +22,7 @@ import errno
 import os
 import time
 
-from util import fbTimeFmt, time2str, date2str, size2str, debug_log
+from .util import fbTimeFmt, time2str, date2str, size2str, debug_log
 
 # FileSpec fields:
 # path - string, relative to some (externally defined) rootdir

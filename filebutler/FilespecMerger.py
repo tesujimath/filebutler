@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2018 Simon Guest
 #
 # This file is part of filebutler.
@@ -19,7 +20,7 @@ import calendar
 import os
 import time
 
-from util import fbTimeFmt, time2str, date2str, size2str
+from .util import fbTimeFmt, time2str, date2str, size2str
 
 class FilespecMerger(object):
     """Merge filespecs from multiple iterators in order of path."""
@@ -37,7 +38,7 @@ class FilespecMerger(object):
         values = []
         for iter in self._iters:
             try:
-                value = iter.next()
+                value = next(iter)
             except StopIteration:
                 value = None
             values.append(value)
@@ -55,7 +56,7 @@ class FilespecMerger(object):
                 yield values[min_i]
                 # get next value for iterator which returned this one
                 try:
-                    values[min_i] = self._iters[min_i].next()
+                    values[min_i] = next(self._iters[min_i])
                 except StopIteration:
                     values[min_i] = None
             else:

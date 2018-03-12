@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -18,7 +19,7 @@
 import datetime
 import fnmatch
 
-from util import Giga, date2str, debug_log
+from .util import Giga, date2str, debug_log
 
 def liberal(fn, a, b):
     if a is None:

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -18,10 +19,10 @@
 import os
 import os.path
 
-from Filter import Filter
-from FilespecMerger import FilespecMerger
-from PooledFile import listdir
-from util import debug_log
+from .Filter import Filter
+from .FilespecMerger import FilespecMerger
+from .PooledFile import listdir
+from .util import debug_log
 
 class UserFilesetCache(object):
 
@@ -49,7 +50,7 @@ class UserFilesetCache(object):
 
     def _fileset(self, u):
         """On demand creation of child filesets."""
-        if self._users.has_key(u):
+        if u in self._users:
             fileset = self._users[u]
         else:
             fileset = None
@@ -78,13 +79,13 @@ class UserFilesetCache(object):
     def add(self, filespec):
         fileset = self._fileset(filespec.user)
         fileset.add(filespec)
-        if self._attrs.has_key('private') and os.geteuid() == 0 and not self._permissioned[filespec.user]:
+        if 'private' in self._attrs and os.geteuid() == 0 and not self._permissioned[filespec.user]:
             # set permissions of fileset directory
             upath = self._subpath(filespec.user)
             uid = self._mapper.uidFromUsername(filespec.user)
             if uid != -1:
                 os.chown(upath, uid, -1)
-            os.chmod(upath, 0500)
+            os.chmod(upath, 0o500)
             self._permissioned[filespec.user] = True
 
     def finalize(self):

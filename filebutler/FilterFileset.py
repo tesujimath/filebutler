@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -15,9 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
-from Fileset import Fileset
-from Filter import Filter
-from util import debug_log
+from .Fileset import Fileset
+from .Filter import Filter
+from .util import debug_log
 
 class FilterFileset(Fileset):
 

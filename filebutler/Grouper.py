@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -17,8 +18,8 @@
 
 from copy import copy
 
-from FilesetInfo import FilesetInfo
-from Filespec import Filespec
+from .FilesetInfo import FilesetInfo
+from .Filespec import Filespec
 
 class Grouper(object):
 

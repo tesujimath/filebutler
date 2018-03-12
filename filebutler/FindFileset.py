@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -23,11 +24,11 @@ import pwd
 import re
 import stat
 
-from CLIError import CLIError
-from Fileset import Fileset
-from Filespec import Filespec
-from PooledFile import listdir
-from util import filemode, verbose_stderr
+from .CLIError import CLIError
+from .Fileset import Fileset
+from .Filespec import Filespec
+from .PooledFile import listdir
+from .util import filemode, verbose_stderr
 
 class FindFileset(Fileset):
 

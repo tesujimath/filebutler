@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -15,8 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
-from util import size2str, warning
-from FilesetInfo import FilesetInfo
+from .util import size2str, warning
+from .FilesetInfo import FilesetInfo
 
 class FilesetInfoAccumulator(object):
 
@@ -27,13 +28,13 @@ class FilesetInfoAccumulator(object):
 
     def add(self, filespec):
         self._total.add(1, filespec.size)
-        if self._users.has_key(filespec.user):
+        if filespec.user in self._users:
             user = self._users[filespec.user]
         else:
             user = FilesetInfo()
             self._users[filespec.user] = user
         user.add(1, filespec.size)
-        if self._datasets.has_key(filespec.dataset):
+        if filespec.dataset in self._datasets:
             dataset = self._datasets[filespec.dataset]
         else:
             dataset = FilesetInfo()
@@ -43,14 +44,14 @@ class FilesetInfoAccumulator(object):
     def accumulate(self, info, sel):
         self._total.add(info.nFiles, info.totalSize)
         if sel.owner is not None:
-            if not self._users.has_key(sel.owner):
+            if sel.owner not in self._users:
                 user0 = FilesetInfo()
                 self._users[sel.owner] = user0
             else:
                 user0 = self._users[sel.owner]
             user0.add(info.nFiles, info.totalSize)
         if sel.dataset is not None:
-            if not self._datasets.has_key(sel.dataset):
+            if sel.dataset not in self._datasets:
                 dataset0 = FilesetInfo()
                 self._datasets[sel.dataset] = dataset0
             else:
@@ -60,14 +61,14 @@ class FilesetInfoAccumulator(object):
     def decumulate(self, info, sel):
         self._total.remove(info.nFiles, info.totalSize)
         if sel.owner is not None:
-            if self._users.has_key(sel.owner):
+            if sel.owner in self._users:
                 user0 = self._users[sel.owner]
                 user0.remove(info.nFiles, info.totalSize)
                 if user0.nFiles == 0:
                     # remove user, since no files left
                     self._users.pop(sel.owner, None)
         if sel.dataset is not None:
-            if self._datasets.has_key(sel.dataset):
+            if sel.dataset in self._datasets:
                 dataset0 = self._datasets[sel.dataset]
                 dataset0.remove(info.nFiles, info.totalSize)
                 if dataset0.nFiles == 0:

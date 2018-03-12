@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -19,16 +20,16 @@ import errno
 import functools
 import os.path
 
-from CLIError import CLIError
-from DatasetFilesetCache import DatasetFilesetCache
-from Fileset import Fileset
-from FilesetSelector import FilesetSelector
-from PooledFile import PooledFile
-from SimpleFilesetCache import SimpleFilesetCache
-from SizeFilesetCache import SizeFilesetCache
-from UserFilesetCache import UserFilesetCache
-from WeeklyFilesetCache import WeeklyFilesetCache
-from util import filedatestr, filetimestr, verbose_stderr, debug_log, progress_stderr, warning
+from .CLIError import CLIError
+from .DatasetFilesetCache import DatasetFilesetCache
+from .Fileset import Fileset
+from .FilesetSelector import FilesetSelector
+from .PooledFile import PooledFile
+from .SimpleFilesetCache import SimpleFilesetCache
+from .SizeFilesetCache import SizeFilesetCache
+from .UserFilesetCache import UserFilesetCache
+from .WeeklyFilesetCache import WeeklyFilesetCache
+from .util import filedatestr, filetimestr, verbose_stderr, debug_log, progress_stderr, warning
 
 # Stack up the caches we support, so that each cache can instantiate
 # its next one, via its next parameter.

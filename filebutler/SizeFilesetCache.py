@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -20,10 +21,10 @@ import os.path
 import re
 import shutil
 
-from Filter import Filter
-from FilespecMerger import FilespecMerger
-from PooledFile import listdir
-from util import str2size, verbose_stderr, debug_log
+from .Filter import Filter
+from .FilespecMerger import FilespecMerger
+from .PooledFile import listdir
+from .util import str2size, verbose_stderr, debug_log
 
 class SizeFilesetCache(object):
 
@@ -39,7 +40,7 @@ class SizeFilesetCache(object):
     def _initializeBuckets(self):
         self._sizes = [0]
         self._buckets = [None]
-        if self._attrs.has_key('sizebuckets'):
+        if 'sizebuckets' in self._attrs:
             for sizestr in self._attrs['sizebuckets']:
                 self._addBucket(str2size(sizestr))
 

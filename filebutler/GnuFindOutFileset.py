@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -20,12 +21,12 @@ import datetime
 import os
 import re
 
-from Fileset import Fileset
-from Filespec import Filespec
-from Localtime import Localtime
-from PercentageProgress import PercentageProgress
-from CLIError import CLIError
-from util import warning, verbose_stderr
+from .Fileset import Fileset
+from .Filespec import Filespec
+from .Localtime import Localtime
+from .PercentageProgress import PercentageProgress
+from .CLIError import CLIError
+from .util import warning, verbose_stderr
 
 class GnuFindOutFileset(Fileset):
 

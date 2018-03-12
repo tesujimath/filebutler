@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -17,10 +18,10 @@
 
 import os.path
 
-from Filter import Filter
-from FilespecMerger import FilespecMerger
-from PooledFile import listdir
-from util import debug_log
+from .Filter import Filter
+from .FilespecMerger import FilespecMerger
+from .PooledFile import listdir
+from .util import debug_log
 
 class DatasetFilesetCache(object):
 
@@ -46,7 +47,7 @@ class DatasetFilesetCache(object):
 
     def _fileset(self, d):
         """On demand creation of child filesets."""
-        if self._datasets.has_key(d):
+        if d in self._datasets:
             fileset = self._datasets[d]
         else:
             fileset = None

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -17,10 +18,10 @@
 
 import os.path
 
-from Filespec import Filespec
-from FilesetInfo import FilesetInfo
-from PooledFile import PooledFile
-from util import filetimestr, verbose_stderr, debug_log, warning
+from .Filespec import Filespec
+from .FilesetInfo import FilesetInfo
+from .PooledFile import PooledFile
+from .util import filetimestr, verbose_stderr, debug_log, warning
 
 class SimpleFilesetCache(object):
 
@@ -55,7 +56,7 @@ class SimpleFilesetCache(object):
         # first read from in-memory cache, which may be empty, or partial if last file read was interrupted
         #debug_log("SimpleFilesetCache select %s from memory cache\n" % str(filter))
         for filespec in self._filespecs:
-            if includeDeleted or not self._deletedFilelist.has_key(filespec.path):
+            if includeDeleted or filespec.path not in self._deletedFilelist:
                 if filter is None or filter.selects(filespec):
                     #debug_log("SimpleFilesetCache read from memory %s\n" % filespec)
                     yield filespec
@@ -88,7 +89,7 @@ class SimpleFilesetCache(object):
                     try:
                         for filespec in Filespec.fromFile(f, self, self._sel):
                             self._filespecs.append(filespec)
-                            if includeDeleted or not self._deletedFilelist.has_key(filespec.path):
+                            if includeDeleted or filespec.path not in self._deletedFilelist:
                                 if filter is None or filter.selects(filespec):
                                     #debug_log("SimpleFilesetCache read from file %s\n" % filespec)
                                     yield filespec
@@ -133,7 +134,7 @@ class SimpleFilesetCache(object):
         else:
             f = str(filter)
             #debug_log("SimpleFilesetCache(%s)::merge_info(%s)\n" % (self._path, f))
-            if self._info.has_key(f):
+            if f in self._info:
                 info = self._info[f]
             else:
                 #debug_log("SimpleFilesetCache(%s)::merge_info(%s) scanning\n" % (self._path, f))

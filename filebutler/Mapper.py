@@ -30,7 +30,7 @@ class Mapper(object):
 
     def uidFromUsername(self, username):
         """Returns -1 if can't resolve the username."""
-        if not self._uids.has_key(username):
+        if username not in self._uids:
             try:
                 pw = pwd.getpwnam(username)
                 uid = pw[2]
@@ -45,7 +45,7 @@ class Mapper(object):
         return uid
 
     def usernameFromId(self, uid):
-        if not self._usernames.has_key(uid):
+        if uid not in self._usernames:
             try:
                 pw = pwd.getpwuid(uid)
                 name = pw[0]
@@ -64,7 +64,7 @@ class Mapper(object):
             return s
 
     def groupnameFromId(self, gid):
-        if not self._groupnames.has_key(gid):
+        if gid not in self._groupnames:
             try:
                 gr = grp.getgrgid(gid)
                 name = gr[0]

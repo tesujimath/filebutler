@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -19,21 +20,21 @@ import errno
 import os
 import time
 
-from CLIError import CLIError
-from util import date2str, debug_log
+from .CLIError import CLIError
+from .util import date2str, debug_log
 
 class DeletionLog(object):
     """A logfile for deleted files/directories."""
 
     def __init__(self, attrs):
         # first try the syslogdir, if we have permission
-        if not attrs.has_key('syslogdir'):
+        if 'syslogdir' not in attrs:
             raise CLIError("missing attr syslogdir")
         syslogdirs = attrs['syslogdir']
         if len(syslogdirs) != 1:
             raise CLIError("botched attr syslogdir")
         syslogdir = syslogdirs[0]
-        if not attrs.has_key('userlogdir'):
+        if 'userlogdir' not in attrs:
             raise CLIError("missing attr userlogdir")
         userlogdirs = attrs['userlogdir']
         if len(userlogdirs) != 1:

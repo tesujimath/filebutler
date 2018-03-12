@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -22,7 +23,7 @@ import time
 from stat import *
 import sys
 
-from CLIError import CLIError
+from .CLIError import CLIError
 
 _debug = None
 _profile = False

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -18,8 +19,8 @@
 import errno
 import os
 
-from FatalError import FatalError
-from util import debug_log
+from .FatalError import FatalError
+from .util import debug_log
 
 def listdir(path):
     """Just like os.listdir, but close pooled files if hit too many open."""

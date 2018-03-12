@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -20,10 +21,10 @@ import os.path
 import re
 import shutil
 
-from Filter import Filter
-from FilespecMerger import FilespecMerger
-from PooledFile import listdir
-from util import verbose_stderr, debug_log
+from .Filter import Filter
+from .FilespecMerger import FilespecMerger
+from .PooledFile import listdir
+from .util import verbose_stderr, debug_log
 
 class WeeklyFilesetCache(object):
 
@@ -57,7 +58,7 @@ class WeeklyFilesetCache(object):
 
     def _fileset(self, w):
         """On demand creation of child filesets."""
-        if self._weeks.has_key(w):
+        if w in self._weeks:
             fileset = self._weeks[w]
         else:
             fileset = None

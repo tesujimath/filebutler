@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -28,21 +30,21 @@ import smtplib
 import string
 import time
 
-from CLIError import CLIError
-from Cache import Cache
-from DeletionLog import DeletionLog
-from Filter import Filter
-from FilterFileset import FilterFileset
-from FindFileset import FindFileset
-from GnuFindOutFileset import GnuFindOutFileset
-from Grouper import Grouper
-from Mapper import Mapper
-from Pager import Pager
-from Pathway import Pathway
-from UnionFileset import UnionFileset
-from aliases import read_etc_aliases
-from options import parseCommandOptions
-from util import stderr, verbose_stderr, debug_log, initialize, profile, unix_time
+from .CLIError import CLIError
+from .Cache import Cache
+from .DeletionLog import DeletionLog
+from .Filter import Filter
+from .FilterFileset import FilterFileset
+from .FindFileset import FindFileset
+from .GnuFindOutFileset import GnuFindOutFileset
+from .Grouper import Grouper
+from .Mapper import Mapper
+from .Pager import Pager
+from .Pathway import Pathway
+from .UnionFileset import UnionFileset
+from .aliases import read_etc_aliases
+from .options import parseCommandOptions
+from .util import stderr, verbose_stderr, debug_log, initialize, profile, unix_time
 
 class CLI:
 
@@ -117,13 +119,13 @@ class CLI:
         initialize(args)
 
     def _cached(self, name, fileset):
-        if not self._attrs.has_key('cachedir'):
+        if 'cachedir' not in self._attrs:
             raise CLIError("missing attr cachedir")
         cachedirs = self._attrs['cachedir']
         if len(cachedirs) != 1:
             raise CLIError("botched attr cachedir")
         cachedir = cachedirs[0]
-        if not self._attrs.has_key('deltadir'):
+        if 'deltadir' not in self._attrs:
             raise CLIError("missing attr deltadir")
         deltadirs = self._attrs['deltadir']
         if len(deltadirs) != 1:
@@ -145,7 +147,7 @@ class CLI:
                 m = re.search(r"""\$([a-zA-Z]\w*)""", toks[i])
                 if m:
                     name = m.group(1)
-                    if os.environ.has_key(name):
+                    if name in os.environ:
                         val = os.environ[name]
                     else:
                         val = ""
@@ -153,12 +155,12 @@ class CLI:
                     #print("matched env var %s, val='%s', token now '%s'" % (name, val, toks[i]))
 
     def _fileset(self, name):
-        if not self._filesets.has_key(name):
+        if name not in self._filesets:
             raise CLIError("no such fileset %s" % name)
         return self._filesets[name]
 
     def _cache(self, name):
-        if not self._caches.has_key(name):
+        if name not in self._caches:
             raise CLIError("no such cache %s" % name)
         return self._caches[name]
 
@@ -171,11 +173,11 @@ class CLI:
             if timeCommand:
                 toks = toks[1:]
             cmdName = toks[0]
-            if self.commands.has_key(cmdName):
+            if cmdName in self.commands:
                 cmd = self.commands[cmdName]
                 method = cmd['method']
                 usage = cmd['usage']
-                privileged = cmd['privileged'] if cmd.has_key('privileged') else False
+                privileged = cmd['privileged'] if 'privileged' in cmd else False
                 if privileged and os.geteuid() != 0:
                     raise CLIError("attempt to use privileged command %s" % toks[0])
                 if profile():
@@ -234,7 +236,7 @@ class CLI:
     def _helpCmd(self, toks, usage):
         for cmdname in sorted(self.commands.keys()):
             cmd = self.commands[cmdname]
-            privileged = cmd['privileged'] if cmd.has_key('privileged') else False
+            privileged = cmd['privileged'] if 'privileged' in cmd else False
             if not privileged or os.geteuid() == 0:
                 print("%-12s - %s\n               %s\n" % (cmdname, cmd['desc'], cmd['usage']))
         cmdname = 'time'
@@ -287,7 +289,7 @@ class CLI:
         if len(toks) != 1:
             raise CLIError("usage: %s" % usage)
         for name in self._filesetNames:
-            if self._caches.has_key(name):
+            if name in self._caches:
                 print(self._filesets[name].description())
 
     def _filesetCmd(self, toks, usage):
@@ -295,7 +297,7 @@ class CLI:
             raise CLIError("usage: %s" % usage)
         name = toks[1]
         type = toks[2]
-        if self._filesets.has_key(name):
+        if name in self._filesets:
             raise CLIError("duplicate fileset %s" % name)
         if type == "find.gnu.out":
             fileset = self._cached(name, GnuFindOutFileset.parse(self._mapper, self._pathway, name, toks[3:]))
@@ -341,7 +343,7 @@ class CLI:
             print(info.fmt_datasets())
         elif mode == 'e':
             for user, userinfo in info.iterusers():
-                if not self._aliases.has_key(user):
+                if user not in self._aliases:
                     print("%s %s" % (user, str(userinfo)))
         else:
             raise CLIError("usage: %s" % usage)
@@ -351,7 +353,7 @@ class CLI:
             raise CLIError("usage: %s" % usage)
         name = toks[1]
         fileset = self._fileset(name)
-        if self._attrs.has_key('print-options'):
+        if 'print-options' in self._attrs:
             printOptions = toks[2:] + self._attrs['print-options']
         else:
             printOptions = toks[2:]
@@ -391,7 +393,7 @@ class CLI:
             for filespec in fileset.select(filter):
                 # preserve mtime for parent directory
                 parent = os.path.dirname(filespec.path)
-                if not mtimes.has_key(parent):
+                if parent not in mtimes:
                     mtimes[parent] = os.stat(parent).st_mtime
                 if filespec.isdir():
                     dirs.append(filespec)
@@ -434,15 +436,15 @@ class CLI:
     def _sendEmailsCmd(self, toks, usage):
         if len(toks) < 3 or len(toks) > 4:
             raise CLIError("usage: %s" % usage)
-        if not self._attrs.has_key('emailfrom'):
+        if 'emailfrom' not in self._attrs:
             raise CLIError("missing attr emailfrom")
-        if not self._attrs.has_key('templatedir'):
+        if 'templatedir' not in self._attrs:
             raise CLIError("missing attr templatedir")
         templatedirs = self._attrs['templatedir']
         if len(templatedirs) != 1:
             raise CLIError("botched attr templatedir")
         templatedir = templatedirs[0]
-        emailonly = self._attrs['emailonly'] if self._attrs.has_key('emailonly') else None
+        emailonly = self._attrs['emailonly'] if 'emailonly' in self._attrs else None
         name = toks[1]
         template = toks[2]
         override_recipient = None if len(toks) == 3 else toks[3]
@@ -459,7 +461,7 @@ class CLI:
         s = smtplib.SMTP('localhost')
         sender = ' '.join(self._attrs['emailfrom'])
         for user, userfileinfo in fileset.info().iterusers():
-            if self._aliases.has_key(user) and (emailonly is None or user in emailonly):
+            if user in self._aliases and (emailonly is None or user in emailonly):
                 recipient = self._aliases[user] if override_recipient is None else override_recipient
                 user_fileset = FilterFileset("%s-%s" % (name, user), fileset, Filter(owner=user))
                 user_info = user_fileset.info()

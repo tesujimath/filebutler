@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -23,11 +24,11 @@ import shlex
 import string
 import time
 
-from CLIError import CLIError
-from Filter import Filter
-from Sorter import Sorter
-from Grouper import Grouper
-from util import str2size
+from .CLIError import CLIError
+from .Filter import Filter
+from .Sorter import Sorter
+from .Grouper import Grouper
+from .util import str2size
 
 def parseCommandOptions(now, toks, filter=False, sorter=False, grouper=False):
     """Parse filter and/or sorter options."""
