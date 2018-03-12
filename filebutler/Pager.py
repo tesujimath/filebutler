@@ -26,7 +26,7 @@ class Pager(object):
             pager = os.environ['PAGER']
         else:
             pager = 'less'
-        self._pager = subprocess.Popen(pager, stdin=subprocess.PIPE)
+        self._pager = subprocess.Popen(pager, stdin=subprocess.PIPE, universal_newlines=True)
         self.file = self._pager.stdin
 
     def close(self, force=False):
