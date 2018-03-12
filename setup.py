@@ -30,6 +30,7 @@ setup(name='filebutler',
       },
       license='GPLv3',
       install_requires=[
+          'future',
           'pytz',
           'tzlocal',
       ],

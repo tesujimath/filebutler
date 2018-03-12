@@ -8,7 +8,7 @@ URL:            https://github.com/tesujimath/filebutler
 Source0:        %{name}-%{version}.tar.gz
 
 BuildRequires:  python-devel
-Requires:       pytz python-tzlocal
+Requires:       pytz python-tzlocal python2-future
 BuildArch:      noarch
 
 %description
