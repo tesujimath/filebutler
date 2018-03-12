@@ -20,7 +20,6 @@
 import argparse
 import os.path
 import readline
-import string
 import sys
 
 from filebutler.CLI import CLI

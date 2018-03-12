@@ -21,7 +21,6 @@ import os.path
 import re
 import readline
 import shlex
-import string
 import time
 
 from .CLIError import CLIError

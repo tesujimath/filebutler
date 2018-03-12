@@ -19,7 +19,6 @@ from builtins import object
 import grp
 import pwd
 import re
-import string
 
 class Pathway(object):
 
@@ -50,7 +49,7 @@ class Pathway(object):
         self._ignorePathRegexes = []
         with open(ignorefilepath) as f:
             for line in f:
-                i_hash = string.find(line, '#')
+                i_hash = line.find('#')
                 if i_hash != -1:
                     regex = line[:i_hash].strip()
                 else:

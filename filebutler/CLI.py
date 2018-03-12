@@ -155,7 +155,7 @@ class CLI(object):
                         val = os.environ[name]
                     else:
                         val = ""
-                    toks[i] = string.replace(toks[i], "$%s" % name, val)
+                    toks[i] = toks[i].replace("$%s" % name, val)
                     #print("matched env var %s, val='%s', token now '%s'" % (name, val, toks[i]))
 
     def _fileset(self, name):
