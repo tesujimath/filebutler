@@ -17,6 +17,10 @@ from __future__ import absolute_import
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import input
+from builtins import str
+from builtins import range
+from builtins import object
 import cProfile
 import email.mime.text
 import errno
@@ -46,7 +50,7 @@ from .aliases import read_etc_aliases
 from .options import parseCommandOptions
 from .util import stderr, verbose_stderr, debug_log, initialize, profile, unix_time
 
-class CLI:
+class CLI(object):
 
     def __init__(self, args):
         self._attrs = {}
@@ -225,7 +229,7 @@ class CLI:
         done = False
         while not done:
             try:
-                line = raw_input("fb: ")
+                line = input("fb: ")
                 done = self._handleProcess(line)
             except EOFError:
                 print("bye")
@@ -402,7 +406,7 @@ class CLI:
             for filespec in sorted(dirs, key=lambda d: d.path, reverse=True):
                 filespec.delete(logf)
         # now reset mtimes of anything that's left
-        for path, mtime in mtimes.iteritems():
+        for path, mtime in mtimes.items():
             try:
                 os.utime(path, (mtime, mtime))
             except OSError as e:
@@ -420,7 +424,7 @@ class CLI:
 
     def _updateCacheCmd(self, toks, usage):
         if len(toks) == 1:
-            for name in self._caches.keys():
+            for name in list(self._caches.keys()):
                 #print("updating cache %s" % name)
                 self._caches[name].update()
         else:
@@ -429,7 +433,7 @@ class CLI:
 
     def _attrsAsStringMap(self):
         s = {}
-        for key, values in self._attrs.iteritems():
+        for key, values in self._attrs.items():
             s[key] = ' '.join(values)
         return s
 

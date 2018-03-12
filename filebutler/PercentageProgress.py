@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import division
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -16,6 +17,8 @@ from __future__ import absolute_import
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import object
+from past.utils import old_div
 import math
 import time
 
@@ -37,7 +40,7 @@ class PercentageProgress(object):
             if p > 0:
                 elapsed = time.time() - self._start
                 t = max(math.floor(elapsed * 1.0 / p - elapsed), 0)
-                m = t / 60
+                m = old_div(t, 60)
                 s = t % 60
                 remaining = ", %d:%02d remaining" % (m, s)
             else:

@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import division
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -16,6 +17,9 @@ from __future__ import absolute_import
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import str
+from builtins import object
+from past.utils import old_div
 import datetime
 import fnmatch
 
@@ -82,7 +86,7 @@ class Filter(object):
         if self.dataset is not None:
             s = append(s, "dataset:%s" % self.dataset)
         if self.sizeGeq is not None:
-            s = append(s, "size:+%dG" % (self.sizeGeq / Giga))
+            s = append(s, "size:+%dG" % (old_div(self.sizeGeq, Giga)))
         if self.mtimeBefore is not None:
             s = append(s, "older:%s" % date2str(self.mtimeBefore))
         if len(self.notPaths) > 0:

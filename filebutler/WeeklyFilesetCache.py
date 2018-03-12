@@ -16,6 +16,8 @@ from __future__ import absolute_import
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import str
+from builtins import object
 import datetime
 import os.path
 import re
@@ -83,7 +85,7 @@ class WeeklyFilesetCache(object):
 
     def merge_info(self, acc, filter=None):
         #debug_log("WeeklyFilesetCache(%s) merge_info\n" % self._path)
-        for w in self._weeks.keys():
+        for w in list(self._weeks.keys()):
             if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
                 if filter is not None and filter.mtimeBefore is not None and w < self.__class__.week(filter.mtimeBefore):
                     f1 = Filter.clearMtime(filter)
@@ -114,12 +116,12 @@ class WeeklyFilesetCache(object):
         fileset.add(filespec)
 
     def finalize(self):
-        for w in self._weeks.itervalues():
+        for w in self._weeks.values():
             if w is not None:
                 w.finalize()
 
     def saveDeletions(self):
         #debug_log("WeeklyFilesetCache(%s)::saveDeletions\n" % self._path)
-        for w in self._weeks.itervalues():
+        for w in self._weeks.values():
             if w is not None:
                 w.saveDeletions()

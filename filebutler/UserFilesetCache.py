@@ -16,6 +16,7 @@ from __future__ import absolute_import
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import object
 import os
 import os.path
 
@@ -72,7 +73,7 @@ class UserFilesetCache(object):
 
     def merge_info(self, acc, filter=None):
         #debug_log("UserFilesetCache(%s) merge_info\n" % self._path)
-        for u in self._users.keys():
+        for u in list(self._users.keys()):
             if filter is None or filter.owner is None or u == filter.owner:
                 self._fileset(u).merge_info(acc, Filter.clearOwner(filter))
 
@@ -89,12 +90,12 @@ class UserFilesetCache(object):
             self._permissioned[filespec.user] = True
 
     def finalize(self):
-        for u in self._users.itervalues():
+        for u in self._users.values():
             if u is not None:
                 u.finalize()
 
     def saveDeletions(self):
         #debug_log("UserFilesetCache(%s)::saveDeletions\n" % self._path)
-        for u in self._users.itervalues():
+        for u in self._users.values():
             if u is not None:
                 u.saveDeletions()

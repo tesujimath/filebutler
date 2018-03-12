@@ -16,6 +16,7 @@ from __future__ import absolute_import
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import object
 import os.path
 
 from .Filter import Filter
@@ -68,7 +69,7 @@ class DatasetFilesetCache(object):
 
     def merge_info(self, acc, filter=None):
         #debug_log("DatasetFilesetCache(%s) merge_info\n" % self._path)
-        for d in self._datasets.keys():
+        for d in list(self._datasets.keys()):
             if filter is None or filter.dataset is None or d == filter.dataset:
                 self._fileset(d).merge_info(acc, Filter.clearDataset(filter))
 
@@ -77,12 +78,12 @@ class DatasetFilesetCache(object):
         fileset.add(filespec)
 
     def finalize(self):
-        for d in self._datasets.itervalues():
+        for d in self._datasets.values():
             if d is not None:
                 d.finalize()
 
     def saveDeletions(self):
         #debug_log("DatasetFilesetCache(%s)::saveDeletions\n" % self._path)
-        for d in self._datasets.itervalues():
+        for d in self._datasets.values():
             if d is not None:
                 d.saveDeletions()

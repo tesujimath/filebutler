@@ -16,6 +16,7 @@ from __future__ import absolute_import
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import object
 from .util import size2str, warning
 
 class FilesetInfo(object):

@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import str
+from builtins import object
 import datetime
 import pytz
 import tzlocal

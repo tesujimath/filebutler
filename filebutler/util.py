@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import division
 # Copyright 2017 Simon Guest
 #
 # This file is part of filebutler.
@@ -16,6 +17,7 @@ from __future__ import absolute_import
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from past.utils import old_div
 import errno
 import os
 import resource
@@ -121,11 +123,11 @@ def size2str(n):
     if n < Kilo:
         return "0k"             # so small we don't care
     elif n < Mega:
-        return "%dk" % (n / Kilo)
+        return "%dk" % (old_div(n, Kilo))
     elif n < Giga:
-        return "%dM" % (n / Mega)
+        return "%dM" % (old_div(n, Mega))
     elif n < Tera:
-        return "%dG" % (n / Giga)
+        return "%dG" % (old_div(n, Giga))
     else:
         return "%.1fT" % (n * 1.0 / Tera)
 

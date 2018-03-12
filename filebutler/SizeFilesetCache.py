@@ -16,6 +16,9 @@ from __future__ import absolute_import
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import str
+from builtins import range
+from builtins import object
 import datetime
 import os.path
 import re
@@ -64,7 +67,7 @@ class SizeFilesetCache(object):
 
     def _slot(self, w):
         """Return slot for a given filesize."""
-        for i in reversed(range(len(self._sizes))):
+        for i in reversed(list(range(len(self._sizes)))):
             if w >= self._sizes[i]:
                 return i
         raise ValueError("no slot found for size %d, %s" % (w, str(self._sizes)))

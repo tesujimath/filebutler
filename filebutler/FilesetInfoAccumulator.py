@@ -16,6 +16,8 @@ from __future__ import absolute_import
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import str
+from builtins import object
 from .util import size2str, warning
 from .FilesetInfo import FilesetInfo
 
@@ -80,7 +82,7 @@ class FilesetInfoAccumulator(object):
 
     def fmt_users(self):
         lines = [self.fmt_total()]
-        for user in sorted(self._users.items(), key=lambda u: u[1].totalSize, reverse=True):
+        for user in sorted(list(self._users.items()), key=lambda u: u[1].totalSize, reverse=True):
             name = user[0]
             info = user[1]
             # exclude trivial small stuff
@@ -89,11 +91,11 @@ class FilesetInfoAccumulator(object):
         return '\n'.join(lines)
 
     def iterusers(self):
-        return self._users.iteritems()
+        return iter(self._users.items())
 
     def fmt_datasets(self):
         lines = [self.fmt_total()]
-        for dataset in sorted(self._datasets.items(), key=lambda u: u[1].totalSize, reverse=True):
+        for dataset in sorted(list(self._datasets.items()), key=lambda u: u[1].totalSize, reverse=True):
             name = dataset[0]
             info = dataset[1]
             # exclude trivial small stuff

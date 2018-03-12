@@ -16,6 +16,7 @@ from __future__ import absolute_import
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import object
 import errno
 import os
 
@@ -43,7 +44,7 @@ class PooledFile(object):
     @classmethod
     def flushAll(cls):
         """Flush all files in the pool."""
-        for f in cls.pool.keys():
+        for f in list(cls.pool.keys()):
             f.flush()
 
     def __init__(self, name, mode='r'):
