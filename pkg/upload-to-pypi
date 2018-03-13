@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+VERSION=`python -c 'from setuptools_scm import get_version; print(get_version())'`
+test -n "$VERSION" || {
+    echo >&2 "failed to get version"
+    exit 1
+}
+
+python setup.py sdist
+python setup.py bdist_wheel --universal
+twine upload --repository testpypi dist/filebutler-$VERSION.tar.gz dist/filebutler-$VERSION-py2.py3-none-any.whl

@@ -1,0 +1,37 @@
+#!/bin/sh
+
+set -e
+
+RPMBUILDDIR=$HOME/rpmbuild
+SOURCESDIR=$RPMBUILDDIR/SOURCES
+SPECDIR=$RPMBUILDDIR/SPECS
+SRPMDIR=$RPMBUILDDIR/SRPMS
+RPMDIR=$RPMBUILDDIR/RPMS/noarch
+
+# if these directories exist, the script will copy the output RPMs there, as root
+REPO=/bifo/support/admin/rpm/agr-free/7
+SRPMDEST=$REPO/SRPMS/Packages
+RPMDEST=$REPO/x86_64/Packages
+
+URLBASE=https://github.com/tesujimath/filebutler/archive
+
+VERSION=`python -c 'from setuptools_scm import get_version; print(get_version())'`
+test -n "$VERSION" || {
+    echo >&2 "failed to get version"
+    exit 1
+}
+export VERSION
+
+test -d $SOURCESDIR -a -d $SPECDIR || {
+    echo >&2 "missing rpmbuild directory structure"
+    exit 1
+}
+
+# fetch tarball from GitHub
+wget -O $SOURCESDIR/filebutler-$VERSION.tar.gz $URLBASE/v$VERSION.tar.gz
+
+cd $SPECDIR
+rpmbuild -ba filebutler.spec
+rpm --resign $SRPMDIR/filebutler-$VERSION-1.el7.centos.src.rpm $RPMDIR/filebutler-$VERSION-1.el7.centos.noarch.rpm
+test -d $SRPMDEST && sudo cp $SRPMDIR/filebutler-$VERSION-1.el7.centos.src.rpm $SRPMDEST
+test -d $RPMDEST && sudo cp $RPMDIR/filebutler-$VERSION-1.el7.centos.noarch.rpm $RPMDEST
