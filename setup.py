@@ -33,7 +33,6 @@ setup(name='filebutler',
         ],
       },
       package_data={
-          '': ['LICENSE', 'Makefile'],
           'doc': ['*.rst'],
           'examples': ['*'],
       },
