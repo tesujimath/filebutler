@@ -32,6 +32,11 @@ setup(name='filebutler',
             'filebutler = filebutler.__main__:main',
         ],
       },
+      package_data={
+          '': ['LICENSE', 'Makefile'],
+          'doc': ['*.rst'],
+          'examples': ['*'],
+      },
       license='GPLv3',
       install_requires=[
           'future',

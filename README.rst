@@ -6,14 +6,33 @@ Huge means of the order of 100 million files. The motivation is that
 find is far too slow on directory trees with this many files. Even
 working with filelists generated offline by find can be rather slow for
 interactive use. Filebutler improves on this by structuring filelists by
-age, by owner, and by dataset (see below).
+age, by size, by owner, and by dataset (see below).
+
+Installation
+------------
+
+Filebutler is now on PyPI, so may be installed using pip, preferably in
+a virtualenv.
+
+::
+
+    $ pip install filebutler
+
+Alternatively, an RPM may be built from the SPEC file in the repo, but
+note that the version number is taken from the environment variable
+``VERSION``, since there are no embedded version numbers in the sources,
+only git tags.
+
+::
+
+    $ VERSION=0.14.1 rpmbuild -ba filebutler.spec
 
 Example Use
 -----------
 
 ::
 
-    inscrutable$ filebutler
+    $ filebutler
     fb: ls
     gypsy-scratch filelist /mirror/gypsy/z202/scratch/all-scratch-files cached on 2017-12-22
     infernal-scratch filelist /mirror/infernal/z302/scratch/all-scratch-files cached on 2017-12-22
@@ -118,7 +137,7 @@ Filebutler has two main uses:
 -  privileged users, for deleting such users' files automatically, and
    emailing warnings in advance
 
-The `manpage <doc/filebutler.md>`__ lists the commands available for
+The `manpage <doc/filebutler.rst>`__ lists the commands available for
 both types of user.
 
 Unprivileged Users
@@ -172,7 +191,7 @@ to the interactive command set.
 See the `example filebutlerrc <examples/filebutlerrc>`__ file.
 
 The commands and attributes available are defined on the
-`manpage <doc/filebutler.md>`__.
+`manpage <doc/filebutler.rst>`__.
 
 Email Templates
 ~~~~~~~~~~~~~~~
@@ -216,4 +235,4 @@ For example:
     0 5 * * * filebutler -c update-cache --batch
     0 7 * * 1 filebutler -c 'send-emails warn-old-scratch; delete delete-old-scratch' --batch
 
-See the `manpage <doc/filebutler.md>`__ for further details.
+See the `manpage <doc/filebutler.rst>`__ for further details.
