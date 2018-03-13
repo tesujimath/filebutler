@@ -10,4 +10,3 @@ test -n "$VERSION" || {
 
 python setup.py sdist
 python setup.py bdist_wheel --universal
-twine upload --repository testpypi dist/filebutler-$VERSION.tar.gz dist/filebutler-$VERSION-py2.py3-none-any.whl
