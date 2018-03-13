@@ -30,7 +30,12 @@ test -d $SOURCESDIR -a -d $SPECDIR || {
 # fetch tarball from GitHub
 wget -O $SOURCESDIR/filebutler-$VERSION.tar.gz $URLBASE/v$VERSION.tar.gz
 
+# extract the spec file from the tarball
 cd $SPECDIR
+rm -f filebutler.spec
+tar xaf $SOURCESDIR/filebutler-$VERSION.tar.gz --strip-components=1 filebutler-$VERSION/filebutler.spec
+
+# and build it
 rpmbuild -ba filebutler.spec
 rpm --resign $SRPMDIR/filebutler-$VERSION-1.el7.centos.src.rpm $RPMDIR/filebutler-$VERSION-1.el7.centos.noarch.rpm
 test -d $SRPMDEST && sudo cp $SRPMDIR/filebutler-$VERSION-1.el7.centos.src.rpm $SRPMDEST
