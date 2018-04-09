@@ -20,6 +20,7 @@
 import argparse
 import os.path
 import readline
+from setuptools_scm import get_version
 import sys
 
 from filebutler.CLI import CLI
@@ -29,9 +30,14 @@ def main():
     parser.add_argument('--batch', action='store_true', dest='batch', help='batch mode')
     parser.add_argument('--debug', type=argparse.FileType('w'), dest='debug', metavar='FILE', help='debug mode')
     parser.add_argument('--profile', action='store_true', dest='profile', help='profile mode')
+    parser.add_argument('--version', action='store_true', dest='version', help='show version and exit')
     parser.add_argument('-v', action='store_true', dest='verbose', help='verbose mode')
     parser.add_argument('-c', dest='command', help='command to invoke')
     args = parser.parse_args()
+
+    if args.version:
+        print('filebutler v%s' % get_version())
+        sys.exit(0)
 
     cli = CLI(args)
     cli.startup()
