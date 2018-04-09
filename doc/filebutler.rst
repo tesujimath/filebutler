@@ -456,6 +456,10 @@ Example:
 OPTIONS
 =======
 
+``-h``, ``--help`` Show help and exit
+
+``--version`` Show version and exit
+
 ``-c`` *commands* Execute commands (semi-colon separated), rather than
 run interactively
 
@@ -463,7 +467,9 @@ run interactively
 
 ``--batch`` Run in batch mode, with no progress feedback
 
-``--debug`` Run in debug mode
+``--debug`` *file* Run in debug mode, with output going to *file*
+
+``--profile`` Run in profile mode
 
 CONFIGURATION
 =============
