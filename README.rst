@@ -18,14 +18,14 @@ a virtualenv.
 
     $ pip install filebutler
 
-Alternatively, an RPM may be built from the SPEC file in the repo, but
-note that the version number is taken from the environment variable
-``VERSION``, since there are no embedded version numbers in the sources,
-only git tags.
+Alternatively, filebutler is also on conda-forge.
 
 ::
 
-    $ VERSION=0.14.1 rpmbuild -ba filebutler.spec
+    $ conda install filebutler
+
+Installing filebutler from RPM is now deprecated, and the spec file has therefore
+been removed from the repo.
 
 Example Use
 -----------
