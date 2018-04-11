@@ -20,10 +20,10 @@
 import argparse
 import os.path
 import readline
-from setuptools_scm import get_version
 import sys
 
 from filebutler.CLI import CLI
+from filebutler.version import get_version
 
 def main():
     parser = argparse.ArgumentParser(description="""filebutler v%s - view and prune old files.""" % get_version())

@@ -40,7 +40,7 @@ setup(name='filebutler',
       install_requires=[
           'future',
           'pytz',
-          'setuptools_scm',
+          'setuptools',
           'tzlocal',
       ],
       python_requires='>=2.7',
