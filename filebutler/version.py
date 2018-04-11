@@ -18,9 +18,9 @@
 import pkg_resources
 
 def get_version():
-    print('module is %s' % __name__)
+    package = __name__.split('.', 1)[0]
     try:
-        version = pkg_resources.get_distribution(__name__).version
+        version = pkg_resources.get_distribution(package).version
     except pkg_resources.DistributionNotFound:
         # package is not installed
         version = 'UNDEFINED'
