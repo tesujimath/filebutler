@@ -56,7 +56,7 @@ Usage:
 
 ::
 
-    info [-u|-d|-e] <fileset> [<filter-params>]
+    info [-u|-d|-e|-s] <fileset> [<filter-params>]
 
 With ``-u``, shows breakdown by user, sorted by size.
 
@@ -64,6 +64,8 @@ With ``-d``, shows breakdown by dataset, sorted by size.
 
 With ``-e``, shows breakdown by user, sorted by size, only for users
 with no email alias.
+
+With ``-s``, shows breakdown by size, configured by the sizebuckets attribute
 
 print
 -----

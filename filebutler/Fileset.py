@@ -26,8 +26,8 @@ class Fileset(object):
     def __init__(self):
         pass
 
-    def info(self, filter=None):
-        acc = FilesetInfoAccumulator()
+    def info(self, attrs, filter=None):
+        acc = FilesetInfoAccumulator(attrs)
         self.merge_info(acc, filter)
         return acc
 

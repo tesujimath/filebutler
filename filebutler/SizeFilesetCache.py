@@ -24,6 +24,7 @@ import os.path
 import re
 import shutil
 
+from .Buckets import Buckets
 from .Filter import Filter
 from .FilespecMerger import FilespecMerger
 from .PooledFile import listdir
@@ -38,54 +39,28 @@ class SizeFilesetCache(object):
         self._attrs = attrs
         self._sel = sel
         self._next = next
-        self._initializeBuckets()
+        self._sizebuckets = Buckets([str2size(s) for s in self._attrs['sizebuckets']] if 'sizebuckets' in self._attrs else [])
+        self._filesets = [None] * self._sizebuckets.len
 
-    def _initializeBuckets(self):
-        self._sizes = [0]
-        self._buckets = [None]
-        if 'sizebuckets' in self._attrs:
-            for sizestr in self._attrs['sizebuckets']:
-                self._addBucket(str2size(sizestr))
+    def _subpath(self, b):
+        return os.path.join(self._path, str(b))
 
-    def _addBucket(self, size):
-        for i in range(len(self._sizes)):
-            if size == self._sizes[i]:
-                # already present, do nothing
-                return
-            elif size < self._sizes[i]:
-                self._sizes.insert(i, size)
-                self._buckets.insert(i, None) # stub
-                return
-        self._sizes.append(size)
-        self._buckets.append(None) # stub
-
-    def _subpath(self, w):
-        return os.path.join(self._path, str(w))
-
-    def _subdeltadir(self, w):
-        return os.path.join(self._deltadir, str(w))
-
-    def _slot(self, w):
-        """Return slot for a given filesize."""
-        for i in reversed(list(range(len(self._sizes)))):
-            if w >= self._sizes[i]:
-                return i
-        raise ValueError("no slot found for size %d, %s" % (w, str(self._sizes)))
+    def _subdeltadir(self, b):
+        return os.path.join(self._deltadir, str(b))
 
     def _fileset(self, i):
         """On demand creation of child filesets."""
-        w = self._sizes[i]
-        fileset = self._buckets[i]
+        b = self._sizebuckets.bound(i)
+        fileset = self._filesets[i]
         if fileset is None:
-            fileset = self._next(self._subpath(w), self._subdeltadir(w), self._mapper, self._attrs, self._sel)
-            self._buckets[i] = fileset
+            fileset = self._next(self._subpath(b), self._subdeltadir(b), self._mapper, self._attrs, self._sel.withSizebucket(b))
+            self._filesets[i] = fileset
         return fileset
 
     def select(self, filter=None):
         merger = FilespecMerger()
-        for i in range(len(self._sizes)):
-            minSize = self._sizes[i]
-            maxSize = self._sizes[i + 1] - 1 if i < len(self._sizes) - 1 else None
+        for i in range(self._sizebuckets.len):
+            minSize, maxSize = self._sizebuckets.minmax(i)
             if filter is None or filter.sizeGeq is None or maxSize is None or maxSize >= filter.sizeGeq:
                 if filter is not None and filter.sizeGeq is not None and minSize >= filter.sizeGeq:
                     f1 = Filter.clearSize(filter)
@@ -99,9 +74,8 @@ class SizeFilesetCache(object):
     def merge_info(self, acc, filter=None):
         #debug_log("SizeFilesetCache(%s) merge_info\n" % self._path)
 
-        for i in range(len(self._sizes)):
-            minSize = self._sizes[i]
-            maxSize = self._sizes[i + 1] - 1 if i < len(self._sizes) - 1 else None
+        for i in range(self._sizebuckets.len):
+            minSize, maxSize = self._sizebuckets.minmax(i)
             if filter is None or filter.sizeGeq is None or maxSize is None or maxSize >= filter.sizeGeq:
                 if filter is not None and filter.sizeGeq is not None and minSize >= filter.sizeGeq:
                     f1 = Filter.clearSize(filter)
@@ -110,16 +84,16 @@ class SizeFilesetCache(object):
                 self._fileset(i).merge_info(acc, f1)
 
     def add(self, filespec):
-        fileset = self._fileset(self._slot(filespec.size))
+        fileset = self._fileset(self._sizebuckets.indexContaining(filespec.size))
         fileset.add(filespec)
 
     def finalize(self):
-        for b in self._buckets:
-            if b is not None:
-                b.finalize()
+        for fs in self._filesets:
+            if fs is not None:
+                fs.finalize()
 
     def saveDeletions(self):
         #debug_log("SizeFilesetCache(%s)::saveDeletions\n" % self._path)
-        for b in self._buckets:
-            if b is not None:
-                b.saveDeletions()
+        for fs in self._filesets:
+            if fs is not None:
+                fs.saveDeletions()

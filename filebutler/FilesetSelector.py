@@ -18,12 +18,16 @@
 from builtins import object
 class FilesetSelector(object):
 
-    def __init__(self, owner=None, dataset=None):
+    def __init__(self, owner=None, dataset=None, sizebucket=None):
         self.owner = owner
         self.dataset = dataset
+        self.sizebucket = sizebucket
 
     def withOwner(self, owner):
-        return self.__class__(owner, self.dataset)
+        return self.__class__(owner, self.dataset, self.sizebucket)
 
     def withDataset(self, dataset):
-        return self.__class__(self.owner, dataset)
+        return self.__class__(self.owner, dataset, self.sizebucket)
+
+    def withSizebucket(self, sizebucket):
+        return self.__class__(self.owner, self.dataset, sizebucket)

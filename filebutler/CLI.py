@@ -99,7 +99,7 @@ class CLI(object):
                                'method': self._filesetCmd,
             },
             'info':          { 'desc': 'show summary information for a fileset',
-                               'usage': 'info [-u|-d|-e] <fileset> [<filter-params>]',
+                               'usage': 'info [-u|-d|-e|-s] <fileset> [<filter-params>]',
                                'method': self._infoCmd,
             },
             'print':         { 'desc': 'print files in a fileset, optionally filtered, via $PAGER',
@@ -327,7 +327,7 @@ class CLI(object):
     def _infoCmd(self, toks, usage):
         if len(toks) < 2:
             raise CLIError("usage: %s" % usage)
-        if toks[1] == '-u' or toks[1] == '-d' or toks[1] == '-e':
+        if toks[1] == '-u' or toks[1] == '-d' or toks[1] == '-e' or toks[1] == '-s':
             mode = toks[1][1]
             i_fileset = 2
         else:
@@ -338,7 +338,7 @@ class CLI(object):
             filter, _, _ = parseCommandOptions(self._now, toks[i_fileset + 1:], filter=True)
         else:
             filter = None
-        info = self._fileset(name).info(filter)
+        info = self._fileset(name).info(self._attrs, filter)
         if mode == 'a':
             print(info.fmt_total())
         elif mode == 'u':
@@ -349,6 +349,8 @@ class CLI(object):
             for user, userinfo in info.iterusers():
                 if user not in self._aliases:
                     print("%s %s" % (user, str(userinfo)))
+        elif mode == 's':
+            print(info.fmt_sizes())
         else:
             raise CLIError("usage: %s" % usage)
 
@@ -464,11 +466,11 @@ class CLI(object):
         m['fileset_descriptor'] = str(fileset.description())
         s = smtplib.SMTP('localhost')
         sender = ' '.join(self._attrs['emailfrom'])
-        for user, userfileinfo in fileset.info().iterusers():
+        for user, userfileinfo in fileset.info(self._attrs).iterusers():
             if user in self._aliases and (emailonly is None or user in emailonly):
                 recipient = self._aliases[user] if override_recipient is None else override_recipient
                 user_fileset = FilterFileset("%s-%s" % (name, user), fileset, Filter(owner=user))
-                user_info = user_fileset.info()
+                user_info = user_fileset.info(self._attrs)
                 m['username'] = user
                 m['info'] = user_info.fmt_total()
                 m['info_datasets'] = user_info.fmt_datasets()
