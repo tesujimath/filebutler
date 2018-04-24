@@ -426,7 +426,7 @@ class CLI(object):
 
     def _updateCacheCmd(self, toks, usage):
         if len(toks) == 1:
-            for name in list(self._caches.keys()):
+            for name in sorted(list(self._caches.keys())):
                 #print("updating cache %s" % name)
                 self._caches[name].update()
         else:
