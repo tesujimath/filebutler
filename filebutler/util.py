@@ -119,6 +119,12 @@ Mega = 1024 ** 2
 Giga = 1024 ** 3
 Tera = 1024 ** 4
 
+def size2str0(n):
+    if n == 0:
+        return "0"
+    else:
+        return size2str(n)
+
 def size2str(n):
     if n < Kilo:
         return "0k"             # so small we don't care

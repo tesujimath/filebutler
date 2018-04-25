@@ -18,7 +18,7 @@ from __future__ import absolute_import
 
 from builtins import str
 from builtins import object
-from .util import str2size, size2str, warning
+from .util import str2size, size2str0, warning
 from .Buckets import Buckets
 from .FilesetInfo import FilesetInfo
 
@@ -141,8 +141,8 @@ class FilesetInfoAccumulator(object):
                 # exclude trivial small stuff
                 if info.totalSize > 1024:
                     if i < last:
-                        interval = "[%s, %s)" % (size2str(self._sizebuckets.bound(i)), size2str(self._sizebuckets.bound(i + 1)))
+                        interval = "%4s - %4s" % (size2str0(self._sizebuckets.bound(i)), size2str0(self._sizebuckets.bound(i + 1)))
                     else:
-                        interval = "[%s, .)" % size2str(self._sizebuckets.bound(i))
-                    lines.append("%-11s %s" % (interval, str(info)))
+                        interval = "%4s +     " % size2str0(self._sizebuckets.bound(i))
+                    lines.append("%s  %s" % (interval, str(info)))
         return '\n'.join(lines)
