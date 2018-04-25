@@ -91,10 +91,11 @@ class GnuFindOutFileset(Fileset):
             warning("fileset %s ignoring unreadable filelist %s: %s" % (self.name, self._path, e.strerror))
             return
         progress = PercentageProgress("reading %s" % self._path)
-        n = 0
+        n_read = 0
         with open(self._path) as f:
             for line in f:
-                progress.report(f.tell() * 1.0 / filesize)
+                n_read += len(line)
+                progress.report(n_read * 1.0 / filesize)
                 fields = line.rstrip().split(None, 10)
                 if len(fields) > 10:
                     path = re.sub(self._match, self._replace, fields[10])
