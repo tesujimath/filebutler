@@ -333,6 +333,8 @@ class CLI(object):
         else:
             mode = 'a'          # all
             i_fileset = 1
+        if len(toks) <= i_fileset:
+            raise CLIError("usage: %s" % usage)
         name = toks[i_fileset]
         if len(toks) > i_fileset:
             filter, _, _ = parseCommandOptions(self._now, toks[i_fileset + 1:], filter=True)
