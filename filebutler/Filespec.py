@@ -79,17 +79,17 @@ class Filespec(object):
             # tell owning fileset we're deleted
             self.fileset.delete(self)
         except OSError as e:
+            debug_log("failed to delete %s, %s\n" % (self.path, e))
             if e.errno == errno.ENOENT:
                 # deleted already, don't care
-                debug_log("failed to delete %s, ENOENT\n" % self.path)
-            elif e.errno == errno.EACCES:
+                pass
+            elif e.errno == errno.EACCES or e.errno == errno.EPERM:
                 # silently refuse to delete where we don't have permission
-                debug_log("failed to delete %s, EACCES\n" % self.path)
+                pass
             elif e.errno == errno.ENOTEMPTY:
                 # silently refuse to delete non-empty directory
-                debug_log("failed to delete %s, ENOTEMPTY\n" % self.path)
+                pass
             else:
-                debug_log("failed to delete %s, %s\n" % (self.path, e))
                 raise
         if deleted:
             logf.write("%s%s\n" % self.format(pad=False))

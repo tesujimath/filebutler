@@ -417,7 +417,7 @@ class CLI(object):
                 if e.errno == errno.ENOENT:
                     # silently do nothing if there's no directory left
                     pass
-                elif e.errno == errno.EACCES:
+                elif e.errno == errno.EACCES or e.errno == errno.EPERM:
                     # silently do nothing if we don't have permission to fix mtime
                     pass
                 else:

@@ -98,7 +98,7 @@ class Cache(Fileset):
         try:
             cache.create()
         except OSError as e:
-            if e.errno == errno.EACCES:
+            if e.errno == errno.EACCES or e.errno == errno.EPERM:
                 # not ours to update, so silently do nothing
                 warning("can't update system cache %s" % self.name)
                 return

@@ -50,7 +50,7 @@ class DeletionLog(object):
         try:
             self._file = open(os.path.join(syslogdir, datestamp), 'a')
         except IOError as e:
-            if e.errno == errno.EACCES or e.errno == errno.ENOENT:
+            if e.errno == errno.EACCES or e.errno == errno.EPERM or e.errno == errno.ENOENT:
                 # syslogdir no good, try userlogdir
                 try:
                     os.makedirs(userlogdir)
