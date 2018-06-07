@@ -30,7 +30,11 @@ class Pager(object):
         self.file = self._pager.stdin
 
     def close(self, force=False):
-        self.file.close()
+        try:
+            self.file.close()
+        except:
+            # we don't care what happens here, but most likely it's a broken pipe
+            pass
         if force:
             self._pager.terminate()
         self._pager.wait()
