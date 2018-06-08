@@ -48,7 +48,7 @@ from .Pathway import Pathway
 from .UnionFileset import UnionFileset
 from .aliases import read_etc_aliases
 from .options import parseCommandOptions
-from .util import stderr, verbose_stderr, debug_log, initialize, profile, unix_time
+from .util import stderr, verbose_stderr, debug_log, initialize, profile, unix_time, yes_or_no
 
 class CLI(object):
 
@@ -394,6 +394,14 @@ class CLI(object):
             filter, _, _ = parseCommandOptions(self._now, deleteOptions, filter=True)
         else:
             filter = None
+
+        # get confirmation
+        info = fileset.info(self._attrs, filter)
+        if not yes_or_no('Really delete %s' % info.fmt_total()):
+            return
+
+        # do it
+        print('... deleting %s' % name)
         with DeletionLog(self._attrs) as logf:
             # delete directories after their contents
             dirs = []

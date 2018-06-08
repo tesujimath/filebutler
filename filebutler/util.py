@@ -186,3 +186,10 @@ def unix_time(function, args=tuple(), kwargs={}):
     return {'real': end_time - start_time,
             'sys': end_resources.ru_stime - start_resources.ru_stime,
             'user': end_resources.ru_utime - start_resources.ru_utime}
+
+def yes_or_no(prompt, default=False):
+    try:
+        s = input('%s [yN]? ' % prompt)
+        return len(s) >= 1 and s[0] in 'Yy'
+    except:
+        return default
