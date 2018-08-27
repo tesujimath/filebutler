@@ -20,7 +20,6 @@ from builtins import object
 import os.path
 
 from .FilesetCache import FilesetCache
-from .FilespecMerger import FilespecMerger
 from .Filter import Filter
 from .PooledFile import listdir
 from .util import debug_log
@@ -53,21 +52,11 @@ class DatasetFilesetCache(FilesetCache):
             self._datasets[d] = fileset
         return fileset
 
-    def select(self, filter=None):
-        merger = FilespecMerger()
+    def filtered(self, filter=None):
         datasets = sorted(self._datasets.keys())
         for d in datasets:
             if filter is None or filter.dataset is None or d == filter.dataset:
-                merger.add(self._fileset(d).select(Filter.clearDataset(filter)))
-        # no yield from in python 2, so:
-        for filespec in merger.merge():
-            yield filespec
-
-    def merge_info(self, acc, filter=None):
-        #debug_log("DatasetFilesetCache(%s) merge_info\n" % self._path)
-        for d in list(self._datasets.keys()):
-            if filter is None or filter.dataset is None or d == filter.dataset:
-                self._fileset(d).merge_info(acc, Filter.clearDataset(filter))
+                yield self._fileset(d), Filter.clearDataset(filter)
 
     def add(self, filespec):
         fileset = self._fileset(filespec.dataset)

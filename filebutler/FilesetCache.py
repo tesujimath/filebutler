@@ -19,6 +19,8 @@ from __future__ import absolute_import
 from builtins import object
 import os.path
 
+from .FilespecMerger import FilespecMerger
+
 class FilesetCache(object):
     """FilesetCache is a base class."""
 
@@ -35,3 +37,15 @@ class FilesetCache(object):
             return os.path.join(self._deltadir, "deleted.info")
         else:
             return os.path.join(self._path, "info")
+
+    def select(self, filter=None):
+        merger = FilespecMerger()
+        for f, f1 in self.filtered(filter):
+            merger.add(f.select(f1))
+        # no yield from in python 2, so:
+        for filespec in merger.merge():
+            yield filespec
+
+    def merge_info(self, acc, filter=None):
+        for f, f1 in self.filtered(filter):
+            f.merge_info(acc, f1)

@@ -25,7 +25,6 @@ import shutil
 
 from .Filter import Filter
 from .FilesetCache import FilesetCache
-from .FilespecMerger import FilespecMerger
 from .PooledFile import listdir
 from .util import verbose_stderr, debug_log
 
@@ -65,8 +64,8 @@ class WeeklyFilesetCache(FilesetCache):
             self._weeks[w] = fileset
         return fileset
 
-    def select(self, filter=None):
-        merger = FilespecMerger()
+    def filtered(self, filter=None):
+        """Yield each child fileset and its filter."""
         weeks = sorted(self._weeks.keys())
         for w in weeks:
             if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
@@ -74,20 +73,7 @@ class WeeklyFilesetCache(FilesetCache):
                     f1 = Filter.clearMtime(filter)
                 else:
                     f1 = filter
-                merger.add(self._fileset(w).select(f1))
-        # no yield from in python 2, so:
-        for filespec in merger.merge():
-            yield filespec
-
-    def merge_info(self, acc, filter=None):
-        #debug_log("WeeklyFilesetCache(%s) merge_info\n" % self._path)
-        for w in list(self._weeks.keys()):
-            if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
-                if filter is not None and filter.mtimeBefore is not None and w < self.__class__.week(filter.mtimeBefore):
-                    f1 = Filter.clearMtime(filter)
-                else:
-                    f1 = filter
-                self._fileset(w).merge_info(acc, f1)
+                yield self._fileset(w), f1
 
     def create(self):
         """Create empty cache on disk, purging any previous."""

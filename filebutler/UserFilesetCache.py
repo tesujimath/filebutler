@@ -21,7 +21,6 @@ import os
 import os.path
 
 from .FilesetCache import FilesetCache
-from .FilespecMerger import FilespecMerger
 from .Filter import Filter
 from .PooledFile import listdir
 from .util import debug_log
@@ -57,21 +56,11 @@ class UserFilesetCache(FilesetCache):
             self._permissioned[u] = False
         return fileset
 
-    def select(self, filter=None):
-        merger = FilespecMerger()
+    def filtered(self, filter=None):
         users = sorted(self._users.keys())
         for u in users:
             if filter is None or filter.owner is None or u == filter.owner:
-                merger.add(self._fileset(u).select(Filter.clearOwner(filter)))
-        # no yield from in python 2, so:
-        for filespec in merger.merge():
-            yield filespec
-
-    def merge_info(self, acc, filter=None):
-        #debug_log("UserFilesetCache(%s) merge_info\n" % self._path)
-        for u in list(self._users.keys()):
-            if filter is None or filter.owner is None or u == filter.owner:
-                self._fileset(u).merge_info(acc, Filter.clearOwner(filter))
+                yield self._fileset(u), Filter.clearOwner(filter)
 
     def add(self, filespec):
         fileset = self._fileset(filespec.user)

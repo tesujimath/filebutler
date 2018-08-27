@@ -26,7 +26,6 @@ import shutil
 
 from .Buckets import Buckets
 from .FilesetCache import FilesetCache
-from .FilespecMerger import FilespecMerger
 from .Filter import Filter
 from .PooledFile import listdir
 from .util import str2size, verbose_stderr, debug_log
@@ -53,8 +52,7 @@ class SizeFilesetCache(FilesetCache):
             self._filesets[i] = fileset
         return fileset
 
-    def select(self, filter=None):
-        merger = FilespecMerger()
+    def filtered(self, filter=None):
         for i in range(self._sizebuckets.len):
             minSize, maxSize = self._sizebuckets.minmax(i)
             if filter is None or filter.sizeGeq is None or maxSize is None or maxSize >= filter.sizeGeq:
@@ -62,22 +60,7 @@ class SizeFilesetCache(FilesetCache):
                     f1 = Filter.clearSize(filter)
                 else:
                     f1 = filter
-                merger.add(self._fileset(i).select(f1))
-        # no yield from in python 2, so:
-        for filespec in merger.merge():
-            yield filespec
-
-    def merge_info(self, acc, filter=None):
-        #debug_log("SizeFilesetCache(%s) merge_info\n" % self._path)
-
-        for i in range(self._sizebuckets.len):
-            minSize, maxSize = self._sizebuckets.minmax(i)
-            if filter is None or filter.sizeGeq is None or maxSize is None or maxSize >= filter.sizeGeq:
-                if filter is not None and filter.sizeGeq is not None and minSize >= filter.sizeGeq:
-                    f1 = Filter.clearSize(filter)
-                else:
-                    f1 = filter
-                self._fileset(i).merge_info(acc, f1)
+                yield self._fileset(i), f1
 
     def add(self, filespec):
         fileset = self._fileset(self._sizebuckets.indexContaining(filespec.size))
