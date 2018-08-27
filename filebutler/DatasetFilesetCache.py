@@ -21,7 +21,6 @@ import os.path
 
 from .FilesetCache import FilesetCache
 from .Filter import Filter
-from .PooledFile import listdir
 from .util import debug_log
 
 class DatasetFilesetCache(FilesetCache):
@@ -32,14 +31,8 @@ class DatasetFilesetCache(FilesetCache):
 
         # load stubs for all datasets found
         if os.path.exists(self._path):
-            for d in listdir(self._path):
+            for d in self.children():
                 self._datasets[d] = None # stub
-
-    def _subpath(self, d):
-        return os.path.join(self._path, d)
-
-    def _subdeltadir(self, d):
-        return os.path.join(self._deltadir, d)
 
     def _fileset(self, d):
         """On demand creation of child filesets."""

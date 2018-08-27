@@ -21,6 +21,7 @@ import os.path
 
 from .FilesetInfo import FilesetInfo
 from .FilespecMerger import FilespecMerger
+from .PooledFile import listdir
 from .util import debug_log, warning
 
 class FilesetCache(object):
@@ -35,6 +36,18 @@ class FilesetCache(object):
         self._next = next
         self._fileinfo = None
         self._deletedInfo = FilesetInfo()
+
+    def _subpath(self, x):
+        return os.path.join(self._path, '_' + str(x))
+
+    def _subdeltadir(self, x):
+        return os.path.join(self._deltadir, '_' + str(x))
+
+    def children(self):
+        """Child filesets are stored with a leading underscore, to leave room for metadata."""
+        for x in listdir(self._path):
+            if x.startswith('_'):
+                yield x[1:]
 
     def infopath(self, deleted=False):
         if deleted:

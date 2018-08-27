@@ -22,7 +22,6 @@ import os.path
 
 from .FilesetCache import FilesetCache
 from .Filter import Filter
-from .PooledFile import listdir
 from .util import debug_log
 
 class UserFilesetCache(FilesetCache):
@@ -34,15 +33,9 @@ class UserFilesetCache(FilesetCache):
 
         # load stubs for all users found
         if os.path.exists(self._path):
-            for u in listdir(self._path):
+            for u in self.children():
                 self._users[u] = None # stub
                 self._permissioned[u] = False
-
-    def _subpath(self, u):
-        return os.path.join(self._path, u)
-
-    def _subdeltadir(self, u):
-        return os.path.join(self._deltadir, u)
 
     def _fileset(self, u):
         """On demand creation of child filesets."""

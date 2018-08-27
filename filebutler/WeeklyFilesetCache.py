@@ -43,15 +43,9 @@ class WeeklyFilesetCache(FilesetCache):
 
         # load stubs for all weeks found
         if os.path.exists(self._path):
-            for wstr in listdir(self._path):
+            for wstr in self.children():
                 w = int(wstr)
                 self._weeks[w] = None # stub
-
-    def _subpath(self, w):
-        return os.path.join(self._path, str(w))
-
-    def _subdeltadir(self, w):
-        return os.path.join(self._deltadir, str(w))
 
     def _fileset(self, w):
         """On demand creation of child filesets."""
@@ -84,7 +78,7 @@ class WeeklyFilesetCache(FilesetCache):
         if os.path.exists(self._path):
             # Purge existing cache.
             # For safety in case of misconfiguration, we only delete directories in the format YYYYWW
-            YYYYWW = re.compile(r"""^\d\d\d\d\d\d$""")
+            YYYYWW = re.compile(r"""^_?\d\d\d\d\d\d$""")
             for x in listdir(self._path):
                 px = os.path.join(self._path, x)
                 if YYYYWW.match(x):

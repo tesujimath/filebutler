@@ -27,7 +27,6 @@ import shutil
 from .Buckets import Buckets
 from .FilesetCache import FilesetCache
 from .Filter import Filter
-from .PooledFile import listdir
 from .util import str2size, verbose_stderr, debug_log
 
 class SizeFilesetCache(FilesetCache):
@@ -36,12 +35,6 @@ class SizeFilesetCache(FilesetCache):
         super(self.__class__, self).__init__(path, deltadir, mapper, attrs, sel, next)
         self._sizebuckets = Buckets([str2size(s) for s in self._attrs['sizebuckets']] if 'sizebuckets' in self._attrs else [])
         self._filesets = [None] * self._sizebuckets.len
-
-    def _subpath(self, b):
-        return os.path.join(self._path, str(b))
-
-    def _subdeltadir(self, b):
-        return os.path.join(self._deltadir, str(b))
 
     def _fileset(self, i):
         """On demand creation of child filesets."""
