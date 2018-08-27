@@ -20,20 +20,16 @@ from builtins import object
 import os
 import os.path
 
-from .Filter import Filter
+from .FilesetCache import FilesetCache
 from .FilespecMerger import FilespecMerger
+from .Filter import Filter
 from .PooledFile import listdir
 from .util import debug_log
 
-class UserFilesetCache(object):
+class UserFilesetCache(FilesetCache):
 
     def __init__(self, path, deltadir, mapper, attrs, sel, next):
-        self._path = path
-        self._deltadir = deltadir
-        self._mapper = mapper
-        self._attrs = attrs
-        self._sel = sel
-        self._next = next
+        super(self.__class__, self).__init__(path, deltadir, mapper, attrs, sel, next)
         self._users = {}        # of fileset, indexed by integer user
         self._permissioned = {}        # of boolean, indexed by integer user
 

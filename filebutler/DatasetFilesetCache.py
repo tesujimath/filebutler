@@ -19,20 +19,16 @@ from __future__ import absolute_import
 from builtins import object
 import os.path
 
-from .Filter import Filter
+from .FilesetCache import FilesetCache
 from .FilespecMerger import FilespecMerger
+from .Filter import Filter
 from .PooledFile import listdir
 from .util import debug_log
 
-class DatasetFilesetCache(object):
+class DatasetFilesetCache(FilesetCache):
 
     def __init__(self, path, deltadir, mapper, attrs, sel, next):
-        self._path = path
-        self._deltadir = deltadir
-        self._mapper = mapper
-        self._attrs = attrs
-        self._sel = sel
-        self._next = next
+        super(self.__class__, self).__init__(path, deltadir, mapper, attrs, sel, next)
         self._datasets = {}        # of fileset, indexed by dataset
 
         # load stubs for all datasets found

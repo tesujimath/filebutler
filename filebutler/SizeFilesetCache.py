@@ -25,20 +25,16 @@ import re
 import shutil
 
 from .Buckets import Buckets
-from .Filter import Filter
+from .FilesetCache import FilesetCache
 from .FilespecMerger import FilespecMerger
+from .Filter import Filter
 from .PooledFile import listdir
 from .util import str2size, verbose_stderr, debug_log
 
-class SizeFilesetCache(object):
+class SizeFilesetCache(FilesetCache):
 
     def __init__(self, path, deltadir, mapper, attrs, sel, next):
-        self._path = path
-        self._deltadir = deltadir
-        self._mapper = mapper
-        self._attrs = attrs
-        self._sel = sel
-        self._next = next
+        super(self.__class__, self).__init__(path, deltadir, mapper, attrs, sel, next)
         self._sizebuckets = Buckets([str2size(s) for s in self._attrs['sizebuckets']] if 'sizebuckets' in self._attrs else [])
         self._filesets = [None] * self._sizebuckets.len
 

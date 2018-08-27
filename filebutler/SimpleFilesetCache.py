@@ -20,20 +20,17 @@ from builtins import str
 from builtins import object
 import os.path
 
-from .Filespec import Filespec
+from .FilesetCache import FilesetCache
 from .FilesetInfo import FilesetInfo
+from .Filespec import Filespec
 from .PooledFile import PooledFile
 from .util import filetimestr, verbose_stderr, debug_log, warning
 
-class SimpleFilesetCache(object):
+class SimpleFilesetCache(FilesetCache):
 
     def __init__(self, path, deltadir, mapper, attrs, sel):
         #debug_log("SimpleFilesetCache(%s)::__init__)\n" % path)
-        self._path = path
-        self._deltadir = deltadir
-        self._mapper = mapper
-        self._attrs = attrs
-        self._sel = sel
+        super(self.__class__, self).__init__(path, deltadir, mapper, attrs, sel, None)
         self._filespecs = []    # in-memory read cache
         self._info = {}         # indexed by filter string
         self._file = None
@@ -47,12 +44,6 @@ class SimpleFilesetCache(object):
             return os.path.join(self._deltadir, "deleted.filelist")
         else:
             return os.path.join(self._path, "filelist")
-
-    def infopath(self, deleted=False):
-        if deleted:
-            return os.path.join(self._deltadir, "deleted.info")
-        else:
-            return os.path.join(self._path, "info")
 
     def select(self, filter=None, includeDeleted=False):
         # first read from in-memory cache, which may be empty, or partial if last file read was interrupted

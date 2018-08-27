@@ -24,11 +24,12 @@ import re
 import shutil
 
 from .Filter import Filter
+from .FilesetCache import FilesetCache
 from .FilespecMerger import FilespecMerger
 from .PooledFile import listdir
 from .util import verbose_stderr, debug_log
 
-class WeeklyFilesetCache(object):
+class WeeklyFilesetCache(FilesetCache):
 
     @classmethod
     def week(cls, t):
@@ -38,12 +39,7 @@ class WeeklyFilesetCache(object):
         return isoyear * 100 + isoweek
 
     def __init__(self, path, deltadir, mapper, attrs, sel, next):
-        self._path = path
-        self._deltadir = deltadir
-        self._mapper = mapper
-        self._attrs = attrs
-        self._sel = sel
-        self._next = next
+        super(self.__class__, self).__init__(path, deltadir, mapper, attrs, sel, next)
         self._weeks = {}        # of fileset, indexed by integer week
 
         # load stubs for all weeks found
