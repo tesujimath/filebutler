@@ -28,6 +28,7 @@ from filebutler.version import get_version
 def main():
     parser = argparse.ArgumentParser(description="""filebutler v%s - view and prune old files.""" % get_version())
     parser.add_argument('--batch', action='store_true', dest='batch', help='batch mode')
+    parser.add_argument('--config', type=argparse.FileType('r'), dest='config', metavar='FILE', help='config file')
     parser.add_argument('--debug', type=argparse.FileType('w'), dest='debug', metavar='FILE', help='debug mode')
     parser.add_argument('--profile', action='store_true', dest='profile', help='profile mode')
     parser.add_argument('--version', action='store_true', dest='version', help='show version and exit')

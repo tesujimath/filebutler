@@ -121,6 +121,7 @@ class CLI(object):
             },
         }
         initialize(args)
+        self._config = args.config
 
     def _cached(self, name, fileset):
         if 'cachedir' not in self._attrs:
@@ -212,14 +213,18 @@ class CLI(object):
         return done
 
     def startup(self):
-        for rc in ["/etc/filebutlerrc",
-                   os.path.expanduser("~/.filebutlerrc")]:
-            try:
-                with open(rc) as f:
-                    for line in f:
-                        self._handleProcess(line)
-            except IOError:
-                pass
+        if self._config:
+            for line in self._config:
+                self._handleProcess(line)
+        else:
+            for rc in ["/etc/filebutlerrc",
+                       os.path.expanduser("~/.filebutlerrc")]:
+                try:
+                    with open(rc) as f:
+                        for line in f:
+                            self._handleProcess(line)
+                except IOError:
+                    pass
 
     def execute(self, cmds):
         for cmd in cmds:

@@ -188,6 +188,11 @@ The main configuration is simply a command file, which sets attributes
 and defines filesets. The command set for the startup file is identical
 to the interactive command set.
 
+Usually, startup commands are read from both ``/etc/filebutlerrc`` and
+``~/.filebutlerrc``.  This may be overriden using the command line argument
+``--config``, in which case, neither of the default configuration files are
+read.
+
 See the `example filebutlerrc <examples/filebutlerrc>`__ file.
 
 The commands and attributes available are defined on the
