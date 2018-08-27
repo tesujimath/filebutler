@@ -1,5 +1,4 @@
-from __future__ import absolute_import
-# Copyright 2017 Simon Guest
+# Copyright 2017-2018 Simon Guest
 #
 # This file is part of filebutler.
 #
@@ -15,6 +14,14 @@ from __future__ import absolute_import
 #
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
+
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+from builtins import (
+    bytes, dict, int, list, object, range, str,
+    ascii, chr, hex, input, next, oct, open,
+    pow, round, super,
+    filter, map, zip)
 
 from .Fileset import Fileset
 from .FilespecMerger import FilespecMerger
