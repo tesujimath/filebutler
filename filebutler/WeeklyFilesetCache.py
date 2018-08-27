@@ -92,10 +92,9 @@ class WeeklyFilesetCache(FilesetCache):
             os.makedirs(self._path)
         self._weeks = {}
 
-    def add(self, filespec):
+    def filesetFor(self, filespec):
         w = self.__class__.week(filespec.mtime)
-        fileset = self._fileset(w)
-        fileset.add(filespec)
+        return self._fileset(w)
 
     def finalize(self):
         for w in self._weeks.values():

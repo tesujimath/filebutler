@@ -62,9 +62,8 @@ class SizeFilesetCache(FilesetCache):
                     f1 = filter
                 yield self._fileset(i), f1
 
-    def add(self, filespec):
-        fileset = self._fileset(self._sizebuckets.indexContaining(filespec.size))
-        fileset.add(filespec)
+    def filesetFor(self, filespec):
+        return self._fileset(self._sizebuckets.indexContaining(filespec.size))
 
     def finalize(self):
         for fs in self._filesets:

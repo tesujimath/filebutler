@@ -62,9 +62,13 @@ class UserFilesetCache(FilesetCache):
             if filter is None or filter.owner is None or u == filter.owner:
                 yield self._fileset(u), Filter.clearOwner(filter)
 
+    def filesetFor(self, filespec):
+        return self._fileset(filespec.user)
+
     def add(self, filespec):
-        fileset = self._fileset(filespec.user)
-        fileset.add(filespec)
+        super(self.__class__, self).add(filespec)
+        # special handling for private filesets
+        fileset = self.filesetFor(filespec)
         if 'private' in self._attrs and os.geteuid() == 0 and not self._permissioned[filespec.user]:
             # set permissions of fileset directory
             upath = self._subpath(filespec.user)

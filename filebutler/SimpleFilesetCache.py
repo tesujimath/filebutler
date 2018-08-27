@@ -35,7 +35,6 @@ class SimpleFilesetCache(FilesetCache):
         self._info = {}         # indexed by filter string
         self._file = None
         self._filepos = 0
-        self._fileinfo = None
         self._deletedFilelist = {}    # paths of deleted files
         self._deletedInfo = FilesetInfo()
 
@@ -139,6 +138,7 @@ class SimpleFilesetCache(FilesetCache):
         acc.decumulate(self._deletedInfo, self._sel)
 
     def add(self, filespec):
+        super(self.__class__, self).add(filespec)
         if self._fileinfo is None:
             self._fileinfo = FilesetInfo()
         self._fileinfo.add(1, filespec.size)

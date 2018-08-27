@@ -58,9 +58,8 @@ class DatasetFilesetCache(FilesetCache):
             if filter is None or filter.dataset is None or d == filter.dataset:
                 yield self._fileset(d), Filter.clearDataset(filter)
 
-    def add(self, filespec):
-        fileset = self._fileset(filespec.dataset)
-        fileset.add(filespec)
+    def filesetFor(self, filespec):
+        return self._fileset(filespec.dataset)
 
     def finalize(self):
         for d in self._datasets.values():

@@ -31,6 +31,7 @@ class FilesetCache(object):
         self._attrs = attrs
         self._sel = sel
         self._next = next
+        self._fileinfo = None
 
     def infopath(self, deleted=False):
         if deleted:
@@ -49,3 +50,7 @@ class FilesetCache(object):
     def merge_info(self, acc, filter=None):
         for f, f1 in self.filtered(filter):
             f.merge_info(acc, f1)
+
+    def add(self, filespec):
+        if self._next is not None:
+            self.filesetFor(filespec).add(filespec)
