@@ -60,14 +60,3 @@ class DatasetFilesetCache(FilesetCache):
 
     def filesetFor(self, filespec):
         return self._fileset(filespec.dataset)
-
-    def finalize(self):
-        for d in self._datasets.values():
-            if d is not None:
-                d.finalize()
-
-    def saveDeletions(self):
-        #debug_log("DatasetFilesetCache(%s)::saveDeletions\n" % self._path)
-        for d in self._datasets.values():
-            if d is not None:
-                d.saveDeletions()

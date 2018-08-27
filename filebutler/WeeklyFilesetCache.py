@@ -67,12 +67,15 @@ class WeeklyFilesetCache(FilesetCache):
     def filtered(self, filter=None):
         """Yield each child fileset and its filter."""
         weeks = sorted(self._weeks.keys())
+        #debug_log("filtered(%s) with %d weeks to consider\n" % (self._path, len(weeks)))
         for w in weeks:
+            #debug_log("filtered(%s) considering %s\n" % (self._path, str(w)))
             if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
                 if filter is not None and filter.mtimeBefore is not None and w < self.__class__.week(filter.mtimeBefore):
                     f1 = Filter.clearMtime(filter)
                 else:
                     f1 = filter
+                #debug_log("filtered(%s) yielding %s\n" % (self._path, str(w)))
                 yield self._fileset(w), f1
 
     def create(self):
@@ -95,14 +98,3 @@ class WeeklyFilesetCache(FilesetCache):
     def filesetFor(self, filespec):
         w = self.__class__.week(filespec.mtime)
         return self._fileset(w)
-
-    def finalize(self):
-        for w in self._weeks.values():
-            if w is not None:
-                w.finalize()
-
-    def saveDeletions(self):
-        #debug_log("WeeklyFilesetCache(%s)::saveDeletions\n" % self._path)
-        for w in self._weeks.values():
-            if w is not None:
-                w.saveDeletions()

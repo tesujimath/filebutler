@@ -64,14 +64,3 @@ class SizeFilesetCache(FilesetCache):
 
     def filesetFor(self, filespec):
         return self._fileset(self._sizebuckets.indexContaining(filespec.size))
-
-    def finalize(self):
-        for fs in self._filesets:
-            if fs is not None:
-                fs.finalize()
-
-    def saveDeletions(self):
-        #debug_log("SizeFilesetCache(%s)::saveDeletions\n" % self._path)
-        for fs in self._filesets:
-            if fs is not None:
-                fs.saveDeletions()

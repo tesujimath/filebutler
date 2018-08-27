@@ -77,14 +77,3 @@ class UserFilesetCache(FilesetCache):
                 os.chown(upath, uid, -1)
             os.chmod(upath, 0o500)
             self._permissioned[filespec.user] = True
-
-    def finalize(self):
-        for u in self._users.values():
-            if u is not None:
-                u.finalize()
-
-    def saveDeletions(self):
-        #debug_log("UserFilesetCache(%s)::saveDeletions\n" % self._path)
-        for u in self._users.values():
-            if u is not None:
-                u.saveDeletions()

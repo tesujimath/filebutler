@@ -36,7 +36,6 @@ class SimpleFilesetCache(FilesetCache):
         self._file = None
         self._filepos = 0
         self._deletedFilelist = {}    # paths of deleted files
-        self._deletedInfo = FilesetInfo()
 
     def filelistpath(self, deleted=False):
         if deleted:
@@ -97,33 +96,7 @@ class SimpleFilesetCache(FilesetCache):
 
     def merge_info(self, acc, filter=None):
         #debug_log("SimpleFilesetCache(%s) merge_info\n" % self._path)
-        if filter is None:
-            #debug_log("SimpleFilesetCache(%s)::merge_info(None)\n" % self._path)
-            if self._fileinfo is None:
-                #debug_log("SimpleFilesetCache(%s)::merge_info(None) reading info file\n" % self._path)
-                infofile = self.infopath()
-                deletedInfofile = self.infopath(deleted=True)
-                try:
-                    if os.path.exists(deletedInfofile):
-                        # if deleted filelist is older than cache, remove it
-                        if os.stat(deletedInfofile).st_mtime < os.stat(infofile).st_mtime:
-                            #debug_log("removing obsolete deleted infofile %s\n" % deletedInfofile)
-                            os.remove(deletedInfofile)
-                        else:
-                            #debug_log("reading deleted infofile %s\n" % deletedInfofile)
-                            with open(deletedInfofile, 'r') as f:
-                                self._deletedInfo = FilesetInfo.fromFile(f)
-                except IOError:
-                    warning("can't read deleted info %s, ignoring" % deletedInfofile)
-                    self._deletedInfo = FilesetInfo()
-                try:
-                    with open(infofile, 'r') as f:
-                        self._fileinfo = FilesetInfo.fromFile(f)
-                except IOError:
-                    warning("can't read info %s, ignoring" % infofile)
-                    self._fileinfo = FilesetInfo()
-            info = self._fileinfo
-        else:
+        if not super(self.__class__, self).merge_info(acc, filter):
             f = str(filter)
             #debug_log("SimpleFilesetCache(%s)::merge_info(%s)\n" % (self._path, f))
             if f in self._info:
@@ -134,14 +107,11 @@ class SimpleFilesetCache(FilesetCache):
                 self._info[f] = info
                 for filespec in self.select(filter, includeDeleted=True):
                     info.add(1, filespec.size)
-        acc.accumulate(info, self._sel)
-        acc.decumulate(self._deletedInfo, self._sel)
+            acc.accumulate(info, self._sel)
+            acc.decumulate(self._deletedInfo, self._sel)
 
     def add(self, filespec):
         super(self.__class__, self).add(filespec)
-        if self._fileinfo is None:
-            self._fileinfo = FilesetInfo()
-        self._fileinfo.add(1, filespec.size)
         # don't cache writes, as this would mean caching the whole of the filelist
         if self._file is None:
             #debug_log("SimpleFilesetCache writing file cache at %s\n" % self._path)
@@ -152,6 +122,7 @@ class SimpleFilesetCache(FilesetCache):
 
     def finalize(self):
         """Finalize writing the cache."""
+        #debug_log("SimpleFilesetCache::finalize(%s)\n" % self._path)
         if self._file is not None:
             self._file.close()
             self._file = None
@@ -161,18 +132,15 @@ class SimpleFilesetCache(FilesetCache):
             sorted_filelist = sorted(f, key=Filespec.formattedToPath)
         with open(self.filelistpath(), 'w') as f:
             f.writelines(sorted_filelist)
-
-        # write info file
-        with open(self.infopath(), 'w') as infofile:
-            if self._fileinfo is not None:
-                self._fileinfo.write(infofile)
+        super(self.__class__, self).finalize()
 
     def delete(self, filespec):
         #debug_log("SimpleFilesetCache(%s) delete %s\n" % (self._path, filespec.path))
+        super(self.__class__, self).finalize()
         self._deletedFilelist[filespec.path] = True
-        self._deletedInfo.add(1, filespec.size)
 
     def saveDeletions(self):
+        super(self.__class__, self).saveDeletions()
         if len(self._deletedFilelist) > 0:
             deletedFilelist = self.filelistpath(deleted=True)
             #debug_log("SimpleFilesetCache(%s)::saveDeletions deletedFilelist\n" % self._path)
@@ -184,13 +152,3 @@ class SimpleFilesetCache(FilesetCache):
                         f.write("%s\n" % path)
             except IOError:
                 warning("can't write deleted filelist %s, ignoring" % deletedFilelist)
-
-        if self._deletedInfo.nFiles > 0:
-            deletedInfofile = self.infopath(deleted=True)
-            #debug_log("SimpleFilesetCache(%s)::saveDeletions deletedInfo\n" % self._path)
-            try:
-                with open(deletedInfofile, 'w') as f:
-                    self._deletedInfo.write(f)
-            except IOError:
-                warning("can't write deleted info %s, ignoring" % deletedInfofile)
-                self._deletedInfo = FilesetInfo()

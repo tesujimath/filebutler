@@ -53,6 +53,7 @@ def stderr(msg):
 def debug_log(msg):
     if _debug is not None:
         _debug.write(msg)
+        _debug.flush()
 def progress_stderr(msg):
     if _progress:
         stderr(msg)

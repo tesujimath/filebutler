@@ -19,7 +19,9 @@ from __future__ import absolute_import
 from builtins import object
 import os.path
 
+from .FilesetInfo import FilesetInfo
 from .FilespecMerger import FilespecMerger
+from .util import debug_log, warning
 
 class FilesetCache(object):
     """FilesetCache is a base class."""
@@ -32,6 +34,7 @@ class FilesetCache(object):
         self._sel = sel
         self._next = next
         self._fileinfo = None
+        self._deletedInfo = FilesetInfo()
 
     def infopath(self, deleted=False):
         if deleted:
@@ -48,9 +51,87 @@ class FilesetCache(object):
             yield filespec
 
     def merge_info(self, acc, filter=None):
-        for f, f1 in self.filtered(filter):
-            f.merge_info(acc, f1)
+        """Return whether merged from cache; otherwise caller will have to scan over filespecs."""
+        #debug_log("FilesetCache(%s) merge_info\n" % self._path)
+        if filter is None:
+            #debug_log("FilesetCache(%s)::merge_info(None)\n" % self._path)
+            if self._fileinfo is None:
+                #debug_log("FilesetCache(%s)::merge_info(None) reading info file\n" % self._path)
+                infofile = self.infopath()
+                deletedInfofile = self.infopath(deleted=True)
+                try:
+                    if os.path.exists(deletedInfofile):
+                        # if deleted filelist is older than cache, remove it
+                        if os.stat(deletedInfofile).st_mtime < os.stat(infofile).st_mtime:
+                            #debug_log("removing obsolete deleted infofile %s\n" % deletedInfofile)
+                            os.remove(deletedInfofile)
+                        else:
+                            #debug_log("reading deleted infofile %s\n" % deletedInfofile)
+                            with open(deletedInfofile, 'r') as f:
+                                self._deletedInfo = FilesetInfo.fromFile(f)
+                except IOError:
+                    warning("can't read deleted info %s, ignoring" % deletedInfofile)
+                    self._deletedInfo = FilesetInfo()
+                try:
+                    with open(infofile, 'r') as f:
+                        self._fileinfo = FilesetInfo.fromFile(f)
+                except IOError:
+                    warning("can't read info %s, ignoring" % infofile)
+
+            if self._fileinfo is not None:
+                acc.accumulate(self._fileinfo, self._sel)
+                acc.decumulate(self._deletedInfo, self._sel)
+                #debug_log("FilesetCache(%s)::merge_info() done\n" % self._path)
+                return True
+            #debug_log("FilesetCache(%s)::merge_info() not merged yet\n" % self._path)
+
+        #debug_log("FilesetCache(%s)::merge_info() still here\n" % self._path)
+        # didn't manage to read infofile, or we need a filtered scan
+        if self._next is not None:
+            #debug_log("FilesetCache(%s)::merge_info() asking children\n" % self._path)
+            for f, f1 in self.filtered(filter):
+                f.merge_info(acc, f1)
+            return True
+        else:
+            #debug_log("FilesetCache(%s)::merge_info() baling\n" % self._path)
+            return False
 
     def add(self, filespec):
         if self._next is not None:
             self.filesetFor(filespec).add(filespec)
+        if self._fileinfo is None:
+            self._fileinfo = FilesetInfo()
+        self._fileinfo.add(1, filespec.size)
+
+    def finalize(self):
+        #debug_log("FilesetCache::finalize(%s)\n" % self._path)
+        finalized = False
+        if self._next is not None:
+            for f, f1 in self.filtered(None):
+                f.finalize()
+                if not finalized:
+                    finalized = True
+
+        # write info file, only if a child did something
+        if self._next is None or finalized:
+            with open(self.infopath(), 'w') as infofile:
+                if self._fileinfo is not None:
+                    self._fileinfo.write(infofile)
+
+    def delete(self, filespec):
+        self._deletedInfo.add(1, filespec.size)
+
+    def saveDeletions(self):
+        if self._next is not None:
+            for f, f1 in self.filtered(None):
+                f.saveDeletions()
+
+        if self._deletedInfo.nFiles > 0:
+            deletedInfofile = self.infopath(deleted=True)
+            #debug_log("FilesetCache(%s)::saveDeletions deletedInfo\n" % self._path)
+            try:
+                with open(deletedInfofile, 'w') as f:
+                    self._deletedInfo.write(f)
+            except IOError:
+                warning("can't write deleted info %s, ignoring" % deletedInfofile)
+                self._deletedInfo = FilesetInfo()
