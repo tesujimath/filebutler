@@ -59,6 +59,10 @@ class FilesetInfoAccumulator(object):
         self._sizebuckets = Buckets([str2size(s) for s in attrs['sizebuckets']] if 'sizebuckets' in attrs else [])
         self._sizes = [None] * self._sizebuckets.len
 
+    @property
+    def nFiles(self):
+        return self._total.nFiles
+
     def add(self, filespec):
         self._total.add(1, filespec.size)
 
