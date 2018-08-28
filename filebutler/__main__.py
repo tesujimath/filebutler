@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright 2017-2018 Simon Guest
 #
 # This file is part of filebutler.
