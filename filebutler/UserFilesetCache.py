@@ -34,8 +34,8 @@ class UserFilesetCache(FilesetCache):
 
     def __init__(self, path, deltadir, mapper, attrs, sel, next):
         super(self.__class__, self).__init__(path, deltadir, mapper, attrs, sel, next)
-        self._users = {}        # of fileset, indexed by integer user
-        self._permissioned = {}        # of boolean, indexed by integer user
+        self._users = {}        # of fileset, indexed by username
+        self._permissioned = {}        # of boolean, indexed by username
 
         # load stubs for all users found
         if os.path.exists(self._path):
@@ -56,7 +56,7 @@ class UserFilesetCache(FilesetCache):
         return fileset
 
     def filtered(self, filter=None):
-        users = sorted(self._users.keys())
+        users = sorted(self._users.keys(), key=str)
         for u in users:
             if filter is None or filter.owner is None or u == filter.owner:
                 yield self._fileset(u), Filter.clearOwner(filter)
