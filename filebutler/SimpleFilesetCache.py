@@ -112,8 +112,8 @@ class SimpleFilesetCache(FilesetCache):
                 self._info[f] = info
                 for filespec in self.select(filter, includeDeleted=True):
                     info.add(1, filespec.size)
-            acc.accumulate(info, self._sel)
-            acc.decumulate(self._deletedInfo, self._sel)
+            acc.accumulateInfo(info, self._sel)
+            acc.decumulateInfo(self._deletedInfo, self._sel)
 
     def add(self, filespec):
         super(self.__class__, self).add(filespec)

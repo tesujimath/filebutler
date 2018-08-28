@@ -28,20 +28,8 @@ from .util import size2str, warning
 class FilesetInfo(object):
 
     @classmethod
-    def fromFile(cls, f):
-        fi = None
-        for line in f:
-            try:
-                fields = line.rstrip().split(None)
-                if fi is None and len(fields) == 2:
-                    nFiles = int(fields[0])
-                    totalSize = int(fields[1])
-                    fi = cls(nFiles, totalSize)
-                else:
-                    raise ValueError
-            except ValueError:
-                warning("ignoring bad info line: %s" % line.rstrip())
-        return fi
+    def fromDict(cls, d):
+        return cls(d['nFiles'], d['totalSize'])
 
     def __init__(self, nFiles=0, totalSize=0):
         self.nFiles = nFiles
@@ -57,6 +45,3 @@ class FilesetInfo(object):
 
     def __str__(self):
         return "%6s in %9d files" % (size2str(self.totalSize), self.nFiles)
-
-    def write(self, f):
-        f.write("%d %d\n" % (self.nFiles, self.totalSize))

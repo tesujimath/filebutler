@@ -23,11 +23,34 @@ from builtins import (
     pow, round, super,
     filter, map, zip)
 
+import json
+
 from .util import str2size, size2str0, warning
 from .Buckets import Buckets
 from .FilesetInfo import FilesetInfo
 
 class FilesetInfoAccumulator(object):
+
+    @classmethod
+    def fromFile(cls, f, attrs):
+        obj = json.load(f)
+        acc = cls(attrs)
+        acc._total = FilesetInfo.fromDict(obj['total'])
+
+        users = obj['users']
+        for user in users:
+            acc._users[user] = FilesetInfo.fromDict(users[user])
+
+        datasets = obj['datasets']
+        for dataset in datasets:
+            acc._datasets[dataset] = FilesetInfo.fromDict(datasets[dataset])
+
+        sizes = obj['sizes']
+        for i in range(min(len(acc._sizes), len(sizes))):
+            if sizes[i] is not None:
+                acc._sizes[i] = FilesetInfo.fromDict(sizes[i])
+
+        return acc
 
     def __init__(self, attrs):
         self._total = FilesetInfo()
@@ -63,7 +86,7 @@ class FilesetInfoAccumulator(object):
             self._sizes[i] = sizes0
         sizes0.add(1, filespec.size)
 
-    def accumulate(self, info, sel):
+    def accumulateInfo(self, info, sel):
         self._total.add(info.nFiles, info.totalSize)
         if sel.owner is not None:
             if sel.owner not in self._users:
@@ -87,7 +110,35 @@ class FilesetInfoAccumulator(object):
                 self._sizes[i] = sizes0
             sizes0.add(info.nFiles, info.totalSize)
 
-    def decumulate(self, info, sel):
+    def accumulate(self, acc):
+        self._total.add(acc._total.nFiles, acc._total.totalSize)
+        for user in acc._users:
+            user1 = acc._users[user]
+            if user not in self._users:
+                user0 = FilesetInfo()
+                self._users[user] = user0
+            else:
+                user0 = self._users[user]
+            user0.add(user1.nFiles, user1.totalSize)
+        for dataset in acc._datasets:
+            dataset1 = acc._datasets[dataset]
+            if dataset not in self._datasets:
+                dataset0 = FilesetInfo()
+                self._datasets[dataset] = dataset0
+            else:
+                dataset0 = self._datasets[dataset]
+            dataset0.add(dataset1.nFiles, dataset1.totalSize)
+        for i in range(len(acc._sizes)):
+            sizes1 = acc._sizes[i]
+            if sizes1 is not None:
+                if self._sizes[i] is None:
+                    sizes0 = FilesetInfo()
+                    self._sizes[i] = sizes0
+                else:
+                    sizes0 = self._sizes[i]
+                sizes0.add(sizes1.nFiles, sizes1.totalSize)
+
+    def decumulateInfo(self, info, sel):
         self._total.remove(info.nFiles, info.totalSize)
         if sel.owner is not None:
             if sel.owner in self._users:
@@ -110,6 +161,27 @@ class FilesetInfoAccumulator(object):
             if sizes0.nFiles == 0:
                 # remove sizes, since no files left
                 self._sizes[i] = None
+
+    def decumulate(self, acc):
+        self._total.remove(acc._total.nFiles, acc._total.totalSize)
+        for user in acc._users:
+            if user not in self._users:
+                user0 = FilesetInfo()
+                self._users[user] = user0
+            else:
+                user0 = self._users[user]
+            user0.remove(info.nFiles, info.totalSize)
+        for dataset in acc._datasets:
+            if dataset not in self._datasets:
+                dataset0 = FilesetInfo()
+                self._datasets[dataset] = dataset0
+            else:
+                dataset0 = self._datasets[dataset]
+            dataset0.remove(info.nFiles, info.totalSize)
+        for i in range(len(acc._sizes)):
+            size = acc._sizes[i]
+            if size is not None:
+                self._sizes.remove(size.nFiles, size.totalSize)
 
     def fmt_total(self):
         return "total %s" % str(self._total)
@@ -151,3 +223,11 @@ class FilesetInfoAccumulator(object):
                         interval = "%4s +     " % size2str0(self._sizebuckets.bound(i))
                     lines.append("%s  %s" % (interval, str(info)))
         return '\n'.join(lines)
+
+    def write(self, f):
+        json.dump({
+            'total': self._total,
+            'users': self._users,
+            'datasets': self._datasets,
+            'sizes': self._sizes,
+        }, f, default=lambda obj: obj.__dict__)

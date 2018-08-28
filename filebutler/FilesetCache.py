@@ -25,7 +25,7 @@ from builtins import (
 
 import os.path
 
-from .FilesetInfo import FilesetInfo
+from .FilesetInfoAccumulator import FilesetInfoAccumulator
 from .FilespecMerger import FilespecMerger
 from .PooledFile import listdir
 from .util import debug_log, warning
@@ -41,7 +41,7 @@ class FilesetCache(object):
         self._sel = sel
         self._next = next
         self._fileinfo = None
-        self._deletedInfo = FilesetInfo()
+        self._deletedInfo = FilesetInfoAccumulator(self._attrs)
 
     def _subpath(self, x):
         return os.path.join(self._path, '_' + str(x))
@@ -87,19 +87,19 @@ class FilesetCache(object):
                         else:
                             #debug_log("reading deleted infofile %s\n" % deletedInfofile)
                             with open(deletedInfofile, 'r') as f:
-                                self._deletedInfo = FilesetInfo.fromFile(f)
+                                self._deletedInfo = FilesetInfoAccumulator.fromFile(f, self._attrs)
                 except IOError:
                     warning("can't read deleted info %s, ignoring" % deletedInfofile)
-                    self._deletedInfo = FilesetInfo()
+                    self._deletedInfo = FilesetInfoAccumulator(self._attrs)
                 try:
                     with open(infofile, 'r') as f:
-                        self._fileinfo = FilesetInfo.fromFile(f)
+                        self._fileinfo = FilesetInfoAccumulator.fromFile(f, self._attrs)
                 except IOError:
                     warning("can't read info %s, ignoring" % infofile)
 
             if self._fileinfo is not None:
-                acc.accumulate(self._fileinfo, self._sel)
-                acc.decumulate(self._deletedInfo, self._sel)
+                acc.accumulate(self._fileinfo)
+                acc.decumulate(self._deletedInfo)
                 #debug_log("FilesetCache(%s)::merge_info() done\n" % self._path)
                 return True
             #debug_log("FilesetCache(%s)::merge_info() not merged yet\n" % self._path)
@@ -119,8 +119,8 @@ class FilesetCache(object):
         if self._next is not None:
             self.filesetFor(filespec).add(filespec)
         if self._fileinfo is None:
-            self._fileinfo = FilesetInfo()
-        self._fileinfo.add(1, filespec.size)
+            self._fileinfo = FilesetInfoAccumulator(self._attrs)
+        self._fileinfo.add(filespec)
 
     def finalize(self):
         #debug_log("FilesetCache::finalize(%s)\n" % self._path)
@@ -138,7 +138,7 @@ class FilesetCache(object):
                     self._fileinfo.write(infofile)
 
     def delete(self, filespec):
-        self._deletedInfo.add(1, filespec.size)
+        self._deletedInfo.add(filespec)
 
     def saveDeletions(self):
         if self._next is not None:
@@ -153,4 +153,4 @@ class FilesetCache(object):
                     self._deletedInfo.write(f)
             except IOError:
                 warning("can't write deleted info %s, ignoring" % deletedInfofile)
-                self._deletedInfo = FilesetInfo()
+                self._deletedInfo = FilesetInfoAccumulator(self._attrs)
