@@ -212,6 +212,8 @@ class CLI(object):
             stderr("ERROR %s\n" % e.msg)
         except KeyboardInterrupt:
             stderr("\n")
+        except ValueError as e:
+            stderr("%s\n" % str(e))
         return done
 
     def startup(self):
