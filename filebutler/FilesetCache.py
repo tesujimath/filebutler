@@ -147,14 +147,14 @@ class FilesetCache(object):
                     self._fileinfo.write(infofile)
 
     def delete(self, filespec):
-        debug_log("FilesetCache(%s)::delete %s\n" % (self._path, filespec.path))
+        #debug_log("FilesetCache(%s)::delete %s\n" % (self._path, filespec.path))
         self._deletedInfo.add(filespec)
         self._ctx.pendingCaches.add(self)
         if self._parent is not None:
             self._parent.delete(filespec)
 
     def saveDeletions(self):
-        debug_log("FilesetCache(%s)::saveDeletions\n" % self._path)
+        #debug_log("FilesetCache(%s)::saveDeletions\n" % self._path)
         if self._deletedInfo.nFiles > 0:
             deletedInfofile = self.infopath(deleted=True)
             #debug_log("FilesetCache(%s)::saveDeletions deletedInfo\n" % self._path)

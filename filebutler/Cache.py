@@ -117,8 +117,5 @@ class Cache(Fileset):
         os.utime(self._path, None)
         progress_stderr("updated %s\n" % self.name)
 
-    def delete(self, filespec):
-        debug_log("Cache(%s) delete %s\n" % (self._path, filespec.path))
-
     def getCaches(self, caches):
         caches[self.name] = self

@@ -140,13 +140,13 @@ class SimpleFilesetCache(FilesetCache):
         super(self.__class__, self).finalize()
 
     def delete(self, filespec):
-        debug_log("SimpleFilesetCache(%s) delete %s\n" % (self._path, filespec.path))
+        #debug_log("SimpleFilesetCache(%s) delete %s\n" % (self._path, filespec.path))
         super(self.__class__, self).delete(filespec)
         self._deletedFilelist[filespec.path] = True
         self._ctx.pendingCaches.add(self)
 
     def saveDeletions(self):
-        debug_log("SimpleFilesetCache(%s)::saveDeletions\n" % self._path)
+        #debug_log("SimpleFilesetCache(%s)::saveDeletions\n" % self._path)
         super(self.__class__, self).saveDeletions()
         if len(self._deletedFilelist) > 0:
             deletedFilelist = self.filelistpath(deleted=True)
