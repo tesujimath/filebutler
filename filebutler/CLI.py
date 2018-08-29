@@ -437,11 +437,10 @@ class CLI(object):
                     pass
                 else:
                     raise
-        # finally save deletions lists for all caches used by this fileset
-        caches = {}
-        fileset.getCaches(caches)
-        for name in caches:
-            self._caches[name].saveDeletions()
+        # finally save deletions lists for all caches affected by this deletion
+        for cache in self._ctx.pendingCaches:
+            cache.saveDeletions()
+        self._ctx.pendingCaches.clear()
 
     def _updateCacheCmd(self, toks, usage):
         if len(toks) == 1:

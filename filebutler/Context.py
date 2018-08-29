@@ -33,3 +33,4 @@ class Context(object):
     def __init__(self):
         self.mapper = Mapper()
         self.pathway = Pathway()
+        self.pendingCaches = set()

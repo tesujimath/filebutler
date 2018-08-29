@@ -76,7 +76,7 @@ class Cache(Fileset):
 
     def _cache(self):
         if self._cache0 is None:
-            self._cache0 = self._newcache(self, self._path, self._deltadir, self._ctx, self._attrs, FilesetSelector(), 0)
+            self._cache0 = self._newcache(None, self._path, self._deltadir, self._ctx, self._attrs, FilesetSelector(), 0)
         return self._cache0
 
     def _newcache(self, parent, path, deltadir, ctx, attrs, sel, level):
@@ -119,11 +119,6 @@ class Cache(Fileset):
 
     def delete(self, filespec):
         debug_log("Cache(%s) delete %s\n" % (self._path, filespec.path))
-
-    def saveDeletions(self):
-        #debug_log("Cache(%s)::saveDeletions\n" % self.name)
-        cache = self._cache()
-        cache.saveDeletions()
 
     def getCaches(self, caches):
         caches[self.name] = self
