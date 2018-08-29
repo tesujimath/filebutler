@@ -204,7 +204,7 @@ class FilesetInfoAccumulator(object):
             info = user[1]
             # exclude trivial small stuff
             if info.totalSize > 1024:
-                lines.append("%s %s" % (name, str(info)))
+                lines.append("%-13s %s" % (name, str(info)))
         return '\n'.join(lines)
 
     def iterusers(self):
@@ -217,7 +217,7 @@ class FilesetInfoAccumulator(object):
             info = dataset[1]
             # exclude trivial small stuff
             if info.totalSize > 1024:
-                lines.append("%s %s" % (name, str(info)))
+                lines.append("%-32s %s" % (name, str(info)))
         return '\n'.join(lines)
 
     def fmt_sizes(self):

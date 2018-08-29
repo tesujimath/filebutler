@@ -362,7 +362,7 @@ class CLI(object):
         elif mode == 'e':
             for user, userinfo in info.iterusers():
                 if user not in self._aliases:
-                    print("%s %s" % (user, str(userinfo)))
+                    print("%-13s %s" % (user, str(userinfo)))
         elif mode == 's':
             print(info.fmt_sizes())
         else:
