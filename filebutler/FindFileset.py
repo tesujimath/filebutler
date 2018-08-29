@@ -40,7 +40,7 @@ from .util import filemode, verbose_stderr
 class FindFileset(Fileset):
 
     @classmethod
-    def parse(cls, mapper, pathway, name, toks):
+    def parse(cls, ctx, name, toks):
         if len(toks) == 1:
             path = toks[0]
             match = '^'
@@ -51,13 +51,12 @@ class FindFileset(Fileset):
             replace = toks[2]
         else:
             raise CLIError("find requires path, and either both of match-re, replace-str or neither")
-        return cls(mapper, pathway, name, path, match, replace)
+        return cls(ctx, name, path, match, replace)
 
-    def __init__(self, mapper, pathway, name, path, match, replace):
+    def __init__(self, ctx, name, path, match, replace):
         #print("FindFileset init '%s' '%s' '%s'" % (path, match, replace))
         super(self.__class__, self).__init__()
-        self._mapper = mapper
-        self._pathway = pathway
+        self._ctx = ctx
         self.name = name
         self._path = path
         self._match = match
@@ -99,10 +98,10 @@ class FindFileset(Fileset):
                     dirs.append(xpath)
                 path = re.sub(self._match, self._replace, xrel)
                 filespec = Filespec(fileset=self,
-                                    dataset=self._pathway.datasetFromPath(path),
+                                    dataset=self._ctx.pathway.datasetFromPath(path),
                                     path=path,
-                                    user=self._mapper.usernameFromId(s.st_uid),
-                                    group=self._mapper.groupnameFromId(s.st_gid),
+                                    user=self._ctx.mapper.usernameFromId(s.st_uid),
+                                    group=self._ctx.mapper.groupnameFromId(s.st_gid),
                                     size=s.st_size,
                                     mtime=s.st_mtime,
                                     perms=filemode(s.st_mode))

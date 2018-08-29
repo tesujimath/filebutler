@@ -33,9 +33,9 @@ from .util import filetimestr, verbose_stderr, debug_log, warning
 
 class SimpleFilesetCache(FilesetCache):
 
-    def __init__(self, parent, path, deltadir, mapper, attrs, sel):
+    def __init__(self, parent, path, deltadir, ctx, attrs, sel):
         #debug_log("SimpleFilesetCache(%s)::__init__)\n" % path)
-        super(self.__class__, self).__init__(parent, path, deltadir, mapper, attrs, sel, None)
+        super(self.__class__, self).__init__(parent, path, deltadir, ctx, attrs, sel, None)
         self._filespecs = []    # in-memory read cache
         self._info = {}         # indexed by filter string
         self._file = None

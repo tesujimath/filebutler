@@ -33,11 +33,11 @@ from .util import debug_log, warning
 class FilesetCache(object):
     """FilesetCache is a base class."""
 
-    def __init__(self, parent, path, deltadir, mapper, attrs, sel, next):
+    def __init__(self, parent, path, deltadir, ctx, attrs, sel, next):
         self._parent = parent
         self._path = path
         self._deltadir = deltadir
-        self._mapper = mapper
+        self._ctx = ctx
         self._attrs = attrs
         self._sel = sel
         self._next = next

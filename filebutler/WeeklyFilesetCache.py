@@ -42,8 +42,8 @@ class WeeklyFilesetCache(FilesetCache):
         isoyear,isoweek,isoweekday = dt.isocalendar()
         return isoyear * 100 + isoweek
 
-    def __init__(self, parent, path, deltadir, mapper, attrs, sel, next):
-        super(self.__class__, self).__init__(parent, path, deltadir, mapper, attrs, sel, next)
+    def __init__(self, parent, path, deltadir, ctx, attrs, sel, next):
+        super(self.__class__, self).__init__(parent, path, deltadir, ctx, attrs, sel, next)
         self._weeks = {}        # of fileset, indexed by integer week
 
         # load stubs for all weeks found
@@ -59,7 +59,7 @@ class WeeklyFilesetCache(FilesetCache):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self, self._subpath(w), self._subdeltadir(w), self._mapper, self._attrs, self._sel)
+            fileset = self._next(self, self._subpath(w), self._subdeltadir(w), self._ctx, self._attrs, self._sel)
             self._weeks[w] = fileset
         return fileset
 

@@ -38,19 +38,18 @@ from .util import warning, verbose_stderr
 class GnuFindOutFileset(Fileset):
 
     @classmethod
-    def parse(cls, mapper, pathway, name, toks):
+    def parse(cls, ctx, name, toks):
         if len(toks) != 3:
             raise CLIError("find.gnu.out requires path, match-re, replace-str")
         path = toks[0]
         match = toks[1]
         replace = toks[2]
-        return cls(mapper, pathway, name, path, match, replace)
+        return cls(ctx, name, path, match, replace)
 
-    def __init__(self, mapper, pathway, name, path, match, replace):
+    def __init__(self, ctx, name, path, match, replace):
         #print("GnuFindOutFileset init %s %s %s" % (path, match, replace))
         super(self.__class__, self).__init__()
-        self._mapper = mapper
-        self._pathway = pathway
+        self._ctx = ctx
         self.name = name
         self._path = path
         self._match = match
@@ -109,14 +108,14 @@ class GnuFindOutFileset(Fileset):
                     if symlink >= 0:
                         path = path[:symlink]
                     filespec = Filespec(fileset=self,
-                                        dataset=self._pathway.datasetFromPath(path),
+                                        dataset=self._ctx.pathway.datasetFromPath(path),
                                         path=path,
-                                        user=self._mapper.usernameFromString(fields[4]),
-                                        group=self._mapper.groupnameFromString(fields[5]),
+                                        user=self._ctx.mapper.usernameFromString(fields[4]),
+                                        group=self._ctx.mapper.groupnameFromString(fields[5]),
                                         size=int(fields[6]),
                                         mtime=self._dateParser.t(fields),
                                         perms=fields[2])
-                    if (filter == None or filter.selects(filespec)) and not self._pathway.ignored(filespec.path):
+                    if (filter == None or filter.selects(filespec)) and not self._ctx.pathway.ignored(filespec.path):
                         #print("GnuFindOutFileset read from file %s" % filespec)
                         yield filespec
         progress.complete()

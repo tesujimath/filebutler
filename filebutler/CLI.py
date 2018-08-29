@@ -38,15 +38,14 @@ import time
 
 from .CLIError import CLIError
 from .Cache import Cache
+from .Context import Context
 from .DeletionLog import DeletionLog
 from .Filter import Filter
 from .FilterFileset import FilterFileset
 from .FindFileset import FindFileset
 from .GnuFindOutFileset import GnuFindOutFileset
 from .Grouper import Grouper
-from .Mapper import Mapper
 from .Pager import Pager
-from .Pathway import Pathway
 from .UnionFileset import UnionFileset
 from .aliases import read_etc_aliases
 from .options import parseCommandOptions
@@ -60,8 +59,7 @@ class CLI(object):
         self._filesets = {}
         self._caches = {}
         self._now = time.time() # for consistency between all filters
-        self._mapper = Mapper()
-        self._pathway = Pathway()
+        self._ctx = Context()
         self._aliases = read_etc_aliases()
         self.commands = {
             'help':          { 'desc': 'provide help',
@@ -141,7 +139,7 @@ class CLI(object):
         cache = Cache(name, fileset,
                       os.path.join(cachedir, name),
                       os.path.join(deltadir, name),
-                      self._mapper,
+                      self._ctx,
                       self._attrs)
         self._caches[name] = cache
         return cache
@@ -272,11 +270,11 @@ class CLI(object):
         if name == 'dataset':
             if len(values) != 2:
                 raise CLIError("botched attr %s" % name)
-            self._pathway.setDatasetRegex(values[0], values[1])
+            self._ctx.pathway.setDatasetRegex(values[0], values[1])
         if name == 'ignorepathsfrom':
             if len(values) != 1:
                 raise CLIError("botched attr %s" % name)
-            self._pathway.setIgnorePathsFrom(values[0])
+            self._ctx.pathway.setIgnorePathsFrom(values[0])
 
     def _clearCmd(self, toks, usage):
         if len(toks) != 2:
@@ -284,7 +282,7 @@ class CLI(object):
         name = toks[1]
         del self._attrs[name]
         if name == 'dataset':
-            self._pathway.clearDatasetRegex()
+            self._ctx.pathway.clearDatasetRegex()
 
     def _lsAttrsCmd(self, toks, usage):
         if len(toks) != 1:
@@ -313,9 +311,9 @@ class CLI(object):
         if name in self._filesets:
             raise CLIError("duplicate fileset %s" % name)
         if type == "find.gnu.out":
-            fileset = self._cached(name, GnuFindOutFileset.parse(self._mapper, self._pathway, name, toks[3:]))
+            fileset = self._cached(name, GnuFindOutFileset.parse(self._ctx, name, toks[3:]))
         elif type == "find":
-            fileset = self._cached(name, FindFileset.parse(self._mapper, self._pathway, name, toks[3:]))
+            fileset = self._cached(name, FindFileset.parse(self._ctx, name, toks[3:]))
         elif type == "filter":
             if len(toks) < 4:
                 raise CLIError("filter requires fileset, criteria")
