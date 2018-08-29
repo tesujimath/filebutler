@@ -63,6 +63,10 @@ class FilesetInfoAccumulator(object):
     def nFiles(self):
         return self._total.nFiles
 
+    @property
+    def totalSize(self):
+        return self._total.totalSize
+
     def add(self, filespec):
         self._total.add(1, filespec.size)
 
@@ -115,7 +119,7 @@ class FilesetInfoAccumulator(object):
             sizes0.add(info.nFiles, info.totalSize)
 
     def accumulate(self, acc):
-        self._total.add(acc._total.nFiles, acc._total.totalSize)
+        self._total.add(acc.nFiles, acc.totalSize)
         for user in acc._users:
             user1 = acc._users[user]
             if user not in self._users:
@@ -167,25 +171,28 @@ class FilesetInfoAccumulator(object):
                 self._sizes[i] = None
 
     def decumulate(self, acc):
-        self._total.remove(acc._total.nFiles, acc._total.totalSize)
+        self._total.remove(acc.nFiles, acc.totalSize)
         for user in acc._users:
+            user1 = acc._users[user]
             if user not in self._users:
                 user0 = FilesetInfo()
                 self._users[user] = user0
             else:
                 user0 = self._users[user]
-            user0.remove(info.nFiles, info.totalSize)
+            user0.remove(user1.nFiles, user1.totalSize)
         for dataset in acc._datasets:
+            dataset1 = acc._datasets[dataset]
             if dataset not in self._datasets:
                 dataset0 = FilesetInfo()
                 self._datasets[dataset] = dataset0
             else:
                 dataset0 = self._datasets[dataset]
-            dataset0.remove(info.nFiles, info.totalSize)
+            dataset0.remove(dataset1.nFiles, dataset1.totalSize)
         for i in range(len(acc._sizes)):
-            size = acc._sizes[i]
-            if size is not None:
-                self._sizes.remove(size.nFiles, size.totalSize)
+            sizes0 = self._sizes[i]
+            sizes1 = acc._sizes[i]
+            if sizes1 is not None:
+                sizes0.remove(sizes1.nFiles, sizes1.totalSize)
 
     def fmt_total(self):
         return "total %s" % str(self._total)
