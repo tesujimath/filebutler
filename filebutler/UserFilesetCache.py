@@ -32,8 +32,8 @@ from .util import debug_log
 
 class UserFilesetCache(FilesetCache):
 
-    def __init__(self, path, deltadir, mapper, attrs, sel, next):
-        super(self.__class__, self).__init__(path, deltadir, mapper, attrs, sel, next)
+    def __init__(self, parent, path, deltadir, mapper, attrs, sel, next):
+        super(self.__class__, self).__init__(parent, path, deltadir, mapper, attrs, sel, next)
         self._users = {}        # of fileset, indexed by username
         self._permissioned = {}        # of boolean, indexed by username
 
@@ -50,7 +50,7 @@ class UserFilesetCache(FilesetCache):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(u), self._subdeltadir(u), self._mapper, self._attrs, self._sel.withOwner(u))
+            fileset = self._next(self, self._subpath(u), self._subdeltadir(u), self._mapper, self._attrs, self._sel.withOwner(u))
             self._users[u] = fileset
             self._permissioned[u] = False
         return fileset

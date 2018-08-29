@@ -33,9 +33,9 @@ from .util import filetimestr, verbose_stderr, debug_log, warning
 
 class SimpleFilesetCache(FilesetCache):
 
-    def __init__(self, path, deltadir, mapper, attrs, sel):
+    def __init__(self, parent, path, deltadir, mapper, attrs, sel):
         #debug_log("SimpleFilesetCache(%s)::__init__)\n" % path)
-        super(self.__class__, self).__init__(path, deltadir, mapper, attrs, sel, None)
+        super(self.__class__, self).__init__(parent, path, deltadir, mapper, attrs, sel, None)
         self._filespecs = []    # in-memory read cache
         self._info = {}         # indexed by filter string
         self._file = None
@@ -140,8 +140,8 @@ class SimpleFilesetCache(FilesetCache):
         super(self.__class__, self).finalize()
 
     def delete(self, filespec):
-        #debug_log("SimpleFilesetCache(%s) delete %s\n" % (self._path, filespec.path))
-        super(self.__class__, self).finalize()
+        debug_log("SimpleFilesetCache(%s) delete %s\n" % (self._path, filespec.path))
+        super(self.__class__, self).delete(filespec)
         self._deletedFilelist[filespec.path] = True
 
     def saveDeletions(self):

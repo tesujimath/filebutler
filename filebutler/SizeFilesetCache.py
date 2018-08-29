@@ -35,8 +35,8 @@ from .util import str2size, verbose_stderr, debug_log
 
 class SizeFilesetCache(FilesetCache):
 
-    def __init__(self, path, deltadir, mapper, attrs, sel, next):
-        super(self.__class__, self).__init__(path, deltadir, mapper, attrs, sel, next)
+    def __init__(self, parent, path, deltadir, mapper, attrs, sel, next):
+        super(self.__class__, self).__init__(parent, path, deltadir, mapper, attrs, sel, next)
         self._sizebuckets = Buckets([str2size(s) for s in self._attrs['sizebuckets']] if 'sizebuckets' in self._attrs else [])
         self._filesets = [None] * self._sizebuckets.len
 
@@ -45,7 +45,7 @@ class SizeFilesetCache(FilesetCache):
         b = self._sizebuckets.bound(i)
         fileset = self._filesets[i]
         if fileset is None:
-            fileset = self._next(self._subpath(b), self._subdeltadir(b), self._mapper, self._attrs, self._sel.withSizebucket(b))
+            fileset = self._next(self, self._subpath(b), self._subdeltadir(b), self._mapper, self._attrs, self._sel.withSizebucket(b))
             self._filesets[i] = fileset
         return fileset
 

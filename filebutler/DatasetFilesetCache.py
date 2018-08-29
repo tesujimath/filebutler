@@ -31,8 +31,8 @@ from .util import debug_log
 
 class DatasetFilesetCache(FilesetCache):
 
-    def __init__(self, path, deltadir, mapper, attrs, sel, next):
-        super(self.__class__, self).__init__(path, deltadir, mapper, attrs, sel, next)
+    def __init__(self, parent, path, deltadir, mapper, attrs, sel, next):
+        super(self.__class__, self).__init__(parent, path, deltadir, mapper, attrs, sel, next)
         self._datasets = {}        # of fileset, indexed by dataset
 
         # load stubs for all datasets found
@@ -47,7 +47,7 @@ class DatasetFilesetCache(FilesetCache):
         else:
             fileset = None
         if fileset is None:
-            fileset = self._next(self._subpath(d), self._subdeltadir(d), self._mapper, self._attrs, self._sel.withDataset(d))
+            fileset = self._next(self, self._subpath(d), self._subdeltadir(d), self._mapper, self._attrs, self._sel.withDataset(d))
             self._datasets[d] = fileset
         return fileset
 

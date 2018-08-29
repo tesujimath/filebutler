@@ -33,7 +33,8 @@ from .util import debug_log, warning
 class FilesetCache(object):
     """FilesetCache is a base class."""
 
-    def __init__(self, path, deltadir, mapper, attrs, sel, next):
+    def __init__(self, parent, path, deltadir, mapper, attrs, sel, next):
+        self._parent = parent
         self._path = path
         self._deltadir = deltadir
         self._mapper = mapper
@@ -138,16 +139,20 @@ class FilesetCache(object):
                     self._fileinfo.write(infofile)
 
     def delete(self, filespec):
+        debug_log("FilesetCache(%s)::delete %s\n" % (self._path, filespec.path))
         self._deletedInfo.add(filespec)
+        if self._parent is not None:
+            self._parent.delete(filespec)
 
     def saveDeletions(self):
+        debug_log("FilesetCache(%s)::saveDeletions\n" % self._path)
         if self._next is not None:
             for f, f1 in self.filtered(None):
                 f.saveDeletions()
 
         if self._deletedInfo.nFiles > 0:
             deletedInfofile = self.infopath(deleted=True)
-            #debug_log("FilesetCache(%s)::saveDeletions deletedInfo\n" % self._path)
+            debug_log("FilesetCache(%s)::saveDeletions deletedInfo\n" % self._path)
             try:
                 with open(deletedInfofile, 'w') as f:
                     self._deletedInfo.write(f)

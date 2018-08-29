@@ -76,14 +76,14 @@ class Cache(Fileset):
 
     def _cache(self):
         if self._cache0 is None:
-            self._cache0 = self._newcache(self._path, self._deltadir, self._mapper, self._attrs, FilesetSelector(), 0)
+            self._cache0 = self._newcache(self, self._path, self._deltadir, self._mapper, self._attrs, FilesetSelector(), 0)
         return self._cache0
 
-    def _newcache(self, path, deltadir, mapper, attrs, sel, level):
+    def _newcache(self, parent, path, deltadir, mapper, attrs, sel, level):
         if level < len(self._caches):
-            return self._caches[level](path, deltadir, mapper, attrs, sel, functools.partial(self._newcache, level = level + 1))
+            return self._caches[level](parent, path, deltadir, mapper, attrs, sel, functools.partial(self._newcache, level = level + 1))
         else:
-            return SimpleFilesetCache(path, deltadir, mapper, attrs, sel)
+            return SimpleFilesetCache(parent, path, deltadir, mapper, attrs, sel)
 
     def select(self, filter=None):
         self._abortIfMissingCache()
@@ -116,6 +116,9 @@ class Cache(Fileset):
         # touch cache rootdir, to show updated
         os.utime(self._path, None)
         progress_stderr("updated %s\n" % self.name)
+
+    def delete(self, filespec):
+        debug_log("Cache(%s) delete %s\n" % (self._path, filespec.path))
 
     def saveDeletions(self):
         #debug_log("Cache(%s)::saveDeletions\n" % self.name)
