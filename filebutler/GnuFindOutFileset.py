@@ -48,7 +48,7 @@ class GnuFindOutFileset(Fileset):
 
     def __init__(self, mapper, pathway, name, path, match, replace):
         #print("GnuFindOutFileset init %s %s %s" % (path, match, replace))
-        Fileset.__init__(self)
+        super(self.__class__, self).__init__()
         self._mapper = mapper
         self._pathway = pathway
         self.name = name

@@ -43,7 +43,7 @@ from .util import filedatestr, filetimestr, verbose_stderr, debug_log, progress_
 class Cache(Fileset):
 
     def __init__(self, name, fileset, path, deltadir, mapper, attrs):
-        Fileset.__init__(self)
+        super(self.__class__, self).__init__()
         self.name = name
         self._fileset = fileset
         self._path = path
