@@ -46,3 +46,7 @@ class UnionFileset(Fileset):
     def merge_info(self, acc, filter=None):
         for fileset in self._filesets:
             fileset.merge_info(acc, filter)
+
+    def getCaches(self, caches):
+        for fileset in self._filesets:
+            fileset.getCaches(caches)

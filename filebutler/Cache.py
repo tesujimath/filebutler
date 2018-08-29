@@ -121,3 +121,6 @@ class Cache(Fileset):
         #debug_log("Cache(%s)::saveDeletions\n" % self.name)
         cache = self._cache()
         cache.saveDeletions()
+
+    def getCaches(self, caches):
+        caches[self.name] = self

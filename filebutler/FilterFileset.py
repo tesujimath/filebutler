@@ -48,3 +48,6 @@ class FilterFileset(Fileset):
         f1 = self._filter.intersect(filter)
         #debug_log("FilterFileset(%s)::select filter=%s\n" % (self.name, f1))
         self._fileset.merge_info(acc, f1)
+
+    def getCaches(self, caches):
+        self._fileset.getCaches(caches)

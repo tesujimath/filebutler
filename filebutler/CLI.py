@@ -439,8 +439,10 @@ class CLI(object):
                     pass
                 else:
                     raise
-        # finally save deletions lists for all caches
-        for name in self._caches:
+        # finally save deletions lists for all caches used by this fileset
+        caches = {}
+        fileset.getCaches(caches)
+        for name in caches:
             self._caches[name].saveDeletions()
 
     def _updateCacheCmd(self, toks, usage):
