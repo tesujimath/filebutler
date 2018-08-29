@@ -26,7 +26,6 @@ from builtins import (
 import datetime
 import os.path
 import re
-import shutil
 
 from .Buckets import Buckets
 from .FilesetCache import FilesetCache
@@ -58,6 +57,12 @@ class SizeFilesetCache(FilesetCache):
                 else:
                     f1 = filter
                 yield self._fileset(i), f1
+
+    def create(self):
+        """Create empty cache on disk, purging any previous."""
+        #debug_log("SizeFilesetCache creating at %s\n" % self._path)
+        self.purge()
+        self._filesets = [None] * self._sizebuckets.len
 
     def filesetFor(self, filespec):
         return self._fileset(self._sizebuckets.indexContaining(filespec.size))

@@ -61,6 +61,13 @@ class UserFilesetCache(FilesetCache):
             if filter is None or filter.owner is None or u == filter.owner:
                 yield self._fileset(u), Filter.clearOwner(filter)
 
+    def create(self):
+        """Create empty cache on disk, purging any previous."""
+        #debug_log("UserFilesetCache creating at %s\n" % self._path)
+        self.purge()
+        self._users = {}
+        self._permissioned = {}
+
     def filesetFor(self, filespec):
         return self._fileset(filespec.user)
 

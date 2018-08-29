@@ -26,7 +26,6 @@ from builtins import (
 import datetime
 import os.path
 import re
-import shutil
 
 from .Filter import Filter
 from .FilesetCache import FilesetCache
@@ -80,20 +79,7 @@ class WeeklyFilesetCache(FilesetCache):
     def create(self):
         """Create empty cache on disk, purging any previous."""
         #debug_log("WeeklyFilesetCache creating at %s\n" % self._path)
-        if os.path.exists(self._path):
-            # Purge existing cache.
-            # For safety in case of misconfiguration, we only delete directories in the format YYYYWW
-            YYYYWW = re.compile(r"""^_?\d\d\d\d\d\d$""")
-            for x in listdir(self._path):
-                px = os.path.join(self._path, x)
-                if YYYYWW.match(x):
-                    shutil.rmtree(px)
-                elif x == 'info':
-                    os.remove(px)
-                else:
-                    verbose_stderr("WARNING: cache purge ignoring %s\n" % px)
-        else:
-            os.makedirs(self._path)
+        self.purge()
         self._weeks = {}
 
     def filesetFor(self, filespec):

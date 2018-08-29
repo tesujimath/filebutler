@@ -57,5 +57,11 @@ class DatasetFilesetCache(FilesetCache):
             if filter is None or filter.dataset is None or d == filter.dataset:
                 yield self._fileset(d), Filter.clearDataset(filter)
 
+    def create(self):
+        """Create empty cache on disk, purging any previous."""
+        #debug_log("DatasetFilesetCache creating at %s\n" % self._path)
+        self.purge()
+        self._datasets = {}
+
     def filesetFor(self, filespec):
         return self._fileset(filespec.dataset)

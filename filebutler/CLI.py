@@ -34,9 +34,11 @@ import readline
 import shlex
 import smtplib
 import string
+import sys
 import time
 
 from .CLIError import CLIError
+from .ConfigError import ConfigError
 from .Cache import Cache
 from .Context import Context
 from .DeletionLog import DeletionLog
@@ -208,6 +210,9 @@ class CLI(object):
             done = self._process(line)
         except CLIError as e:
             stderr("ERROR %s\n" % e.msg)
+        except ConfigError as e:
+            stderr("CONFIGURATION ERROR %s - abort\n" % e.msg)
+            sys.exit(1)
         except KeyboardInterrupt:
             stderr("\n")
         except ValueError as e:

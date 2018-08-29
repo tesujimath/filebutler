@@ -323,6 +323,20 @@ Attributes
 Attributes may be set at any time, either in the startup file, or as a
 command, and generally affect subsequent commands.
 
+cache
+-----
+
+List of cache kinds to use, in order.
+
+Example:
+
+::
+
+    set cache weekly user size dataset
+
+If this attribute is not set, the default order is used, which is ``weekly size dataset user``.
+The cache order may be tuned to optimize the queries of most interest.
+
 cachedir
 --------
 

@@ -28,6 +28,7 @@ import functools
 import os.path
 
 from .CLIError import CLIError
+from .ConfigError import ConfigError
 from .DatasetFilesetCache import DatasetFilesetCache
 from .Fileset import Fileset
 from .FilesetSelector import FilesetSelector
@@ -42,6 +43,14 @@ from .util import filedatestr, filetimestr, verbose_stderr, debug_log, progress_
 # its next one, via its next parameter.
 class Cache(Fileset):
 
+    caches = {
+        'weekly':  WeeklyFilesetCache,
+        'size':    SizeFilesetCache,
+        'dataset': DatasetFilesetCache,
+        'user':    UserFilesetCache,
+    }
+    defaultCacheKinds = ['weekly', 'size', 'dataset', 'user']
+
     def __init__(self, name, fileset, path, deltadir, ctx, attrs):
         super(self.__class__, self).__init__()
         self.name = name
@@ -51,7 +60,11 @@ class Cache(Fileset):
         self._ctx = ctx
         self._attrs = attrs.copy() # copy the dictionary, so we freeze its values
         self._cache0 = None
-        self._caches = [WeeklyFilesetCache, SizeFilesetCache, DatasetFilesetCache, UserFilesetCache]
+        cacheKinds = self._attrs['cache'] if 'cache' in self._attrs else self.__class__.defaultCacheKinds
+        try:
+            self._caches = [self.__class__.caches[kind] for kind in cacheKinds]
+        except KeyError as e:
+            raise ConfigError("invalid cache kind '%s' (valid kinds are %s)" % (e, ', '.join(sorted(self.__class__.caches.keys()))))
 
     def _exists(self):
         try:

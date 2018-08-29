@@ -24,6 +24,7 @@ from builtins import (
     filter, map, zip)
 
 import os.path
+import shutil
 
 from .FilesetInfoAccumulator import FilesetInfoAccumulator
 from .FilespecMerger import FilespecMerger
@@ -69,6 +70,23 @@ class FilesetCache(object):
             return os.path.join(self._deltadir, "deleted.info")
         else:
             return os.path.join(self._path, "info")
+
+    def purge(self):
+        """Purge existing cache on disk, and create empty."""
+        #debug_log("FilesetCache purging %s\n" % self._path)
+        if os.path.exists(self._path):
+            # Purge existing cache.
+            # For safety in case of misconfiguration, we only delete directories with a leading underscore
+            for x in listdir(self._path):
+                px = os.path.join(self._path, x)
+                if x.startswith('_'):
+                    shutil.rmtree(px)
+                elif x == 'info':
+                    os.remove(px)
+                else:
+                    verbose_stderr("WARNING: cache purge ignoring %s\n" % px)
+        else:
+            os.makedirs(self._path)
 
     def select(self, filter=None):
         merger = FilespecMerger()
