@@ -44,6 +44,20 @@ Example Use
     very-old-scratch filter old-scratch older:2009-10-05
     big-old-scratch filter old-scratch size:+1G
 
+    fb: time info -s scratch
+    total 139.8T in  62306443 files
+       0 -   1k     10G in  32652282 files
+      1k -  10k     55G in  18798049 files
+     10k - 100k    196G in   6735931 files
+    100k -   1M   1012G in   3096409 files
+      1M -  10M    2.5T in    698040 files
+     10M - 100M    7.3T in    218382 files
+    100M -   1G   28.0T in     90412 files
+      1G -  10G   32.4T in     14142 files
+     10G - 100G   58.6T in      2733 files
+    100G +         9.7T in        63 files
+    time: real 0.00s, user 0.00s, sys 0.00s
+
     fb: time info -u old-scratch
     total 34.2T in 7138319 files
     captainjack 9.8T in 122775 files
