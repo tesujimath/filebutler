@@ -88,6 +88,8 @@ class WeeklyFilesetCache(FilesetCache):
                 px = os.path.join(self._path, x)
                 if YYYYWW.match(x):
                     shutil.rmtree(px)
+                elif x == 'info':
+                    os.remove(px)
                 else:
                     verbose_stderr("WARNING: cache purge ignoring %s\n" % px)
         else:
