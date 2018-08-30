@@ -29,7 +29,7 @@ import shutil
 from .FilesetInfoAccumulator import FilesetInfoAccumulator
 from .FilespecMerger import FilespecMerger
 from .PooledFile import listdir
-from .util import debug_log, warning
+from .util import debug_log, verbose_stderr, warning
 
 class FilesetCache(object):
     """FilesetCache is a base class."""
