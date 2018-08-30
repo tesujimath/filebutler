@@ -332,9 +332,9 @@ Example:
 
 ::
 
-    set cache weekly user size dataset
+    set cache weekly size user
 
-If this attribute is not set, the default order is used, which is ``weekly size dataset user``.
+If this attribute is not set, the default order is used, which is ``weekly user size dataset``.
 The cache order may be tuned to optimize the queries of most interest.
 
 cachedir

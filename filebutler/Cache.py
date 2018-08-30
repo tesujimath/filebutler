@@ -49,7 +49,7 @@ class Cache(Fileset):
         'dataset': DatasetFilesetCache,
         'user':    UserFilesetCache,
     }
-    defaultCacheKinds = ['weekly', 'size', 'dataset', 'user']
+    defaultCacheKinds = ['weekly', 'user', 'size', 'dataset']
 
     def __init__(self, name, fileset, path, deltadir, ctx, attrs):
         super(self.__class__, self).__init__()
