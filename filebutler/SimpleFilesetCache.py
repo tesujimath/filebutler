@@ -152,8 +152,6 @@ class SimpleFilesetCache(FilesetCache):
             deletedFilelist = self.filelistpath(deleted=True)
             #debug_log("SimpleFilesetCache(%s)::saveDeletions deletedFilelist\n" % self._path)
             try:
-                if not os.path.exists(self._deltadir):
-                    os.makedirs(self._deltadir)
                 with open(deletedFilelist, 'w') as f:
                     for path in self._deletedFilelist:
                         f.write("%s\n" % path)

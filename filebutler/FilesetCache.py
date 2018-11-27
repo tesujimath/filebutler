@@ -173,6 +173,12 @@ class FilesetCache(object):
 
     def saveDeletions(self):
         #debug_log("FilesetCache(%s)::saveDeletions\n" % self._path)
+        try:
+            if not os.path.exists(self._deltadir):
+                os.makedirs(self._deltadir)
+        except IOError:
+            warning("can't create deltadir %s, ignoring" % self._deltadir)
+            return
         if self._deletedInfo.nFiles > 0:
             deletedInfofile = self.infopath(deleted=True)
             #debug_log("FilesetCache(%s)::saveDeletions deletedInfo\n" % self._path)

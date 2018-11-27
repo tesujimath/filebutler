@@ -422,7 +422,13 @@ class CLI(object):
                 # preserve mtime for parent directory
                 parent = os.path.dirname(filespec.path)
                 if parent not in mtimes:
-                    mtimes[parent] = os.stat(parent).st_mtime
+                    try:
+                        mtimes[parent] = os.stat(parent).st_mtime
+                    except OSError as e:
+                        if e.errno == errno.ENOENT:
+                            pass
+                        else:
+                            raise
                 if filespec.isdir():
                     dirs.append(filespec)
                 else:
