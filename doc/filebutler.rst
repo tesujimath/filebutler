@@ -142,7 +142,7 @@ fileset type filter
 ~~~~~~~~~~~~~~~~~~~
 
 Parameters:
-``<fileset> [-user <username] [-mtime +<n>] [-size +<n>[kMGT]] [! -path <glob>]``
+``<fileset> [-user <username] [-mtime +<n>] [-size +<n>[kMGT]] [! -path <glob>] [-regex <path-regex>]``
 
 Example:
 
@@ -152,10 +152,13 @@ Example:
     fileset my-old-scratch filter old-scratch -user $USER
     fileset my-big-old-scratch filter my-old-scratch -size +1G
     fileset my-junk filter my-old-scratch ! -path *important*
+    fileset my-isos filter my-home -regex \\.iso$
 
 Selects a subset of the underlying fileset, according to the filter
 parameters. Filter parameter syntax is modeled on find, albeit with very
 selective support for certain features.
+
+Note that because the input line is read by GNU readline, backslashes must be doubled, alas.
 
 fileset type union
 ~~~~~~~~~~~~~~~~~~

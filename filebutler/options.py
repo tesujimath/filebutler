@@ -45,6 +45,7 @@ def parseCommandOptions(now, toks, filter=False, sorter=False, grouper=False):
     sizeGeq = None
     mtimeBefore = None
     notPaths = []
+    regex = None
 
     # sorter options
     bySize = False
@@ -100,6 +101,16 @@ def parseCommandOptions(now, toks, filter=False, sorter=False, grouper=False):
                 raise CLIError("! requires -path <glob>")
             notPaths.append(toks[i + 2])
             i += 2
+        elif tok == '-regex' and filter:
+            if i + 1 >= len(toks):
+                raise CLIError("-regex missing parameter")
+            regex = toks[i + 1]
+            # check the syntax
+            try:
+                regexC = re.compile(regex)
+            except:
+                raise CLIError("invalid regex %s" % regex)
+            i += 1
         elif tok == '-by-size' and sorter:
             bySize = True
         elif tok == '-depth' and grouper:
@@ -121,8 +132,8 @@ def parseCommandOptions(now, toks, filter=False, sorter=False, grouper=False):
             raise CLIError("unknown %sparameter %s" % (category, tok))
         i += 1
 
-    if filter and (owner is not None or dataset is not None or sizeGeq is not None or mtimeBefore is not None or notPaths != []):
-        f0 = Filter(owner=owner, dataset=dataset, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore, notPaths=notPaths)
+    if filter and (owner is not None or dataset is not None or sizeGeq is not None or mtimeBefore is not None or notPaths != [] or regex is not None):
+        f0 = Filter(owner=owner, dataset=dataset, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore, notPaths=notPaths, regex=regex)
     else:
         f0 = None
     if sorter and bySize:
