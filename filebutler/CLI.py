@@ -354,19 +354,34 @@ class CLI(object):
             filter = None
         info = self._fileset(name).info(self._attrs, filter)
         if mode == 'a':
-            print('\n'.join(info.fmt_total()))
+            lines = info.fmt_total()
         elif mode == 'u':
-            print('\n'.join(info.fmt_users()))
+            lines = info.fmt_users()
         elif mode == 'd':
-            print('\n'.join(info.fmt_datasets()))
+            lines = info.fmt_datasets()
         elif mode == 'e':
+            lines = []
             for user, userinfo in info.iterusers():
                 if user not in self._aliases:
-                    print("%-13s %s" % (user, str(userinfo)))
+                    lines.append("%-13s %s" % (user, str(userinfo)))
         elif mode == 's':
-            print('\n'.join(info.fmt_sizes()))
+            lines = info.fmt_sizes()
         else:
             raise CLIError("usage: %s" % usage)
+        _, terminal_lines = os.get_terminal_size() # requires Python 3.3
+        if len(lines) < terminal_lines:
+            print('\n'.join(lines))
+        else:
+            pager = Pager()
+            try:
+                pager.file.write("%s\n" % '\n'.join(lines))
+            except IOError as e:
+                if e.errno == errno.EPIPE:
+                    pass
+                else:
+                    raise
+            finally:
+                pager.close()
 
     def _printCmd(self, toks, usage):
         if len(toks) < 2:
