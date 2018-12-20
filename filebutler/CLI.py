@@ -354,17 +354,17 @@ class CLI(object):
             filter = None
         info = self._fileset(name).info(self._attrs, filter)
         if mode == 'a':
-            print(info.fmt_total())
+            print('\n'.join(info.fmt_total()))
         elif mode == 'u':
-            print(info.fmt_users())
+            print('\n'.join(info.fmt_users()))
         elif mode == 'd':
-            print(info.fmt_datasets())
+            print('\n'.join(info.fmt_datasets()))
         elif mode == 'e':
             for user, userinfo in info.iterusers():
                 if user not in self._aliases:
                     print("%-13s %s" % (user, str(userinfo)))
         elif mode == 's':
-            print(info.fmt_sizes())
+            print('\n'.join(info.fmt_sizes()))
         else:
             raise CLIError("usage: %s" % usage)
 
@@ -409,7 +409,7 @@ class CLI(object):
 
         # get confirmation
         info = fileset.info(self._attrs, filter)
-        if not yes_or_no('Really delete %s' % info.fmt_total()):
+        if not yes_or_no('Really delete %s' % ' '.join(info.fmt_total())):
             return
 
         # do it
@@ -501,8 +501,8 @@ class CLI(object):
                 user_fileset = FilterFileset("%s-%s" % (name, user), fileset, Filter(owner=user))
                 user_info = user_fileset.info(self._attrs)
                 m['username'] = user
-                m['info'] = user_info.fmt_total()
-                m['info_datasets'] = user_info.fmt_datasets()
+                m['info'] = '\n'.join(user_info.fmt_total())
+                m['info_datasets'] = '\n'.join(user_info.fmt_datasets())
                 #print("==================== %s %s\n\n%s" % (user_email, subject, body))
                 msg = email.mime.text.MIMEText(body_template.substitute(m))
                 msg['Subject'] = subject_template.substitute(m)

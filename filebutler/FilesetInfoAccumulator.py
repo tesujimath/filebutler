@@ -195,33 +195,33 @@ class FilesetInfoAccumulator(object):
                 sizes0.remove(sizes1.nFiles, sizes1.totalSize)
 
     def fmt_total(self):
-        return "total %s" % str(self._total)
+        return ["total %s" % str(self._total)]
 
     def fmt_users(self):
-        lines = [self.fmt_total()]
+        lines = self.fmt_total()
         for user in sorted(list(self._users.items()), key=lambda u: u[1].totalSize, reverse=True):
             name = user[0]
             info = user[1]
             # exclude trivial small stuff
             if info.totalSize > 1024:
                 lines.append("%-13s %s" % (name, str(info)))
-        return '\n'.join(lines)
+        return lines
 
     def iterusers(self):
         return iter(self._users.items())
 
     def fmt_datasets(self):
-        lines = [self.fmt_total()]
+        lines = self.fmt_total()
         for dataset in sorted(list(self._datasets.items()), key=lambda u: u[1].totalSize, reverse=True):
             name = dataset[0]
             info = dataset[1]
             # exclude trivial small stuff
             if info.totalSize > 1024:
                 lines.append("%-32s %s" % (name, str(info)))
-        return '\n'.join(lines)
+        return lines
 
     def fmt_sizes(self):
-        lines = [self.fmt_total()]
+        lines = self.fmt_total()
         last = len(self._sizes) - 1
         for i in range(last + 1):
             if self._sizes[i] is not None:
@@ -233,7 +233,7 @@ class FilesetInfoAccumulator(object):
                     else:
                         interval = "%4s +     " % size2str0(self._sizebuckets.bound(i))
                     lines.append("%s  %s" % (interval, str(info)))
-        return '\n'.join(lines)
+        return lines
 
     def write(self, f):
         json.dump({
