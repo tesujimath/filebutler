@@ -30,13 +30,13 @@ import os
 import os.path
 import pstats
 import re
-import readline
 import shlex
 import smtplib
 import string
 import sys
 import time
 
+from .CLICompleter import CLICompleter
 from .CLIError import CLIError
 from .ConfigError import ConfigError
 from .Cache import Cache
@@ -124,69 +124,11 @@ class CLI(object):
         }
         initialize(args)
         self._config = args.config
-        readline.set_completer(self._completer)
-        readline.set_completer_delims(" ")
-        readline.parse_and_bind("tab: complete")
+        self._completer = CLICompleter(self)
 
-    def _completer(self, text, state):
-        result = None
-        with open("/home/guestsi/junk/completer.log", "a") as logf:
-            try:
-                logf.write("CLI::_completer '%s' %s\n" % (text, state))
-                if state == 0:
-                    line = readline.get_line_buffer().lstrip()
-                    toks = line.split()
-                    logf.write("line '%s': %s\n" % (line, str(toks)))
-                    if line == text:
-                        logf.write("calling _complete_cmd\n")
-                        self._completions = self._complete_cmd(toks, text)
-                    else:
-                        completer = "_complete_%s_cmd" % toks[0].replace('-', '_')
-                        if hasattr(self, completer):
-                            logf.write("calling %s\n" % completer)
-                            self._completions = getattr(self, completer)(toks, text)
-                        else:
-                            logf.write("not calling %s\n" % completer)
-                            self._completions = None
-                    logf.write("completions %s\n" % str(self._completions))
-                if self._completions is None:
-                    result = None
-                elif state >= len(self._completions):
-                    result = None
-                else:
-                    result = self._completions[state] + ' '
-                logf.write("result %s\n" % str(result))
-            except Exception as e:
-                logf.write("Exception %s\n" % str(e))
-                raise e
-        return result
-
-    def _complete_cmd(self, toks, text):
-        return [cmd for cmd in self.commands if cmd.startswith(text)]
-        #privileged = cmd['privileged'] if 'privileged' in cmd else False
-        #        if privileged and os.geteuid() != 0:
-
-    def _complete_fileset_cmd(self, toks, text):
-        result = []
-        return result
-
-    def _complete_info_cmd(self, toks, text):
-        return None
-
-    def _complete_print_cmd(self, toks, text):
-        result = []
-        if len(toks) == 1 or len(toks) == 2 and toks[1] == text:
-            self._append_fileset_completions(result, text)
-        return result
-
-    def _complete_delete_cmd(self, toks, text):
-        return None
-
-    def _complete_update_cache_cmd(self, toks, text):
-        return None
-
-    def _append_fileset_completions(self, result, text):
-        return result.extend([fileset for fileset in self._filesets if fileset.startswith(text)])
+    @property
+    def filesetNames(self):
+        return self._filesets.keys()
 
     def _cached(self, name, fileset):
         if 'cachedir' not in self._attrs:
