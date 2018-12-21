@@ -24,6 +24,7 @@ from builtins import (
     filter, map, zip)
 
 import os
+import pwd
 import readline
 
 class CLICompleter(object):
@@ -42,10 +43,13 @@ class CLICompleter(object):
             try:
                 logf.write("CLI::_completer '%s' %s\n" % (text, state))
                 if state == 0:
+                    self._completions = []
                     line = readline.get_line_buffer().lstrip()
                     self._toks = line.split()
+                    if text != '':
+                        self._toks = self._toks[:-1] # don't include the current text
                     logf.write("line '%s': %s\n" % (line, str(self._toks)))
-                    if line == self._text:
+                    if not self._toks:
                         logf.write("calling _complete_cmd\n")
                         self._complete_cmd()
                     else:
@@ -70,27 +74,86 @@ class CLICompleter(object):
         return result
 
     def _complete_cmd(self):
-        self._completions = [cmd for cmd in self._cli.commands if cmd.startswith(self._text)]
-        #privileged = cmd['privileged'] if 'privileged' in cmd else False
-        #        if privileged and os.geteuid() != 0:
+        if os.geteuid() != 0:
+            cmds = [cmd for cmd in self._cli.commands if 'privileged' not in self._cli.commands[cmd]]
+        else:
+            cmds = [cmd for cmd in self._cli.commands]
+        self._append_matching(cmds, sort=True)
 
     def _complete_fileset_cmd(self):
-        result = []
-        return result
+        if self._append_option_parameters():
+            return
+        n = len(self._toks)
+        if n == 1:
+            # next param is new fileset name, can't complete this
+            pass
+        elif n == 2:
+            self._append_matching(['find.gnu.out','find','filter','union'])
+        elif self._toks[2] == 'filter':
+            if n == 3:
+                self._append_filesets()
+            else:
+                self._append_options(filter=True)
+        elif self._toks[2] == 'union':
+            self._append_filesets()
 
     def _complete_info_cmd(self):
-        return None
+        if self._append_option_parameters():
+            return
+        n = len(self._toks)
+        if n == 1:
+            self._append_filesets()
+        else:
+            self._append_options(filter=True)
 
     def _complete_print_cmd(self):
-        self._completions = []
-        if len(self._toks) == 1 or len(self._toks) == 2 and self._toks[1] == self._text:
-            self._append_fileset_completions()
+        if self._append_option_parameters():
+            return
+        n = len(self._toks)
+        if n == 1:
+            self._append_filesets()
+        else:
+            self._append_options(filter=True, sorter=True, grouper=True)
 
     def _complete_delete_cmd(self):
-        return None
+        if self._append_option_parameters():
+            return
+        n = len(self._toks)
+        if n == 1:
+            self._append_filesets()
+        else:
+            self._append_options(filter=True)
 
     def _complete_update_cache_cmd(self):
-        return None
+        self._append_filesets()
 
-    def _append_fileset_completions(self):
-        return self._completions.extend([fileset for fileset in self._cli.filesetNames if fileset.startswith(self._text)])
+    def _append_filesets(self):
+        self._append_matching(self._cli.filesetNames)
+
+    def _append_options(self, filter=False, sorter=False, grouper=False):
+        if filter:
+            self._append_matching(['-user','-dataset','-size','-mtime','! -path','-regex'])
+        if sorter:
+            self._append_matching(['-by-size'])
+        if grouper:
+            self._append_matching(['-depth'])
+
+    def _append_option_parameters(self):
+        lasttok = self._toks[-1]
+        if lasttok == '-user':
+            self._append_users()
+            return True
+        if lasttok == '-dataset':
+            self._append_datasets()
+            return True
+        return False
+
+    def _append_users(self):
+        self._append_matching([pwent[0] for pwent in pwd.getpwall() if pwent[2] >= 500 and pwent[2] < 3000], sort=True)
+
+    def _append_datasets(self):
+        self._append_matching([pwent[0] for pwent in pwd.getpwall() if pwent[2] >= 3000 and pwent[2] < 4000], sort=True)
+
+    def _append_matching(self, xs, sort=False):
+        matching = [x for x in xs if x.startswith(self._text)]
+        self._completions.extend(sorted(matching) if sort else matching)
