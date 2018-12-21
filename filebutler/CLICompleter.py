@@ -39,38 +39,26 @@ class CLICompleter(object):
         result = None
         self._text = text
         self._state = state
-        with open("/home/guestsi/junk/completer.log", "a") as logf:
-            try:
-                logf.write("CLI::_completer '%s' %s\n" % (text, state))
-                if state == 0:
-                    self._completions = []
-                    line = readline.get_line_buffer().lstrip()
-                    self._toks = line.split()
-                    if text != '':
-                        self._toks = self._toks[:-1] # don't include the current text
-                    logf.write("line '%s': %s\n" % (line, str(self._toks)))
-                    if not self._toks:
-                        logf.write("calling _complete_cmd\n")
-                        self._complete_cmd()
-                    else:
-                        completer = "_complete_%s_cmd" % self._toks[0].replace('-', '_')
-                        if hasattr(self, completer):
-                            logf.write("calling %s\n" % completer)
-                            getattr(self, completer)()
-                        else:
-                            logf.write("not calling %s\n" % completer)
-                            self._completions = None
-                    logf.write("completions %s\n" % str(self._completions))
-                if self._completions is None:
-                    result = None
-                elif state >= len(self._completions):
-                    result = None
+        if state == 0:
+            self._completions = []
+            line = readline.get_line_buffer().lstrip()
+            self._toks = line.split()
+            if text != '':
+                self._toks = self._toks[:-1] # don't include the current text
+            if not self._toks:
+                self._complete_cmd()
+            else:
+                completer = "_complete_%s_cmd" % self._toks[0].replace('-', '_')
+                if hasattr(self, completer):
+                    getattr(self, completer)()
                 else:
-                    result = self._completions[state] + ' '
-                logf.write("result %s\n" % str(result))
-            except Exception as e:
-                logf.write("Exception %s\n" % str(e))
-                raise e
+                    self._completions = None
+        if self._completions is None:
+            result = None
+        elif state >= len(self._completions):
+            result = None
+        else:
+            result = self._completions[state] + ' '
         return result
 
     def _complete_cmd(self):
