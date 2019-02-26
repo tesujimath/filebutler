@@ -94,6 +94,17 @@ Usage:
 
 The ``filter-params`` are as described for the filter fileset type.
 
+symlinks
+--------
+
+Print all symlinks to the given target.  With ``-r``, do this recursively.
+
+Usage:
+
+::
+
+    symlinks [-r] <target-path>
+
 fileset
 -------
 
@@ -471,6 +482,15 @@ Example:
     set private
     fileset home find /home
     clear private
+
+symlinksfileset
+---------------
+
+This is the name of the fileset used to resolve symlink targets.  You
+should probably set this to the top-level union fileset, to ensure the
+``symlinks`` command covers all filesets.
+
+There is no filtering support for symlinks.
 
 OPTIONS
 =======

@@ -103,10 +103,13 @@ class GnuFindOutFileset(Fileset):
                 fields = line.rstrip().split(None, 10)
                 if len(fields) > 10:
                     path = re.sub(self._match, self._replace, fields[10])
-                    # strip out symlink destination
-                    symlink = path.find(' -> ')
-                    if symlink >= 0:
-                        path = path[:symlink]
+                    # see if it's a symlink
+                    symlink = path.split(' -> ', 1)
+                    if len(symlink) > 1:
+                        path = symlink[0]
+                        target = symlink[1]
+                    else:
+                        target = None
                     filespec = Filespec(fileset=self,
                                         dataset=self._ctx.pathway.datasetFromPath(path),
                                         path=path,
@@ -114,7 +117,8 @@ class GnuFindOutFileset(Fileset):
                                         group=self._ctx.mapper.groupnameFromString(fields[5]),
                                         size=int(fields[6]),
                                         mtime=self._dateParser.t(fields),
-                                        perms=fields[2])
+                                        perms=fields[2],
+                                        target=target)
                     if (filter == None or filter.selects(filespec)) and not self._ctx.pathway.ignored(filespec.path):
                         #print("GnuFindOutFileset read from file %s" % filespec)
                         yield filespec

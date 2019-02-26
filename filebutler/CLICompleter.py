@@ -27,6 +27,8 @@ import os
 import pwd
 import readline
 
+from .util import verbose_stderr
+
 class CLICompleter(object):
 
     def __init__(self, cli):
@@ -111,6 +113,14 @@ class CLICompleter(object):
             self._append_filesets()
         else:
             self._append_options(filter=True)
+
+    def _complete_symlinks_cmd(self):
+        n = len(self._toks)
+        #verbose_stderr("_complete_symlinks_cmd %d %s '%s'\n" % (n, str(self._toks), self._text))
+        if n == 1:
+            self._append_matching(['-r'])
+        if n == 1 or n == 2 and self._toks[1] == '-r':
+            self._completions.extend(sorted(self._cli.completeSymlinks(self._text)))
 
     def _complete_update_cache_cmd(self):
         self._append_filesets()

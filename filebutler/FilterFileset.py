@@ -51,3 +51,11 @@ class FilterFileset(Fileset):
 
     def getCaches(self, caches):
         self._fileset.getCaches(caches)
+
+    def symlinkSources(self, target, recursive):
+        # no filtering for symlinks
+        return self._fileset.symlinkSources(target, recursive)
+
+    def completeSymlinks(self, prefix):
+        # transparent pass-through
+        return self._fileset.completeSymlinks(prefix)

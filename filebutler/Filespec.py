@@ -55,7 +55,7 @@ class Filespec(object):
                                calendar.timegm(time.strptime(fields[2], fbTimeFmt)),
                                fields[3])
 
-    def __init__(self, fileset, dataset, path, user, group, size, mtime, perms):
+    def __init__(self, fileset, dataset, path, user, group, size, mtime, perms, target=None):
         self.fileset = fileset  # fileset whicih owns this filespec
         self.dataset = dataset
         self.path = path
@@ -64,6 +64,8 @@ class Filespec(object):
         self.size = size
         self.mtime = mtime
         self.perms = perms
+        # symlink target, cope with it being relative
+        self.target = os.path.join(os.path.dirname(path), target) if target is not None else None
 
     def __str__(self):
         return self.format(all=True)[0]

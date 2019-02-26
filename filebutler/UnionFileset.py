@@ -50,3 +50,15 @@ class UnionFileset(Fileset):
     def getCaches(self, caches):
         for fileset in self._filesets:
             fileset.getCaches(caches)
+
+    def symlinkSources(self, target, recursive):
+        result = []
+        for fileset in self._filesets:
+            result.extend(fileset.symlinkSources(target, recursive))
+        return result
+
+    def completeSymlinks(self, prefix):
+        matching = []
+        for fileset in self._filesets:
+            matching.extend(fileset.completeSymlinks(prefix))
+        return matching

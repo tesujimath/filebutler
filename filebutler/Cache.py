@@ -35,6 +35,7 @@ from .FilesetSelector import FilesetSelector
 from .PooledFile import PooledFile
 from .SimpleFilesetCache import SimpleFilesetCache
 from .SizeFilesetCache import SizeFilesetCache
+from .SymlinkCache import SymlinkCache
 from .UserFilesetCache import UserFilesetCache
 from .WeeklyFilesetCache import WeeklyFilesetCache
 from .util import filedatestr, filetimestr, verbose_stderr, debug_log, progress_stderr, warning
@@ -65,6 +66,7 @@ class Cache(Fileset):
             self._caches = [self.__class__.caches[kind] for kind in cacheKinds]
         except KeyError as e:
             raise ConfigError("invalid cache kind '%s' (valid kinds are %s)" % (e, ', '.join(sorted(self.__class__.caches.keys()))))
+        self._symlinks = SymlinkCache(self._path)
 
     def _exists(self):
         try:
@@ -116,6 +118,7 @@ class Cache(Fileset):
         cache = self._cache()
         try:
             cache.create()
+            self._symlinks.purge()
         except OSError as e:
             if e.errno == errno.EACCES or e.errno == errno.EPERM:
                 # not ours to update, so silently do nothing
@@ -123,12 +126,23 @@ class Cache(Fileset):
                 return
         for filespec in self._fileset.select():
             cache.add(filespec)
+            if filespec.target is not None:
+                self._symlinks.add(filespec.path, filespec.target)
         # ensure from here on we don't hit open file problems
         PooledFile.flushAll()
         cache.finalize()
         # touch cache rootdir, to show updated
-        os.utime(self._path, None)
+        try:
+            os.utime(self._path, None)
+        except PermissionError:
+            pass
         progress_stderr("updated %s\n" % self.name)
 
     def getCaches(self, caches):
         caches[self.name] = self
+
+    def symlinkSources(self, target, recursive):
+        return sorted(self._symlinks.sources(target, recursive))
+
+    def completeSymlinks(self, prefix):
+        return self._symlinks.complete(prefix)

@@ -96,6 +96,10 @@ class FindFileset(Fileset):
                         raise
                 if stat.S_ISDIR(s.st_mode):
                     dirs.append(xpath)
+                if stat.S_ISLNK(s.st_mode):
+                    target = os.readlink(xpath)
+                else:
+                    target = None
                 path = re.sub(self._match, self._replace, xrel)
                 filespec = Filespec(fileset=self,
                                     dataset=self._ctx.pathway.datasetFromPath(path),
@@ -104,7 +108,8 @@ class FindFileset(Fileset):
                                     group=self._ctx.mapper.groupnameFromId(s.st_gid),
                                     size=s.st_size,
                                     mtime=s.st_mtime,
-                                    perms=filemode(s.st_mode))
+                                    perms=filemode(s.st_mode),
+                                    target=target)
                 if filter == None or filter.selects(filespec):
                     #print("FindFileset scan found %s" % filespec)
                     yield filespec

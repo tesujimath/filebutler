@@ -35,6 +35,7 @@ import smtplib
 import string
 import sys
 import time
+import traceback
 
 from .CLICompleter import CLICompleter
 from .CLIError import CLIError
@@ -51,7 +52,7 @@ from .Pager import Pager
 from .UnionFileset import UnionFileset
 from .aliases import read_etc_aliases
 from .options import parseCommandOptions
-from .util import stderr, verbose_stderr, debug_log, initialize, profile, unix_time, yes_or_no
+from .util import stderr, debug_log, initialize, profile, unix_time, yes_or_no
 
 class CLI(object):
 
@@ -111,6 +112,10 @@ class CLI(object):
             'delete':        { 'desc': 'delete all files in a fileset, optionally filtered',
                                'usage': 'delete <fileset> [<filter-params>]',
                                'method': self._deleteCmd,
+            },
+            'symlinks':      { 'desc': 'print symlinks pointing at target path, optionally recursively',
+                               'usage': 'symlinks [-r] <target-path>',
+                               'method': self._symlinksCmd,
             },
             'update-cache':  { 'desc': 'update all or named caches, by rescanning source filelists',
                                'usage': 'update-cache [<fileset> ...]',
@@ -221,6 +226,7 @@ class CLI(object):
         except KeyboardInterrupt:
             stderr("\n")
         except ValueError as e:
+            traceback.print_exc()
             stderr("%s\n" % str(e))
         return done
 
@@ -472,6 +478,44 @@ class CLI(object):
         for cache in self._ctx.pendingCaches:
             cache.saveDeletions()
         self._ctx.pendingCaches.clear()
+
+    def _symlinksFileset(self):
+        symlinksfileset = self._attrs.get('symlinksfileset')
+        if symlinksfileset is None:
+            raise CLIError("missing attr symlinksfileset")
+        if len(symlinksfileset) != 1:
+            raise CLIError("botched attr symlinksfileset")
+        return self._fileset(symlinksfileset[0])
+
+    def _symlinksCmd(self, toks, usage):
+        fileset = self._symlinksFileset()
+        if len(toks) == 2:
+            target = toks[1]
+            recursive = False
+        elif len(toks) == 3 and toks[1] == '-r':
+            target = toks[2]
+            recursive = True
+        else:
+            raise CLIError("usage: %s" % usage)
+        sources = fileset.symlinkSources(target, recursive)
+        _, terminal_lines = os.get_terminal_size() # requires Python 3.3
+        if len(sources) < terminal_lines:
+            print('\n'.join(sources))
+        else:
+            pager = Pager()
+            try:
+                pager.file.write("%s\n" % '\n'.join(sources))
+            except IOError as e:
+                if e.errno == errno.EPIPE:
+                    pass
+                else:
+                    raise
+            finally:
+                pager.close()
+
+    def completeSymlinks(self, prefix):
+        fileset = self._symlinksFileset()
+        return fileset.completeSymlinks(prefix)
 
     def _updateCacheCmd(self, toks, usage):
         if len(toks) == 1:
