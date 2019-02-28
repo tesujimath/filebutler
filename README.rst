@@ -8,6 +8,10 @@ working with filelists generated offline by find can be rather slow for
 interactive use. Filebutler improves on this by structuring filelists by
 age, by size, by owner, and by dataset (see below).
 
+As of version 0.23.0, it also builds a reverse index of symlinks for
+all filesets, to support querying by symlink target, that is, what
+symlinks point into a given directory tree.
+
 Installation
 ------------
 
@@ -27,8 +31,8 @@ Alternatively, filebutler is also on conda-forge.
 Installing filebutler from RPM is now deprecated, and the spec file has therefore
 been removed from the repo.
 
-Example Use
------------
+Example use for old file pruning
+--------------------------------
 
 ::
 
@@ -87,6 +91,53 @@ Example Use
     <snip>
 
     fb: delete very-old-scratch
+
+
+Example use for symlink queries
+-------------------------------
+
+Tab completion is available on path names, to complete on any
+subdirectory which contains a symlink target.
+
+::
+
+    $ filebutler
+    fb: symlinks -r /dataset/bio                    <TAB>
+    fb: symlinks -r /dataset/bioinformatics_dev/    <TAB>
+    /dataset/bioinformatics_dev/active/
+    /dataset/bioinformatics_dev/active/data_prism/data_prism.py
+    /dataset/bioinformatics_dev/active/data_prism/kmer_prism.py
+    /dataset/bioinformatics_dev/active/data_prism/taxonomy_prism.py
+    /dataset/bioinformatics_dev/scratch/
+
+This means there are symlink targets (that is, things pointed at by a symlink somewhere on the system) in all these directory trees.  Let's drill down a bit more
+
+::
+
+    fb: symlinks -r /dataset/bioinformatics_dev/s           <TAB>
+    fb: symlinks -r /dataset/bioinformatics_dev/scratch/    <TAB>
+    /dataset/bioinformatics_dev/scratch/bcl2fastq/
+    /dataset/bioinformatics_dev/scratch/gnu/
+    /dataset/bioinformatics_dev/scratch/localdata_backup/
+    /dataset/bioinformatics_dev/scratch/metabat/
+    /dataset/bioinformatics_dev/scratch/octopus/
+    /dataset/bioinformatics_dev/scratch/summer_projects_2018/
+    /dataset/bioinformatics_dev/scratch/summer_projects_2018/fraserm/project/
+    /dataset/bioinformatics_dev/scratch/summer_projects_2018/fraserm/stacks/
+    /dataset/bioinformatics_dev/scratch/summer_projects_2018/fraserm/uneak_SQ0690/
+    /dataset/bioinformatics_dev/scratch/tardis/
+    /dataset/bioinformatics_dev/scratch/topcons2/
+
+    fb: symlinks -r /dataset/bioinformatics_dev/scratch/to           <TAB>
+    fb: symlinks -r /dataset/bioinformatics_dev/scratch/topcons2/    <ENTER>
+    /dataset/bioinformatics_dev/scratch/topcons2/TOPCONS2/topcons2_webserver/predictors/Philius/runPhilius.sh.mod <- /dataset/bioinformatics_dev/scratch/topcons2/TOPCONS2/topcons2_webserver/predictors/Philius/runPhilius.sh
+    /dataset/bioinformatics_dev/scratch/topcons2/bin/modhmm <- /dataset/bioinformatics_dev/scratch/topcons2/TOPCONS2/topcons2_webserver/predictors/modhmm
+    /dataset/bioinformatics_dev/scratch/topcons2/bin/modhmm <- /dataset/bioinformatics_dev/scratch/topcons2/TOPCONS2/topcons2_webserver/predictors/spoctopus/modhmm
+    /dataset/bioinformatics_dev/scratch/topcons2/data/big/chrisp/topcons2_webserver/database <- /dataset/bioinformatics_dev/scratch/topcons2/TOPCONS2/topcons2_webserver/database
+    fb:
+
+The reason for the reversed order of printing symlinks is so that it sorts by destination, not by source.
+If you just want to know about a single target, omit the ``-r`` option (for recursive).
 
 Concepts
 --------

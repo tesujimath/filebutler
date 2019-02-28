@@ -98,6 +98,8 @@ symlinks
 --------
 
 Print all symlinks to the given target.  With ``-r``, do this recursively.
+Use of this command requires that the attribute ``symlinksfileset`` be
+defined (see below).  Tab completion is available on pathnames.
 
 Usage:
 
