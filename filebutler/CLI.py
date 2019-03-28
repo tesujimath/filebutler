@@ -52,7 +52,7 @@ from .Pager import Pager
 from .UnionFileset import UnionFileset
 from .aliases import read_etc_aliases
 from .options import parseCommandOptions
-from .util import stderr, debug_log, initialize, profile, unix_time, yes_or_no
+from .util import stderr, debug_log, initialize, profile, unix_time, yes_or_no, daystart
 
 class CLI(object):
 
@@ -61,7 +61,7 @@ class CLI(object):
         self._filesetNames = [] # in order of creation
         self._filesets = {}
         self._caches = {}
-        self._now = time.time() # for consistency between all filters
+        self._daystart = daystart() # for consistency between all filters
         self._ctx = Context()
         self._aliases = read_etc_aliases()
         self.commands = {
@@ -333,7 +333,7 @@ class CLI(object):
         elif type == "filter":
             if len(toks) < 4:
                 raise CLIError("filter requires fileset, criteria")
-            filter, _, _ = parseCommandOptions(self._now, toks[4:], filter=True)
+            filter, _, _ = parseCommandOptions(self._daystart, toks[4:], filter=True)
             fileset = FilterFileset(name, self._fileset(toks[3]), filter)
         elif type == "union":
             if len(toks) < 4:
@@ -360,7 +360,7 @@ class CLI(object):
             raise CLIError("usage: %s" % usage)
         name = toks[i_fileset]
         if len(toks) > i_fileset:
-            filter, _, _ = parseCommandOptions(self._now, toks[i_fileset + 1:], filter=True)
+            filter, _, _ = parseCommandOptions(self._daystart, toks[i_fileset + 1:], filter=True)
         else:
             filter = None
         info = self._fileset(name).info(self._attrs, filter)
@@ -404,7 +404,7 @@ class CLI(object):
         else:
             printOptions = toks[2:]
         if printOptions != []:
-            filter, sorter, grouper = parseCommandOptions(self._now, printOptions, filter=True, sorter=True, grouper=True)
+            filter, sorter, grouper = parseCommandOptions(self._daystart, printOptions, filter=True, sorter=True, grouper=True)
         else:
             filter, sorter, grouper = None, None, Grouper()
 
@@ -429,7 +429,7 @@ class CLI(object):
         fileset = self._fileset(name)
         deleteOptions = toks[2:]
         if deleteOptions != []:
-            filter, _, _ = parseCommandOptions(self._now, deleteOptions, filter=True)
+            filter, _, _ = parseCommandOptions(self._daystart, deleteOptions, filter=True)
         else:
             filter = None
 

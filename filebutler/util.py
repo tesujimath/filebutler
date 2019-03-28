@@ -24,6 +24,7 @@ from builtins import (
     filter, map, zip)
 
 from past.utils import old_div
+import datetime
 import errno
 import os
 import resource
@@ -80,6 +81,11 @@ def time2str(t):
 
 def date2str(t):
     return time.strftime(fbDateFmt, time.localtime(t))
+
+def daystart():
+    """Return start of today as epoch."""
+    d0 = datetime.datetime.combine(datetime.date.today(), datetime.time())
+    return (d0 - datetime.datetime(1970, 1, 1)).total_seconds()
 
 # stolen from Python 3:
 _filemode_table = (

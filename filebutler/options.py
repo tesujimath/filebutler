@@ -36,7 +36,7 @@ from .Sorter import Sorter
 from .Grouper import Grouper
 from .util import str2size
 
-def parseCommandOptions(now, toks, filter=False, sorter=False, grouper=False):
+def parseCommandOptions(daystart, toks, filter=False, sorter=False, grouper=False):
     """Parse filter and/or sorter options."""
 
     # filter options
@@ -93,7 +93,7 @@ def parseCommandOptions(now, toks, filter=False, sorter=False, grouper=False):
                 raise CLIError("-mtime only supports +n format")
             if mtimeBefore is not None:
                 raise CLIError("duplicate -mtime")
-            mtimeBefore = now - n * 60 * 60 * 24
+            mtimeBefore = daystart - n * 60 * 60 * 24
             i += 1
         elif tok == '!' and filter:
             # only for -path
