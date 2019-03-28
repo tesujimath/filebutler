@@ -27,8 +27,6 @@ import calendar
 import os
 import time
 
-from .util import fbTimeFmt, time2str, date2str, size2str
-
 class FilespecMerger(object):
     """Merge filespecs from multiple iterators in order of path."""
 

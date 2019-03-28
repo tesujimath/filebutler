@@ -77,6 +77,9 @@ def profile():
 fbTimeFmt = "%Y%m%d-%H%M%S"
 fbDateFmt = "%Y-%m-%d"
 
+def time2utcstr(t):
+    return time.strftime(fbTimeFmt, time.gmtime(t))
+
 def time2str(t):
     return time.strftime(fbTimeFmt, time.localtime(t))
 

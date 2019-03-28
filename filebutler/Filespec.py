@@ -28,7 +28,7 @@ import errno
 import os
 import time
 
-from .util import fbTimeFmt, time2str, date2str, size2str, debug_log
+from .util import fbTimeFmt, time2utcstr, date2str, size2str, debug_log
 
 # FileSpec fields:
 # path - string, relative to some (externally defined) rootdir
@@ -41,6 +41,7 @@ class Filespec(object):
 
     @classmethod
     def fromFile(cls, f, fileset, sel):
+        """Read filespecs from file, with mtime in UTC."""
         for line in f:
             fields = line.rstrip().split(None, 4)
             if len(fields) != 5:
@@ -106,6 +107,7 @@ class Filespec(object):
         return formatted.split(None, 4)[4]
 
     def format(self, width=0, all=False, pad=True):
+        """Format filespec, with mtime in localtime."""
         usergroup = "%s:%s" % (self.user, self.group)
         if len(usergroup) >= width:
             width = len(usergroup) + 1
@@ -122,9 +124,10 @@ class Filespec(object):
         return s, width
 
     def write(self, f):
+        """Write filespec, with mtime in UTC."""
         f.write("%s %d %s %s %s\n" % (
             self.group,
             self.size,
-            time2str(self.mtime),
+            time2utcstr(self.mtime),
             self.perms,
             self.path))
