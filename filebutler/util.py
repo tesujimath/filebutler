@@ -28,9 +28,10 @@ import datetime
 import errno
 import os
 import resource
-import time
 from stat import *
 import sys
+import time
+import tzlocal
 
 from .CLIError import CLIError
 
@@ -89,9 +90,11 @@ def week_number(t):
     return isoyear * 100 + isoweek
 
 def daystart():
-    """Return start of today as epoch."""
-    d0 = datetime.datetime.combine(datetime.date.today(), datetime.time())
-    return (d0 - datetime.datetime(1970, 1, 1)).total_seconds()
+    """Return start of today in localtime as epoch."""
+    localoffset = tzlocal.get_localzone().utcoffset(datetime.datetime.now())
+    d0 = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=datetime.timezone.utc) - localoffset
+    epoch = datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc)
+    return (d0 - epoch).total_seconds()
 
 # stolen from Python 3:
 _filemode_table = (
