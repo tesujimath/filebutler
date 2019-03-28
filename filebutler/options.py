@@ -32,8 +32,9 @@ import time
 
 from .CLIError import CLIError
 from .Filter import Filter
-from .Sorter import Sorter
 from .Grouper import Grouper
+from .MTimeFilter import MTimeFilter
+from .Sorter import Sorter
 from .util import str2size
 
 def parseCommandOptions(daystart, toks, filter=False, sorter=False, grouper=False):
@@ -43,7 +44,7 @@ def parseCommandOptions(daystart, toks, filter=False, sorter=False, grouper=Fals
     owner = None
     dataset = None
     sizeGeq = None
-    mtimeBefore = None
+    mtime = None
     notPaths = []
     regex = None
 
@@ -82,18 +83,14 @@ def parseCommandOptions(daystart, toks, filter=False, sorter=False, grouper=Fals
             sizeGeq = n
             i += 1
         elif tok == '-mtime' and filter:
+            if mtime is not None:
+                raise CLIError("duplicate -mtime")
             if i + 1 >= len(toks):
                 raise CLIError("-mtime missing parameter")
-            mtime = toks[i + 1]
-            if len(mtime) < 2 or mtime[0] != '+':
-                raise CLIError("-mtime only supports +n format")
             try:
-                n = int(mtime[1:])
+                mtime = MTimeFilter(daystart, toks[i + 1])
             except ValueError:
-                raise CLIError("-mtime only supports +n format")
-            if mtimeBefore is not None:
-                raise CLIError("duplicate -mtime")
-            mtimeBefore = daystart - n * 60 * 60 * 24
+                raise CLIError("-mtime requires +n or n")
             i += 1
         elif tok == '!' and filter:
             # only for -path
@@ -132,8 +129,8 @@ def parseCommandOptions(daystart, toks, filter=False, sorter=False, grouper=Fals
             raise CLIError("unknown %sparameter %s" % (category, tok))
         i += 1
 
-    if filter and (owner is not None or dataset is not None or sizeGeq is not None or mtimeBefore is not None or notPaths != [] or regex is not None):
-        f0 = Filter(owner=owner, dataset=dataset, sizeGeq=sizeGeq, mtimeBefore=mtimeBefore, notPaths=notPaths, regex=regex)
+    if filter and (owner is not None or dataset is not None or sizeGeq is not None or mtime is not None or notPaths != [] or regex is not None):
+        f0 = Filter(owner=owner, dataset=dataset, sizeGeq=sizeGeq, mtime=mtime, notPaths=notPaths, regex=regex)
     else:
         f0 = None
     if sorter and bySize:

@@ -82,6 +82,12 @@ def time2str(t):
 def date2str(t):
     return time.strftime(fbDateFmt, time.localtime(t))
 
+def week_number(t):
+    """Return time t as an integer valued week YYYYWW."""
+    dt = datetime.datetime.fromtimestamp(t)
+    isoyear,isoweek,isoweekday = dt.isocalendar()
+    return isoyear * 100 + isoweek
+
 def daystart():
     """Return start of today as epoch."""
     d0 = datetime.datetime.combine(datetime.date.today(), datetime.time())

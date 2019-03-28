@@ -30,16 +30,9 @@ import re
 from .Filter import Filter
 from .FilesetCache import FilesetCache
 from .PooledFile import listdir
-from .util import verbose_stderr, debug_log
+from .util import verbose_stderr, debug_log, week_number
 
 class WeeklyFilesetCache(FilesetCache):
-
-    @classmethod
-    def week(cls, t):
-        """Return time t as an integer valued week YYYYWW."""
-        dt = datetime.datetime.fromtimestamp(t)
-        isoyear,isoweek,isoweekday = dt.isocalendar()
-        return isoyear * 100 + isoweek
 
     def __init__(self, parent, path, deltadir, ctx, attrs, sel, next):
         super(self.__class__, self).__init__(parent, path, deltadir, ctx, attrs, sel, next)
@@ -68,13 +61,17 @@ class WeeklyFilesetCache(FilesetCache):
         #debug_log("filtered(%s) with %d weeks to consider\n" % (self._path, len(weeks)))
         for w in weeks:
             #debug_log("filtered(%s) considering %s\n" % (self._path, str(w)))
-            if filter is None or filter.mtimeBefore is None or w <= self.__class__.week(filter.mtimeBefore):
-                if filter is not None and filter.mtimeBefore is not None and w < self.__class__.week(filter.mtimeBefore):
-                    f1 = Filter.clearMtime(filter)
-                else:
-                    f1 = filter
-                #debug_log("filtered(%s) yielding %s\n" % (self._path, str(w)))
-                yield self._fileset(w), f1
+            if filter is None or filter.mtime is None:
+                yield self._fileset(w), filter
+            else:
+                intersects, contains = filter.mtime.selects_week(w)
+                if intersects:
+                    if contains:
+                        f1 = Filter.clearMtime(filter)
+                    else:
+                        f1 = filter
+                    #debug_log("filtered(%s) yielding %s\n" % (self._path, str(w)))
+                    yield self._fileset(w), f1
 
     def create(self):
         """Create empty cache on disk, purging any previous."""
@@ -83,5 +80,4 @@ class WeeklyFilesetCache(FilesetCache):
         self._weeks = {}
 
     def filesetFor(self, filespec):
-        w = self.__class__.week(filespec.mtime)
-        return self._fileset(w)
+        return self._fileset(week_number(filespec.mtime))
