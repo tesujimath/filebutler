@@ -58,13 +58,14 @@ class WeeklyFilesetCache(FilesetCache):
     def filtered(self, filter=None):
         """Yield each child fileset and its filter."""
         weeks = sorted(self._weeks.keys())
-        #debug_log("filtered(%s) with %d weeks to consider\n" % (self._path, len(weeks)))
+        #debug_log("filtered(%s, %s, %s) with %d weeks to consider\n" % (self._path, str(filter), "None" if filter is None else repr(filter.mtime), len(weeks)))
         for w in weeks:
             #debug_log("filtered(%s) considering %s\n" % (self._path, str(w)))
             if filter is None or filter.mtime is None:
                 yield self._fileset(w), filter
             else:
                 intersects, contains = filter.mtime.selects_week(w)
+                #debug_log("filtered(%s) %s %s %s %s\n" % (self._path, str(w), str(filter.mtime), str(intersects), str(contains)))
                 if intersects:
                     if contains:
                         f1 = Filter.clearMtime(filter)

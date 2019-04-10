@@ -83,14 +83,24 @@ def parseCommandOptions(daystart, toks, filter=False, sorter=False, grouper=Fals
             sizeGeq = n
             i += 1
         elif tok == '-mtime' and filter:
-            if mtime is not None:
-                raise CLIError("duplicate -mtime")
             if i + 1 >= len(toks):
                 raise CLIError("-mtime missing parameter")
+            age_str = toks[i + 1]
+            if len(age_str) > 1 and age_str[0] == '+':
+                after = False
+                age_str = age_str[1:]
+            else:
+                after = True
             try:
-                mtime = MTimeFilter(daystart, toks[i + 1])
+                this_mtime = MTimeFilter.age(daystart, age_str, after)
             except ValueError:
                 raise CLIError("-mtime requires +n or n")
+            if mtime is None:
+                mtime = this_mtime
+            else:
+                mtime = mtime.intersect(this_mtime)
+                if not mtime.consistent:
+                    raise CLIError("inconsistent -mtime")
             i += 1
         elif tok == '!' and filter:
             # only for -path

@@ -218,3 +218,11 @@ def yes_or_no(prompt, default=False):
         return len(s) >= 1 and s[0] in 'Yy'
     except:
         return default
+
+def liberal(fn, a, b):
+    if a is None:
+        return b
+    elif b is None:
+        return a
+    else:
+        return fn(a, b)

@@ -46,7 +46,7 @@ class FilterFileset(Fileset):
 
     def merge_info(self, acc, filter=None):
         f1 = self._filter.intersect(filter)
-        #debug_log("FilterFileset(%s)::select filter=%s\n" % (self.name, f1))
+        #debug_log("FilterFileset(%s)::merge_info filter=(%s ^ %s = %s)\n" % (self.name, self._filter, filter, f1))
         self._fileset.merge_info(acc, f1)
 
     def getCaches(self, caches):

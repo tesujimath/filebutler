@@ -28,15 +28,7 @@ import datetime
 import fnmatch
 import re
 
-from .util import Giga, debug_log
-
-def liberal(fn, a, b):
-    if a is None:
-        return b
-    elif b is None:
-        return a
-    else:
-        return fn(a, b)
+from .util import Giga, debug_log, liberal
 
 class Filter(object):
 

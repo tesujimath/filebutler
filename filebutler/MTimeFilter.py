@@ -28,46 +28,62 @@ import datetime
 import fnmatch
 import re
 
-from .util import date2str, week_number
+from .util import date2str, week_number, liberal
 
 class MTimeFilter(object):
 
-    def __init__(self, daystart, s):
-        self.consistent = True
-        self._after = True
-        if len(s) > 1 and s[0] == '+':
-            self._after = False
-            s_n = s[1:]
+    @classmethod
+    def age(cls, daystart, s, isAfter):
+        """Return a new MTimeFilter selecting before/after the given age."""
+        epoch = daystart - int(s) * 60 * 60 * 24
+        if isAfter:
+            return cls(after=epoch)
         else:
-            s_n = s
-        self._epoch = daystart - int(s_n) * 60 * 60 * 24
+            return cls(before=epoch)
+
+    def __init__(self, before=None, after=None):
+        self.consistent = before is None or after is None or before > after
+        self._before = before
+        self._after = after
 
     def intersect(self, f1):
         """Return a new filter which is the intersection of self with the parameter f1."""
         if f1 is None:
             return self
-        if self._after != f1._after:
-            self.consistent = False
-            return self
-        if self._after:
-            self._epoch = max(self._epoch, f1._epoch)
         else:
-            self._epoch = min(self._epoch, f1._epoch)
+            return self.__class__(before=liberal(min, self._before, f1._before),
+                                  after=liberal(max, self._after, f1._after))
 
     def selects(self, mtime):
         if not self.consistent:
             return False
-        if self._after:
-            return mtime >= self._epoch
-        else:
-            return mtime < self._epoch
+        if self._before is not None and mtime >= self._before:
+            return False
+        if self._after is not None and mtime < self._after:
+            return False
+        return True
 
     def selects_week(self, w):
         """Return whether the filter intersects with the given week, and whether this is total containment."""
-        w0 = week_number(self._epoch)
-        intersects = w >= w0 if self._after else w <= w0
-        contains = intersects and w0 != w
+        if self._before is not None:
+            wBefore = week_number(self._before)
+            intersects = w <= wBefore
+            contains = intersects and wBefore != w
+        else:
+            intersects = True
+            contains = True
+        if intersects:
+            if self._after is not None:
+                wAfter = week_number(self._after)
+                intersects = w >= wAfter
+                contains = contains and intersects and wAfter != w
         return intersects, contains
 
     def __str__(self):
-        return "%s:%s" % ("younger" if self._after else "older", date2str(self._epoch))
+        if self._before is not None:
+            selectors = [ "%s:%s" % ("older", date2str(self._before)) ]
+        else:
+            selectors = []
+        if self._after is not None:
+            selectors.append("%s:%s" % ("younger", date2str(self._after)))
+        return ','.join(selectors) if selectors else "anytime"
