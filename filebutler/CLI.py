@@ -64,6 +64,7 @@ class CLI(object):
         self._daystart = daystart() # for consistency between all filters
         self._ctx = Context()
         self._aliases = read_etc_aliases()
+        self._commandLoc = None
         self.commands = {
             'help':          { 'desc': 'provide help',
                                'usage': 'help',
@@ -215,7 +216,10 @@ class CLI(object):
                     ps.print_stats()
                 done = method == self._quitCmd
             else:
-                raise CLIError("unknown command %s, try help" % cmdName)
+                if self._commandLoc is None:
+                    raise CLIError("unknown command %s, try help" % cmdName)
+                else:
+                    raise CLIError("unknown command %s at %s" % (cmdName, self._commandLoc))
         return done
 
     def _handleProcess(self, line):
@@ -243,10 +247,15 @@ class CLI(object):
                        os.path.expanduser("~/.filebutlerrc")]:
                 try:
                     with open(rc) as f:
+                        count = 0
                         for line in f:
+                            count += 1
+                            self._commandLoc = "%s:%d" % (rc, count)
                             self._handleProcess(line)
                 except IOError:
                     pass
+                finally:
+                    self._commandLoc = None
 
     def execute(self, cmds):
         for cmd in cmds:
@@ -490,10 +499,15 @@ class CLI(object):
         path = toks[1]
         try:
             with open(os.path.expanduser(path)) as f:
+                count = 0
                 for line in f:
+                    count += 1
+                    self._commandLoc = "%s:%d" % (path, count)
                     self._handleProcess(line)
         except OSError:
             raise CLIError("can't read file: %s" % path)
+        finally:
+            self._commandLoc = None
 
     def _symlinksFileset(self):
         symlinksfileset = self._attrs.get('symlinksfileset')
