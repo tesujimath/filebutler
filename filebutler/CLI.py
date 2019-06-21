@@ -489,7 +489,7 @@ class CLI(object):
             raise CLIError("usage: %s" % usage)
         path = toks[1]
         try:
-            with open(path) as f:
+            with open(os.path.expanduser(path)) as f:
                 for line in f:
                     self._handleProcess(line)
         except OSError:

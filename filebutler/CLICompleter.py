@@ -135,12 +135,16 @@ class CLICompleter(object):
         self._append_matching(self._cli.filesetNames)
 
     def _append_filenames(self):
+        def isdir(path):
+            "Return whether expanduser of path is a directory."
+            return os.path.isdir(os.path.expanduser(path))
+
         def listdirx(root):
             "List directory 'root' appending the path separator to subdirs."
             paths = []
-            for name in os.listdir(root):
+            for name in os.listdir(os.path.expanduser(root)):
                 path = os.path.join(root, name)
-                if os.path.isdir(path):
+                if isdir(path):
                     name += os.sep
                 paths.append(name)
             return paths
@@ -157,7 +161,7 @@ class CLICompleter(object):
                 return paths
             # resolved to a single directory, so return list of files below it
             path = paths[0]
-            if os.path.isdir(path):
+            if isdir(path):
                 #debug_log('is a directory: "%s"\n' % path)
                 return [os.path.join(path, p) for p in listdirx(path)]
             # exact file match terminates this completion
