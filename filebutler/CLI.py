@@ -439,7 +439,8 @@ class CLI(object):
             return
 
         # do it
-        print('... deleting %s' % name)
+        description = name if filter is None else '%s %s' % (name, str(filter))
+        print('... deleting %s' % description)
         with DeletionLog(self._attrs) as logf:
             # delete directories after their contents
             dirs = []
