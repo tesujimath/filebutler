@@ -113,6 +113,10 @@ class CLI(object):
                                'usage': 'delete <fileset> [<filter-params>]',
                                'method': self._deleteCmd,
             },
+            'source':        { 'desc': 'source commands from given file',
+                               'usage': 'source <filepath>',
+                               'method': self._sourceCmd,
+            },
             'symlinks':      { 'desc': 'print symlinks pointing at target path, optionally recursively',
                                'usage': 'symlinks [-r] <target-path>',
                                'method': self._symlinksCmd,
@@ -479,6 +483,17 @@ class CLI(object):
         for cache in self._ctx.pendingCaches:
             cache.saveDeletions()
         self._ctx.pendingCaches.clear()
+
+    def _sourceCmd(self, toks, usage):
+        if len(toks) != 2:
+            raise CLIError("usage: %s" % usage)
+        path = toks[1]
+        try:
+            with open(path) as f:
+                for line in f:
+                    self._handleProcess(line)
+        except OSError:
+            raise CLIError("can't read file: %s" % path)
 
     def _symlinksFileset(self):
         symlinksfileset = self._attrs.get('symlinksfileset')

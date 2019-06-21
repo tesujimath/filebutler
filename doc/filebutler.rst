@@ -94,6 +94,17 @@ Usage:
 
 The ``filter-params`` are as described for the filter fileset type.
 
+source
+------
+
+Execute filebutler commands from the given file.
+
+Usage:
+
+::
+
+    source <filepath>
+
 symlinks
 --------
 

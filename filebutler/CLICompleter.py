@@ -27,7 +27,7 @@ import os
 import pwd
 import readline
 
-from .util import verbose_stderr
+from .util import verbose_stderr #, debug_log
 
 class CLICompleter(object):
 
@@ -61,6 +61,7 @@ class CLICompleter(object):
             result = None
         else:
             result = self._completions[state] + ' '
+        #debug_log('_completer(%s, %d): "%s"\n' % (text, state, result))
         return result
 
     def _complete_cmd(self):
@@ -114,6 +115,11 @@ class CLICompleter(object):
         else:
             self._append_options(filter=True)
 
+    def _complete_source_cmd(self):
+        n = len(self._toks)
+        if n == 1:
+            self._append_filenames()
+
     def _complete_symlinks_cmd(self):
         n = len(self._toks)
         #verbose_stderr("_complete_symlinks_cmd %d %s '%s'\n" % (n, str(self._toks), self._text))
@@ -127,6 +133,40 @@ class CLICompleter(object):
 
     def _append_filesets(self):
         self._append_matching(self._cli.filesetNames)
+
+    def _append_filenames(self):
+        def listdirx(root):
+            "List directory 'root' appending the path separator to subdirs."
+            paths = []
+            for name in os.listdir(root):
+                path = os.path.join(root, name)
+                if os.path.isdir(path):
+                    name += os.sep
+                paths.append(name)
+            return paths
+
+        def complete_path(path):
+            if not path:
+                return listdirx('.')
+            dirname, rest = os.path.split(path)
+            tmp = dirname if dirname else '.'
+            paths = [os.path.join(dirname, p) for p in listdirx(tmp) if p.startswith(rest)]
+            # more than one match, or single match which does not exist (typo)
+            if len(paths) != 1:
+                #debug_log('len %d\n' % len(paths))
+                return paths
+            # resolved to a single directory, so return list of files below it
+            path = paths[0]
+            if os.path.isdir(path):
+                #debug_log('is a directory: "%s"\n' % path)
+                return [os.path.join(path, p) for p in listdirx(path)]
+            # exact file match terminates this completion
+            #debug_log('not a directory: "%s"\n' % path)
+            return [path + ' ']
+
+        paths = sorted(complete_path(self._text))
+        #debug_log('CLI::_append_filenames(%s): %s\n' % (self._text, ', '.join(['"%s"' % path for path in paths])))
+        self._completions.extend(paths)
 
     def _append_options(self, filter=False, sorter=False, grouper=False):
         if filter:
