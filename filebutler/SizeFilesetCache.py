@@ -50,13 +50,14 @@ class SizeFilesetCache(FilesetCache):
 
     def filtered(self, filter=None):
         for i in range(self._sizebuckets.len):
-            minSize, maxSize = self._sizebuckets.minmax(i)
-            if filter is None or filter.sizeGeq is None or maxSize is None or maxSize >= filter.sizeGeq:
-                if filter is not None and filter.sizeGeq is not None and minSize >= filter.sizeGeq:
-                    f1 = Filter.clearSize(filter)
-                else:
-                    f1 = filter
-                yield self._fileset(i), f1
+            if os.path.exists(self._subpath(self._sizebuckets.bound(i))):
+                minSize, maxSize = self._sizebuckets.minmax(i)
+                if filter is None or filter.sizeGeq is None or maxSize is None or maxSize >= filter.sizeGeq:
+                    if filter is not None and filter.sizeGeq is not None and minSize >= filter.sizeGeq:
+                        f1 = Filter.clearSize(filter)
+                    else:
+                        f1 = filter
+                    yield self._fileset(i), f1
 
     def create(self):
         """Create empty cache on disk, purging any previous."""
