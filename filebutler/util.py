@@ -15,15 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-from builtins import (
-    bytes, dict, int, list, object, range, str,
-    ascii, chr, hex, input, next, oct, open,
-    pow, round, super,
-    filter, map, zip)
-
-from past.utils import old_div
 import datetime
 import errno
 import os
@@ -154,11 +145,11 @@ def size2str(n):
     if n < Kilo:
         return "0k"             # so small we don't care
     elif n < Mega:
-        return "%dk" % (old_div(n, Kilo))
+        return "%dk" % (n // Kilo)
     elif n < Giga:
-        return "%dM" % (old_div(n, Mega))
+        return "%dM" % (n // Mega)
     elif n < Tera:
-        return "%dG" % (old_div(n, Giga))
+        return "%dG" % (n // Giga)
     else:
         return "%.1fT" % (n * 1.0 / Tera)
 

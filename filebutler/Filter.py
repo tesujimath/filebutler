@@ -15,15 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with filebutler.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-from builtins import (
-    bytes, dict, int, list, object, range, str,
-    ascii, chr, hex, input, next, oct, open,
-    pow, round, super,
-    filter, map, zip)
-
-from past.utils import old_div
 import datetime
 import fnmatch
 import re
@@ -85,7 +76,7 @@ class Filter(object):
         if self.dataset is not None:
             s = append(s, "dataset:%s" % self.dataset)
         if self.sizeGeq is not None:
-            s = append(s, "size:+%dG" % (old_div(self.sizeGeq, Giga)))
+            s = append(s, "size:+%dG" % (self.sizeGeq // Giga))
         if self.mtime is not None:
             s = append(s, str(self.mtime))
         if len(self.notPaths) > 0:
