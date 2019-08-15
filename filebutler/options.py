@@ -37,7 +37,7 @@ from .MTimeFilter import MTimeFilter
 from .Sorter import Sorter
 from .util import str2size
 
-def parseCommandOptions(daystart, toks, filter=False, sorter=False, grouper=False):
+def parseCommandOptions(daystart, toks, filter=False, sorter=False, grouper=False, confirm=False):
     """Parse filter and/or sorter options."""
 
     # filter options
@@ -53,6 +53,9 @@ def parseCommandOptions(daystart, toks, filter=False, sorter=False, grouper=Fals
 
     # grouper options
     collapse = None
+
+    # confirm options
+    y0 = False
 
     i = 0
     while i < len(toks):
@@ -128,6 +131,8 @@ def parseCommandOptions(daystart, toks, filter=False, sorter=False, grouper=Fals
             except ValueError:
                 raise CLIError("-depth requires integer parameter")
             i += 1
+        elif tok == '-y' and confirm:
+            y0 = True
         else:
             category = ""
             if filter and not sorter and not grouper:
@@ -152,4 +157,4 @@ def parseCommandOptions(daystart, toks, filter=False, sorter=False, grouper=Fals
     else:
         g0 = None
 
-    return f0, s0, g0
+    return f0, s0, g0, y0

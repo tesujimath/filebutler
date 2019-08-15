@@ -90,9 +90,10 @@ Usage:
 
 ::
 
-    delete <fileset> [<filter-params>]
+    delete <fileset> [<filter-params>] [-y]
 
 The ``filter-params`` are as described for the filter fileset type.
+The ``-y`` option skips the confirmation.
 
 source
 ------
