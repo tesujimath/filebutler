@@ -91,7 +91,7 @@ class Filespec(object):
             else:
                 raise
         if deleted:
-            logf.write("%s%s\n" % self.format(pad=False))
+            logf.write("%s\n" % self.format(pad=False)[0])
 
     @classmethod
     def formattedToPath(cls, formatted):
