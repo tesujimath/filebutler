@@ -31,6 +31,7 @@ import traceback
 
 from .CLICompleter import CLICompleter
 from .CLIError import CLIError
+from .CondaEnvCounter import CondaEnvCounter
 from .ConfigError import ConfigError
 from .Cache import Cache
 from .Context import Context
@@ -101,6 +102,10 @@ class CLI(object):
             'print':         { 'desc': 'print files in a fileset, optionally filtered, via $PAGER',
                                'usage': 'print <fileset> [<filter-params>] [-by-size] [-depth <depth>]',
                                'method': self._printCmd,
+            },
+            'dump-conda':    { 'desc': 'dump conda environments in a fileset into file',
+                               'usage': 'dump-conda <fileset> <file>',
+                               'method': self._dumpCondaCmd,
             },
             'delete':        { 'desc': 'delete all files in a fileset, optionally filtered',
                                'usage': 'delete <fileset> [<filter-params>] [-y]',
@@ -426,6 +431,24 @@ class CLI(object):
                 raise
         finally:
             pager.close()
+
+    def _dumpCondaCmd(self, toks, usage):
+        if len(toks) != 3:
+            raise CLIError("usage: %s" % usage)
+        name = toks[1]
+        outpath = toks[2]
+        fileset = self._fileset(name)
+        with open(outpath, "w") as outfile:
+            condaEnvCounter = CondaEnvCounter()
+            try:
+                for filespec in fileset.select():
+                    condaEnvCounter.add(filespec)
+                condaEnvCounter.dump(outfile)
+            except IOError as e:
+                if e.errno == errno.EPIPE:
+                    pass
+                else:
+                    raise
 
     def _deleteCmd(self, toks, usage):
         if len(toks) < 2:
