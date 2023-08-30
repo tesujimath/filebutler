@@ -14,9 +14,13 @@
         };
         python3WithPackages =
           pkgs.python3.withPackages(ps: with ps; [
+            # runtime:
             pytz
             setuptools
             tzlocal
+            # for PyPI packaging:
+            twine
+            wheel
           ]);
 
       in
