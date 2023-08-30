@@ -19,6 +19,7 @@
             setuptools
             tzlocal
             # for PyPI packaging:
+            pip-tools
             twine
             wheel
           ]);
